@@ -224,7 +224,7 @@
                 loginContainer.style.display = 'none';
 
                 // Подключение к WebSocket
-                socket = new WebSocket(`ws://${window.location.host}/ws?username=${encodeURIComponent(username)}`);
+                socket = new WebSocket(`wss://${window.location.host}/ws?username=${encodeURIComponent(username)}`);
 
                 // Обработчики WebSocket
                 socket.onmessage = function(event) {
