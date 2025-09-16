@@ -1,0 +1,12 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@ --with python3 --buildsystem=pybuild
+
+override_dh_auto_install:
+	dh_auto_install
+	mkdir -p $(CURDIR)/debian/chat/usr/share/chat
+	cp -r chat.py static templates $(CURDIR)/debian/chat/usr/share/chat/
+
+override_dh_installsystemd:
+	dh_installsystemd --name=chat

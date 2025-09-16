@@ -1,0 +1,11 @@
+Source: chat
+Section: python
+Priority: optional
+Maintainer: Zaebee <sinezub@yandex.ru>
+Build-Depends: debhelper-compat (= 13), dh-python, python3-all, pybuild-plugin-pyproject, python3-setuptools
+Standards-Version: 4.5.0
+
+Package: chat
+Architecture: all
+Depends: python3-fastapi, python3-jinja2, python3-multipart, python3-uvicorn, python3-websockets, python3:any
+Description: A simple multi-user chat application using FastAPI and WebSockets.
