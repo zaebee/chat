@@ -1,9 +1,0 @@
-Package: chat
-Version: 0.1.0
-Architecture: all
-Maintainer: Zaebee <sinezub@yandex.ru>
-Installed-Size: 54
-Depends: python3-fastapi, python3-jinja2, python3-multipart, python3-uvicorn, python3-websockets, python3:any
-Section: python
-Priority: optional
-Description: A simple multi-user chat application using FastAPI and WebSockets.
