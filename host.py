@@ -37,6 +37,9 @@ class HiveHost:
         )
         self.logger.info(f"P2P Daemon started with PID: {self.p2p_daemon_process.pid}")
 
+        # Start a task to read stderr from the daemon
+        asyncio.create_task(self._read_daemon_stderr())
+
         # Wait for daemon to signal readiness
         while True:
             line = await self.p2p_daemon_process.stdout.readline()
@@ -70,6 +73,14 @@ class HiveHost:
         # This method will be called by the p2p daemon via WebSocket
         # For now, just put it on the event bus
         await self.event_bus.put(msg)
+
+    async def _read_daemon_stderr(self):
+        while True:
+            line = await self.p2p_daemon_process.stderr.readline()
+            if line:
+                self.logger.error(f"P2P Daemon STDERR: {line.decode().strip()}")
+            else:
+                break
 
     def setup_api_routes(self):
         @self.fastapi_app.get("/api/v1/status")
