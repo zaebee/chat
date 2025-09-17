@@ -139,3 +139,14 @@ async def post_message_from_agent(message: Message, api_key: APIKey = Depends(ge
 *   The system's state is legible through the `/api/v1/status` endpoint.
 *   An AI agent can post messages through the `/api/v1/messages` endpoint.
 *   All new code is written in accordance with the `ARCHITECTURE_PRINCIPLES.md`.
+
+#### **3.6. Agent Management API (Future - V2.0)**
+
+As per the consultation with our AI teammate Eddy, the long-term vision is to evolve this application into a "Single-Node Hive." This will be the focus of Version 2.0, and the requirements will be expanded to include a full agent management API.
+
+*   **Concept:** The application will expose a set of API endpoints for managing the lifecycle of other agents running within the same process.
+*   **Endpoints (for V2.0):**
+    *   `GET /api/v1/agents`: List all running agents.
+    *   `POST /api/v1/agents`: Deploy a new agent (e.g., by providing a URL to its code).
+    *   `GET /api/v1/agents/{agent_id}`: Get the status of a specific agent.
+    *   `DELETE /api/v1/agents/{agent_id}`: Stop a running agent.
