@@ -1,7 +1,7 @@
 import asyncio
 from libp2p.host.basic_host import BasicHost
 from libp2p.network.swarm import Swarm
-from libp2p.peer.peerinfo import PeerInfo
+from libp2p.peer.id import ID as PeerID
 from libp2p.crypto.secp256k1 import create_new_key_pair
 from libp2p.pubsub.pubsub import Pubsub
 from libp2p.pubsub.gossipsub import GossipSub
@@ -15,7 +15,10 @@ class P2PNode:
 
     async def start(self, callback, bootstrap_peer: str = None):
         key_pair = create_new_key_pair()
-        self.host = BasicHost(key_pair)
+        peer_id = PeerID.from_pubkey(key_pair.public_key)
+        swarm = Swarm(peer_id)
+        self.host = BasicHost(swarm, key_pair)
+        
         listen_addr = f"/ip4/0.0.0.0/tcp/{self.port}"
         await self.host.get_network().listen(listen_addr)
         self.pubsub = Pubsub(self.host, GossipSub([]))
@@ -49,6 +52,8 @@ class P2PNode:
         return self.host.get_network().connections
 
     async def get_status(self):
+        if not self.host:
+            return {"status": "stopped"}
         return {
             "peer_id": self.host.get_id().pretty(),
             "listen_addrs": [str(a) for a in self.host.get_addrs()],

@@ -20,6 +20,7 @@ This document outlines the high-level goals and planned features for the Hive Ch
 *   [ ] **Foundational Services:** The Host will provide a shared **Async Event Bus** and a **Structured Audit Logger** to all agents.
 *   [ ] **Agent-based Refactor:** Refactor the existing chat application to be the first, default agent, aligned with the **ATCG-Genome**.
 *   [ ] **P2P Agent Communication:** Implement the underlying libp2p stack.
+*   [ ] **Basic Unit Testing:** Establish a testing framework (e.g., `pytest`) and add initial tests for the Hive Host and P2P components.
 *   **τ (System Tension) Monitoring:** Implement and expose basic τ monitoring via the `/api/v1/status` endpoint.
 *   [ ] **Simple Management CLI:** Implement a basic command-line interface for the user to view the status of the hive.
 
