@@ -1,12 +1,12 @@
 import trio
-from libp2p import new_node
+from libp2p import new_host
 import websockets
 import asyncio
 import argparse
 from multiaddr import Multiaddr
 
 async def p2p_daemon_main(websocket_port: int, p2p_port: int, bootstrap_peer: str = None):
-    node = await new_node(transport_opt=[f"/ip4/0.0.0.0/tcp/{p2p_port}"])
+    node = await new_host(transport_opt=[f"/ip4/0.0.0.0/tcp/{p2p_port}"])
     await node.get_network().listen(f"/ip4/0.0.0.0/tcp/{p2p_port}")
     print(f"P2P Node started with Peer ID: {node.get_id().pretty()}")
 
