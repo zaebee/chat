@@ -3,7 +3,7 @@ import logging
 import sys
 from fastapi import FastAPI
 import websockets
-from agents.chat_agent import ChatAgent
+from agents.chat_agent import ChatAgent # Import ChatAgent
 
 class HiveHost:
     def __init__(self):
@@ -53,7 +53,7 @@ class HiveHost:
         self.p2p_websocket_client = await websockets.connect(f"ws://localhost:{websocket_port}")
         self.logger.info("Connected to P2P Daemon WebSocket.")
 
-        self.load_default_agents()
+        await self.load_default_agents()
         self.logger.info("Hive Host started.")
 
     async def _event_consumer(self):
@@ -69,11 +69,11 @@ class HiveHost:
             self.p2p_daemon_process.terminate()
             await self.p2p_daemon_process.wait()
 
-    def load_default_agents(self):
+    async def load_default_agents(self):
         # Agents receive the host's core services and a way to talk to the p2p daemon
         chat_agent = ChatAgent(self.p2p_websocket_client, self.event_bus, self.logger, self.fastapi_app)
         self.agents.append(chat_agent)
-        chat_agent.start()
+        await chat_agent.start()
         self.logger.info(f"Loaded agent: {chat_agent.get_status()['name']}")
 
     async def handle_p2p_message(self, msg):
