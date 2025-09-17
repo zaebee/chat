@@ -36,56 +36,32 @@ We recognize that the development and operation of this software will be a colla
 
 *   **Implementation:** Documentation, APIs, and even commit messages should be written with both a human and an AI audience in mind. The system should be designed to be not just "user-friendly," but "teammate-friendly."
 
-## 2. P2P Dependency Analysis
+## 2. P2P Layer Decision: From `py-libp2p` to `p2pd`
 
-This section presents the findings of a deep research into the dependency tree of the `py-libp2p` library and its compatibility with the Debian packaging ecosystem.
+This section documents the decision to pivot from `py-libp2p` to `p2pd` for the P2P communication layer.
 
-### 2.1. Executive Summary
+### 2.1. Problem with `py-libp2p`
 
-The research concludes that packaging `py-libp2p` as a traditional Debian package (`.deb`) is **not feasible** at this time without a significant, and likely prohibitive, amount of effort.
+Despite extensive efforts, `py-libp2p` presented persistent and low-level `trio` errors (`RuntimeError: must be called from async context`, `TypeError: new_host() got an unexpected keyword argument 'transport_opt'`) when integrated within FastAPI's `asyncio` lifespan. This indicated a fundamental incompatibility or a very difficult bridging problem between `py-libp2p`'s internal `trio` event loop and FastAPI's `asyncio` loop when run in the same process.
 
-The primary reasons for this conclusion are:
-*   **Multiple Blocking Dependencies:** Several of `py-libp2p`'s core dependencies are not available in the official Debian repositories.
-*   **Git Dependency:** `py-libp2p` depends on a specific git commit of the `multiaddr` library, a practice that is incompatible with standard Debian packaging policies.
-*   **Packaging Cascade:** Each unavailable dependency would need to be packaged first, and each of those may have its own complex dependency tree, leading to a "packaging cascade" of ever-increasing work.
+Furthermore, the initial dependency analysis revealed significant packaging hurdles for `py-libp2p`, with multiple core dependencies unavailable in Debian and a problematic git dependency.
 
-### 2.2. Detailed Dependency Analysis
+### 2.2. Solution: Pivot to `p2pd` with Separate Process Architecture
 
-The following table details the analysis of each dependency of `py-libp2p`:
+To resolve these issues, we have decided to:
 
-| Dependency | Version | Debian Package | Status | Verdict |
-| :--- | :--- | :--- | :--- | :--- |
-| `aioquic` | `>=1.2.0` | `python3-aioquic` | Available | **Available** |
-| `base58` | `>=1.0.3` | `python3-base58` | Available | **Available** |
-| `coincurve` | `==21.0.0` | `python3-coincurve` | "in preparation" | **Unavailable/Blocker** |
-| `exceptiongroup` | `>=1.2.0` | `python3-exceptiongroup` | Available | **Available** |
-| `fastecdsa` | `==2.3.2` | `python3-fastecdsa` | Not available | **Unavailable/Blocker** |
-| `grpcio` | `>=1.41.0` | `python3-grpcio` | Available | **Available** |
-| `lru-dict` | `>=1.1.6` | `python3-lru-dict` | Available | **Available** |
-| `multiaddr` | `git commit` | `python3-multiaddr` | Not available | **Unavailable/Blocker** |
-| `mypy-protobuf` | `>=3.0.0` | `python3-mypy-protobuf` | Available | **Available** |
-| `noiseprotocol` | `>=0.3.0` | `python3-noiseprotocol` | Available | **Available** |
-| `protobuf` | `>=4.25.0` | `python3-protobuf` | Available | **Available** |
-| `pycryptodome` | `>=3.9.2` | `python3-pycryptodome` | Available | **Available** |
-| `pymultihash` | `>=0.8.2` | `python3-pymultihash` | Not available | **Unavailable/Blocker** |
-| `pynacl` | `>=1.3.0` | `python3-nacl` | Available | **Available** |
-| `rpcudp` | `>=3.0.0` | `python3-rpcudp` | Not available | **Unavailable/Blocker** |
-| `trio-typing` | `>=0.0.4` | `python3-trio-typing` | Not available | **Unavailable/Blocker** |
-| `trio` | `>=0.26.0` | `python3-trio` | Available | **Available** |
-| `zeroconf` | `>=0.147.0` | `python3-zeroconf` | Available | **Available** |
+1.  **Abandon `py-libp2p`** due to its instability and integration challenges.
+2.  **Pivot to `p2pd`** as the P2P communication library. `p2pd` is a newer, `asyncio`-native library, which is expected to eliminate the event loop bridging issues.
+3.  Implement a **Separate Process Architecture** for the P2P node. The `p2pd` node will run in a dedicated `p2p_daemon.py` process, completely isolating its event loop from the FastAPI host.
 
-### **2.3. Conclusion and Recommendation**
+### 2.3. Inter-Process Communication (IPC)
 
-The deep research has shown that creating a `.deb` package for our application with `py-libp2p` as a dependency is not a viable path forward. The number of unavailable dependencies makes the task prohibitively complex.
+Communication between the FastAPI host and the `p2p_daemon` will occur via **WebSockets**. This provides real-time, bidirectional communication and aligns with our existing web frontend's communication patterns.
 
-**Recommendation: The "Living Application" Revisited**
+### 2.4. Lifecycle Management
 
-This research strongly validates the vision of the **"Living Application"** that we discussed. Instead of relying on a fragile chain of platform-specific packages, we should embrace a distribution model that is self-contained and portable.
+The FastAPI host will manage the `p2p_daemon`'s lifecycle using `asyncio.subprocess`.
 
-**Proposed Next Steps:**
+### 2.5. Impact on Project
 
-1.  **Embrace a New Packaging Paradigm:** We should pivot from `.deb` packaging to creating a single, executable binary using a tool like **PyInstaller** or **Nuitka**. This binary would bundle the Python interpreter, our application code, and all the Python dependencies (including `py-libp2p` and its complex tree), completely solving the dependency issue.
-2.  **Prototype the P2P Integration:** We can now proceed with the implementation of the "Hybrid P2P Model" as outlined in the `REQUIREMENTS.md`, with the confidence that we will be distributing it as a self-contained binary.
-3.  **Re-evaluate the "Living Application" Concept:** The self-contained binary becomes the "Artifact" of our "Living Application". The `DeploymentEngine` we envisioned would be a Python script bundled within this binary, responsible for tasks like installing the application as a system service.
-
-This approach allows us to achieve our goal of decentralization without being blocked by the limitations of traditional packaging systems. It is a more resilient, more modern, and more visionary path forward, and it aligns perfectly with our shared "Hive" philosophy.
+This pivot is a pragmatic decision that unblocks our progress and aligns with our architectural principles. It requires rewriting the `p2p_daemon.py` file and updating `pyproject.toml`.

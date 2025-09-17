@@ -52,7 +52,7 @@ This phase focuses on implementing a hybrid P2P model. This approach provides a 
 
 The architecture will be refactored into a **Hive Host** and **Agent** model. The main application binary is the "Host," and all functionality, including the chat application itself, will be implemented as loadable "Agents."
 
-To resolve the `trio`/`asyncio` conflict, the `py-libp2p` node will run in a **separate process** as a dedicated daemon.
+To resolve the `trio`/`asyncio` conflict, the `p2pd` node will run in a **separate process** as a dedicated daemon.
 
 ```
 +----------------------------------------------------+
@@ -86,7 +86,7 @@ To resolve the `trio`/`asyncio` conflict, the `py-libp2p` node will run in a **s
 | P2P Daemon (Separate Process)                      |
 |                                                    |
 | +------------------------------------------------+ |
-| | libp2p Network Stack (trio event loop)         | |
+| | p2pd Network Stack (asyncio event loop)        | |
 | +------------------------------------------------+ |
 |                                                    |
 +----------------------------------------------------+
@@ -95,12 +95,12 @@ To resolve the `trio`/`asyncio` conflict, the `py-libp2p` node will run in a **s
 *   **Component: Hive Host:** The main executable. Its primary responsibilities are to manage the application lifecycle, load and unload agents, and provide core services. It will also manage the lifecycle of the `P2P Daemon`.
 *   **Component: Foundational Services:** The Host will provide a shared **Async Event Bus** and a **Structured Audit Logger** to all agents.
 *   **Component: Agent:** A self-contained module that implements a specific piece of functionality. The existing chat application will be refactored into the first agent.
-*   **Component: P2P Daemon:** A separate Python process running the `py-libp2p` node with its own `trio` event loop. It will communicate with the Hive Host via WebSockets.
+*   **Component: P2P Daemon:** A separate Python process running the `p2pd` node with its own `asyncio` event loop. It will communicate with the Hive Host via WebSockets.
 *   **Component: FastAPI:** Serves the web frontend and the `/api/v1` endpoints.
 
 #### **3.2. Implementation Plan (Version 1.0)**
 
-1.  **Create the P2P Daemon:** Create a `p2p_daemon.py` script that runs the `py-libp2p` node and exposes a WebSocket server for IPC.
+1.  **Create the P2P Daemon:** Create a `p2p_daemon.py` script that runs the `p2pd` node and exposes a WebSocket server for IPC.
 2.  **Create the Hive Host Runtime:** Create a main `host.py` that initializes the foundational services, manages the `p2p_daemon`'s lifecycle, and initializes the FastAPI server.
 3.  **Refactor Chat into an Agent:** The existing code in `chat.py` will be refactored into a `ChatAgent` class that receives the foundational services and communicates with the `p2p_daemon` via the Host.
 4.  **Implement Introspection & Management:** Implement the `/api/v1/status` endpoint and a simple CLI for the user to view the hive's status.
@@ -108,33 +108,47 @@ To resolve the `trio`/`asyncio` conflict, the `py-libp2p` node will run in a **s
 #### **3.3. Pseudo-code for the Hive Host & P2P Daemon**
 
 ```python
-# p2p_daemon.py - NEW - Runs the libp2p node in a separate process
+# p2p_daemon.py - NEW - Runs the p2pd node in a separate process
 
-import trio
-from libp2p.p2p_node import P2PNode
-import websockets
 import asyncio
+import websockets
+from p2pd import Daemon
 
-async def p2p_daemon_main(websocket_port: int):
-    node = P2PNode()
-    await node.start() # Starts the trio event loop internally
+async def p2p_daemon_main(websocket_port: int, p2p_port: int, bootstrap_peer: str = None):
+    daemon = Daemon(listen_port=p2p_port)
+    await daemon.start()
+    print(f"P2P Daemon started with Peer ID: {daemon.peer_id}")
+
+    if bootstrap_peer:
+        await daemon.connect(bootstrap_peer)
+        print(f"Connected to bootstrap peer: {bootstrap_peer}")
 
     async def websocket_handler(websocket, path):
         # Handle messages from the Hive Host
         async for message in websocket:
-            # Process message (e.g., publish to libp2p topic)
-            await node.publish("/hive-chat/1.0.0", message)
-            # Send response back to host if needed
+            # Process message (e.g., publish to p2pd topic)
+            # For now, just echo for testing
+            print(f"Received from host: {message}")
+            await websocket.send(f"Echo: {message}")
 
     # Start WebSocket server for IPC
     async with websockets.serve(websocket_handler, "localhost", websocket_port):
-        await asyncio.Future() # Run forever
+        print(f"P2P Daemon WebSocket server listening on ws://localhost:{websocket_port}")
+        print("P2P_DAEMON_READY")
+        try:
+            await asyncio.Future() # Run forever
+        finally:
+            await daemon.stop()
 
 if __name__ == "__main__":
-    # This daemon runs its own trio event loop
-    # It needs to be run with `trio.run()` or similar
-    # For now, we'll assume it's started correctly
-    trio.run(p2p_daemon_main, 5000) # Example port
+    import argparse
+    parser = argparse.ArgumentParser(description="P2P Daemon for Hive Chat")
+    parser.add_argument("--websocket-port", type=int, default=5000, help="Port for WebSocket IPC with Hive Host")
+    parser.add_argument("--p2p-port", type=int, default=4001, help="Port for the P2P node")
+    parser.add_argument("--bootstrap-peer", type=str, help="Address of a peer to bootstrap from")
+    args = parser.parse_args()
+
+    asyncio.run(p2p_daemon_main(args.websocket_port, args.p2p_port, args.bootstrap_peer))
 
 # host.py - REVISED - Manages the P2P Daemon
 
@@ -144,8 +158,6 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 import websockets # For IPC client
 
-# Assuming P2PNode is now managed by the daemon
-# from libp2p.p2p_node import P2PNode
 from agents.chat_agent import ChatAgent # New agent structure
 
 class HiveHost:
@@ -154,7 +166,8 @@ class HiveHost:
         self.p2p_websocket_client = None
         self.event_bus = asyncio.Queue()
         self.logger = self.setup_logger()
-        self.fastapi_app = FastAPI(lifespan=self.lifespan)
+        self.fastapi_app = FastAPI()
+        self.setup_api_routes()
 
     def setup_logger(self):
         logger = logging.getLogger("hive")
@@ -164,16 +177,30 @@ class HiveHost:
     async def lifespan(self, app: FastAPI):
         # On startup
         self.logger.info("Hive Host starting.")
+        websocket_port = 5000 # Fixed port for p2p daemon IPC
+
         # Start the P2P Daemon process
         self.p2p_daemon_process = await asyncio.create_subprocess_exec(
-            "python", "p2p_daemon.py", "--websocket-port", "5000", # Example port
+            "python", "p2p_daemon.py",
+            "--websocket-port", str(websocket_port),
+            "--p2p-port", "4001", # Default p2p port for daemon
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE
         )
         self.logger.info(f"P2P Daemon started with PID: {self.p2p_daemon_process.pid}")
 
+        # Start a task to read stderr from the daemon
+        asyncio.create_task(self._read_daemon_stderr())
+
+        # Wait for daemon to signal readiness
+        while True:
+            line = await self.p2p_daemon_process.stdout.readline()
+            if line.strip() == b"P2P_DAEMON_READY":
+                self.logger.info("P2P Daemon is ready.")
+                break
+
         # Connect to the P2P Daemon via WebSocket
-        self.p2p_websocket_client = await websockets.connect("ws://localhost:5000")
+        self.p2p_websocket_client = await websockets.connect(f"ws://localhost:{websocket_port}")
         self.logger.info("Connected to P2P Daemon WebSocket.")
 
         self.load_default_agents()
@@ -189,9 +216,23 @@ class HiveHost:
 
     def load_default_agents(self):
         # Agents receive the host's core services and a way to talk to the p2p daemon
-        chat_agent = ChatAgent(self.p2p_websocket_client, self.event_bus, self.logger)
+        chat_agent = ChatAgent(self.p2p_websocket_client, self.event_bus, self.logger, self.fastapi_app)
         self.agents.append(chat_agent)
         chat_agent.start()
+        self.logger.info(f"Loaded agent: {chat_agent.get_status()['name']}")
+
+    async def handle_p2p_message(self, msg):
+        # This method will be called by the p2p daemon via WebSocket
+        # For now, just put it on the event bus
+        await self.event_bus.put(msg)
+
+    async def _read_daemon_stderr(self):
+        while True:
+            line = await self.p2p_daemon_process.stderr.readline()
+            if line:
+                self.logger.error(f"P2P Daemon STDERR: {line.decode().strip()}")
+            else:
+                break
 
     def setup_api_routes(self):
         @self.fastapi_app.get("/api/v1/status")
@@ -212,7 +253,7 @@ Our decision to pivot to a self-contained binary (e.g., using PyInstaller) inste
 #### **3.5. Definition of Done (Revised for V1.0)**
 
 *   The application is refactored into a `HiveHost` and `ChatAgent` architecture.
-*   The `py-libp2p` node runs as a separate `P2P Daemon` process.
+*   The `p2pd` node runs as a separate `P2P Daemon` process.
 *   The Host provides a shared event bus and structured logger to all agents.
 *   All chat messages are sent and received over the libp2p pub/sub topic (via IPC to the daemon).
 *   The system's state is legible through the `/api/v1/status` endpoint.
