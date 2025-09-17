@@ -10,7 +10,9 @@ dependencies = [
     "python-multipart>=0.0.20",
     "uvicorn[standart]>=0.35.0",
     "websockets>=15.0.1",
-    "p2pd>=0.1.0"
+    "p2pd>=0.1.0",
+    "dotenv>=0.9.9",
+    "mistralai>=1.9.10",
 ]
 
 [tool.setuptools]
