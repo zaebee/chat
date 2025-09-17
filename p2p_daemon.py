@@ -6,7 +6,8 @@ async def mock_p2p_daemon_main(websocket_port: int):
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
     logging.info(f"Mock P2P Daemon: Starting up on ws://localhost:{websocket_port}")
     print("P2P_DAEMON_READY") # Signal readiness to the host
-    await asyncio.sleep(3600 * 24) # Run for 24 hours
+        await asyncio.sleep(3600 * 24) # Run for 24 hours
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Mock P2P Daemon for Hive Chat")
