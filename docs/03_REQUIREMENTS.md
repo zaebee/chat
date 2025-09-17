@@ -46,93 +46,160 @@ This phase focuses on implementing a hybrid P2P model. This approach provides a 
 
 ---
 
-### **3. Functional Requirements Document (FRD) - Revision 4**
+### **3. Functional Requirements Document (FRD) - Revision 5**
 
-#### **3.1. System Architecture: The Hive Host & Agent Model**
+#### **3.1. System Architecture: The Hive Host & Agent Model (with Separate P2P Daemon)**
 
 The architecture will be refactored into a **Hive Host** and **Agent** model. The main application binary is the "Host," and all functionality, including the chat application itself, will be implemented as loadable "Agents."
+
+To resolve the `trio`/`asyncio` conflict, the `py-libp2p` node will run in a **separate process** as a dedicated daemon.
 
 ```
 +----------------------------------------------------+
 | Hive Host Binary (Living Application)              |
 |                                                    |
-| +-----------------+   +--------------------------+ |
-| | Agent: Chat     |   | Agent: [Future Agent]    | |
-| +-------+---------+   +--------------------------+ |
+| +------------------------------------------------+ |
+| | FastAPI (serving Frontend & Agent Mgmt API)     | |
+| +------------------------------------------------+ |
 |         |                                          |
 | +-------v----------------------------------------+ |
 | | Foundational Services (Event Bus, Logger)      | |
 | +------------------------------------------------+ |
 |         |                                          |
 | +-------v----------------------------------------+ |
-| | libp2p Network Stack (for all communication)   | |
+| | IPC (WebSockets)                               | |
 | +------------------------------------------------+ |
 |                                                    |
+| +-----------------+   +--------------------------+ |
+| | Agent: Chat     |   | Agent: [Future Agent]    | |
+| +-------+---------+   +--------------------------+ |
+|                                                    |
++----------------------------------------------------+
+         ^                                          ^
+         |                                          |
+         | (Manages Lifecycle)                      |
+         |                                          |
+         +------------------------------------------+
+                                                    |
+                                                    |
++----------------------------------------------------+
+| P2P Daemon (Separate Process)                      |
+|                                                    |
 | +------------------------------------------------+ |
-| | FastAPI (serving Frontend & Agent Mgmt API)     | |
+| | libp2p Network Stack (trio event loop)         | |
 | +------------------------------------------------+ |
 |                                                    |
 +----------------------------------------------------+
 ```
 
-*   **Component: Hive Host:** The main executable. Its primary responsibilities are to manage the application lifecycle, load and unload agents, and provide core services.
+*   **Component: Hive Host:** The main executable. Its primary responsibilities are to manage the application lifecycle, load and unload agents, and provide core services. It will also manage the lifecycle of the `P2P Daemon`.
 *   **Component: Foundational Services:** The Host will provide a shared **Async Event Bus** and a **Structured Audit Logger** to all agents.
 *   **Component: Agent:** A self-contained module that implements a specific piece of functionality. The existing chat application will be refactored into the first agent.
-*   **Component: libp2p Stack:** All communication between agents will occur over the libp2p network.
+*   **Component: P2P Daemon:** A separate Python process running the `py-libp2p` node with its own `trio` event loop. It will communicate with the Hive Host via WebSockets.
 *   **Component: FastAPI:** Serves the web frontend and the `/api/v1` endpoints.
 
 #### **3.2. Implementation Plan (Version 1.0)**
 
-1.  **Create the Hive Host Runtime:** Create a main `host.py` that initializes the foundational services, the libp2p node, and the FastAPI server.
-2.  **Refactor Chat into an Agent:** The existing code in `chat.py` will be refactored into a `ChatAgent` class that receives the foundational services from the host.
-3.  **Implement Introspection & Management:** Implement the `/api/v1/status` endpoint and a simple CLI for the user to view the hive's status.
+1.  **Create the P2P Daemon:** Create a `p2p_daemon.py` script that runs the `py-libp2p` node and exposes a WebSocket server for IPC.
+2.  **Create the Hive Host Runtime:** Create a main `host.py` that initializes the foundational services, manages the `p2p_daemon`'s lifecycle, and initializes the FastAPI server.
+3.  **Refactor Chat into an Agent:** The existing code in `chat.py` will be refactored into a `ChatAgent` class that receives the foundational services and communicates with the `p2p_daemon` via the Host.
+4.  **Implement Introspection & Management:** Implement the `/api/v1/status` endpoint and a simple CLI for the user to view the hive's status.
 
-#### **3.3. Pseudo-code for the Hive Host**
+#### **3.3. Pseudo-code for the Hive Host & P2P Daemon**
 
 ```python
-# host.py - NEW - The main entry point
+# p2p_daemon.py - NEW - Runs the libp2p node in a separate process
+
+import trio
+from libp2p.p2p_node import P2PNode
+import websockets
+import asyncio
+
+async def p2p_daemon_main(websocket_port: int):
+    node = P2PNode()
+    await node.start() # Starts the trio event loop internally
+
+    async def websocket_handler(websocket, path):
+        # Handle messages from the Hive Host
+        async for message in websocket:
+            # Process message (e.g., publish to libp2p topic)
+            await node.publish("/hive-chat/1.0.0", message)
+            # Send response back to host if needed
+
+    # Start WebSocket server for IPC
+    async with websockets.serve(websocket_handler, "localhost", websocket_port):
+        await asyncio.Future() # Run forever
+
+if __name__ == "__main__":
+    # This daemon runs its own trio event loop
+    # It needs to be run with `trio.run()` or similar
+    # For now, we'll assume it's started correctly
+    trio.run(p2p_daemon_main, 5000) # Example port
+
+# host.py - REVISED - Manages the P2P Daemon
 
 import asyncio
 import logging
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from libp2p.p2p_node import P2PNode
+import websockets # For IPC client
+
+# Assuming P2PNode is now managed by the daemon
+# from libp2p.p2p_node import P2PNode
 from agents.chat_agent import ChatAgent # New agent structure
 
 class HiveHost:
     def __init__(self):
-        self.p2p_node = P2PNode()
-        self.agents = []
+        self.p2p_daemon_process = None
+        self.p2p_websocket_client = None
         self.event_bus = asyncio.Queue()
         self.logger = self.setup_logger()
         self.fastapi_app = FastAPI(lifespan=self.lifespan)
 
     def setup_logger(self):
-        # Configure and return a structured JSON logger
         logger = logging.getLogger("hive")
         # ... configuration ...
         return logger
 
     async def lifespan(self, app: FastAPI):
         # On startup
-        await self.p2p_node.start()
+        self.logger.info("Hive Host starting.")
+        # Start the P2P Daemon process
+        self.p2p_daemon_process = await asyncio.create_subprocess_exec(
+            "python", "p2p_daemon.py", "--websocket-port", "5000", # Example port
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        self.logger.info(f"P2P Daemon started with PID: {self.p2p_daemon_process.pid}")
+
+        # Connect to the P2P Daemon via WebSocket
+        self.p2p_websocket_client = await websockets.connect("ws://localhost:5000")
+        self.logger.info("Connected to P2P Daemon WebSocket.")
+
         self.load_default_agents()
         self.logger.info("Hive Host started.")
         yield
         # On shutdown
         self.logger.info("Hive Host shutting down.")
-        await self.p2p_node.stop()
+        if self.p2p_websocket_client:
+            await self.p2p_websocket_client.close()
+        if self.p2p_daemon_process:
+            self.p2p_daemon_process.terminate()
+            await self.p2p_daemon_process.wait()
 
     def load_default_agents(self):
-        # Agents receive the host's core services
-        chat_agent = ChatAgent(self.p2p_node, self.event_bus, self.logger)
+        # Agents receive the host's core services and a way to talk to the p2p daemon
+        chat_agent = ChatAgent(self.p2p_websocket_client, self.event_bus, self.logger)
         self.agents.append(chat_agent)
         chat_agent.start()
 
     def setup_api_routes(self):
         @self.fastapi_app.get("/api/v1/status")
         async def get_system_status():
-            return { "status": "running", "agents": [agent.get_status() for agent in self.agents] }
+            # Query daemon for p2p status
+            await self.p2p_websocket_client.send("get_status")
+            daemon_status = await self.p2p_websocket_client.recv()
+            return { "status": "running", "agents": [agent.get_status() for agent in self.agents], "p2p_daemon": daemon_status }
 
 host = HiveHost()
 app = host.fastapi_app
@@ -145,8 +212,9 @@ Our decision to pivot to a self-contained binary (e.g., using PyInstaller) inste
 #### **3.5. Definition of Done (Revised for V1.0)**
 
 *   The application is refactored into a `HiveHost` and `ChatAgent` architecture.
+*   The `py-libp2p` node runs as a separate `P2P Daemon` process.
 *   The Host provides a shared event bus and structured logger to all agents.
-*   All chat messages are sent and received over the libp2p pub/sub topic.
+*   All chat messages are sent and received over the libp2p pub/sub topic (via IPC to the daemon).
 *   The system's state is legible through the `/api/v1/status` endpoint.
 *   A simple CLI exists for the user to view the hive's status.
 *   The entire application can be bundled into a single executable binary.
