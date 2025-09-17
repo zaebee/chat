@@ -2,10 +2,11 @@ import asyncio
 import websockets
 import argparse
 from p2pd import Daemon
+from p2pd.net import NIC
 
 async def p2p_daemon_main(websocket_port: int, p2p_port: int, bootstrap_peer: str = None):
     daemon = Daemon()
-    await daemon.listen_all(port=p2p_port, proto='tcp', nic='0.0.0.0')
+    await daemon.listen_all(port=p2p_port, proto='tcp', nic=NIC('0.0.0.0'))
     print(f"P2P Daemon started with Peer ID: {daemon.peer_id}")
 
     if bootstrap_peer:
