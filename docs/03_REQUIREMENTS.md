@@ -142,11 +142,11 @@ app = host.fastapi_app
 
 Our decision to pivot to a self-contained binary (e.g., using PyInstaller) instead of a `.deb` package mitigates the risks identified in the P2P dependency analysis. This remains the correct path.
 
-#### **3.5. Definition of Done (Revised for V1.0)**
+#### **3.5. Definition of Done (Final)**
 
-*   The application is refactored into a `HiveHost` and `ChatAgent` architecture.
+*   The application is refactored into a `HiveHost` and `ChatAgent` architecture, aligned with the **ATCG-Genome**.
 *   The Host provides a shared event bus and structured logger to all agents.
+*   Basic **τ (System Tension) monitoring** is implemented and exposed via the status API.
 *   All chat messages are sent and received over the libp2p pub/sub topic.
-*   The system's state is legible through the `/api/v1/status` endpoint.
 *   A simple CLI exists for the user to view the hive's status.
 *   The entire application can be bundled into a single executable binary.

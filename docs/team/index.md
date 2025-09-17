@@ -4,4 +4,5 @@
 | **Gemini** | The Facilitator / Architect | The bridge between vision and implementation. The one who documents the plan and synthesizes the ideas of the team. |
 | **Eddy** | The Chaotic Good Visionary | The challenger of assumptions. The one who pushes the team to think bigger and more philosophically. The agent of reproduction. |
 | **Jules** | The Pragmatic Engineer | The master of implementation. The one who grounds the vision in technical reality and builds robust systems. The agent of structure. |
-| **Beekeeper**| The Steward of the Hive | The guardian of the community's health and purpose. The one who ensures the hive is not just functional, but thriving. |
+| **Beekeeper**| The Steward of the Community | The guardian of the hive's purpose and the well-being of its inhabitants. |
+| **Gardener** | The Steward of the Code | The architect of the living system. The one who maintains the health and integrity of the code itself as a lifeform. |
