@@ -46,7 +46,7 @@ This phase focuses on implementing a hybrid P2P model. This approach provides a 
 
 ---
 
-### **3. Functional Requirements Document (FRD) - Revision 3**
+### **3. Functional Requirements Document (FRD) - Revision 4**
 
 #### **3.1. System Architecture: The Hive Host & Agent Model**
 
@@ -61,6 +61,10 @@ The architecture will be refactored into a **Hive Host** and **Agent** model. Th
 | +-------+---------+   +--------------------------+ |
 |         |                                          |
 | +-------v----------------------------------------+ |
+| | Foundational Services (Event Bus, Logger)      | |
+| +------------------------------------------------+ |
+|         |                                          |
+| +-------v----------------------------------------+ |
 | | libp2p Network Stack (for all communication)   | |
 | +------------------------------------------------+ |
 |                                                    |
@@ -71,29 +75,25 @@ The architecture will be refactored into a **Hive Host** and **Agent** model. Th
 +----------------------------------------------------+
 ```
 
-*   **Component: Hive Host:** The main executable. Its primary responsibilities are to manage the application lifecycle, load and unload agents, and provide core services like the libp2p network stack.
-*   **Component: Agent:** A self-contained module (e.g., a Python class or package) that implements a specific piece of functionality. The existing chat application will be refactored into the first agent.
-*   **Component: libp2p Stack:** All communication between agents, even if they are running in the same host, will occur over the libp2p network. This enforces the "dogfooding" principle and ensures location transparency.
-*   **Component: FastAPI:** This will now serve two purposes: serving the web frontend for the chat agent, and providing the `/api/v1` endpoints for system introspection and future agent management.
+*   **Component: Hive Host:** The main executable. Its primary responsibilities are to manage the application lifecycle, load and unload agents, and provide core services.
+*   **Component: Foundational Services:** The Host will provide a shared **Async Event Bus** and a **Structured Audit Logger** to all agents.
+*   **Component: Agent:** A self-contained module that implements a specific piece of functionality. The existing chat application will be refactored into the first agent.
+*   **Component: libp2p Stack:** All communication between agents will occur over the libp2p network.
+*   **Component: FastAPI:** Serves the web frontend and the `/api/v1` endpoints.
 
 #### **3.2. Implementation Plan (Version 1.0)**
 
-1.  **Create the Hive Host Runtime:**
-    *   Create a main `host.py` that will be the entry point for the application.
-    *   This host will be responsible for initializing the libp2p node and the FastAPI server.
-2.  **Refactor Chat into an Agent:**
-    *   The existing code in `chat.py` will be refactored into a `ChatAgent` class.
-    *   This agent will be loaded by the `host.py` on startup.
-3.  **Implement P2P Communication:**
-    *   The `ChatAgent` will use the libp2p node provided by the host to send and receive messages.
-4.  **Implement Introspection API:**
-    *   The host will expose the `/api/v1/status` endpoint.
+1.  **Create the Hive Host Runtime:** Create a main `host.py` that initializes the foundational services, the libp2p node, and the FastAPI server.
+2.  **Refactor Chat into an Agent:** The existing code in `chat.py` will be refactored into a `ChatAgent` class that receives the foundational services from the host.
+3.  **Implement Introspection & Management:** Implement the `/api/v1/status` endpoint and a simple CLI for the user to view the hive's status.
 
 #### **3.3. Pseudo-code for the Hive Host**
 
 ```python
 # host.py - NEW - The main entry point
 
+import asyncio
+import logging
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from libp2p.p2p_node import P2PNode
@@ -103,19 +103,29 @@ class HiveHost:
     def __init__(self):
         self.p2p_node = P2PNode()
         self.agents = []
+        self.event_bus = asyncio.Queue()
+        self.logger = self.setup_logger()
         self.fastapi_app = FastAPI(lifespan=self.lifespan)
+
+    def setup_logger(self):
+        # Configure and return a structured JSON logger
+        logger = logging.getLogger("hive")
+        # ... configuration ...
+        return logger
 
     async def lifespan(self, app: FastAPI):
         # On startup
         await self.p2p_node.start()
         self.load_default_agents()
+        self.logger.info("Hive Host started.")
         yield
         # On shutdown
+        self.logger.info("Hive Host shutting down.")
         await self.p2p_node.stop()
 
     def load_default_agents(self):
-        # The chat app is now just an agent loaded at startup
-        chat_agent = ChatAgent(self.p2p_node)
+        # Agents receive the host's core services
+        chat_agent = ChatAgent(self.p2p_node, self.event_bus, self.logger)
         self.agents.append(chat_agent)
         chat_agent.start()
 
@@ -135,6 +145,8 @@ Our decision to pivot to a self-contained binary (e.g., using PyInstaller) inste
 #### **3.5. Definition of Done (Revised for V1.0)**
 
 *   The application is refactored into a `HiveHost` and `ChatAgent` architecture.
+*   The Host provides a shared event bus and structured logger to all agents.
 *   All chat messages are sent and received over the libp2p pub/sub topic.
 *   The system's state is legible through the `/api/v1/status` endpoint.
+*   A simple CLI exists for the user to view the hive's status.
 *   The entire application can be bundled into a single executable binary.
