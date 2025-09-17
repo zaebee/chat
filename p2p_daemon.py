@@ -19,6 +19,7 @@ async def p2p_daemon_main(websocket_port: int, p2p_port: int, bootstrap_peer: st
     # Start WebSocket server for IPC
     async with websockets.serve(websocket_handler, "localhost", websocket_port):
         print(f"P2P Daemon WebSocket server listening on ws://localhost:{websocket_port}")
+        print("P2P_DAEMON_READY")
         await asyncio.Future() # Run forever
 
 if __name__ == "__main__":

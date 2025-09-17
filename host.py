@@ -37,8 +37,12 @@ class HiveHost:
         )
         self.logger.info(f"P2P Daemon started with PID: {self.p2p_daemon_process.pid}")
 
-        # Give daemon a moment to start
-        await asyncio.sleep(1)
+        # Wait for daemon to signal readiness
+        while True:
+            line = await self.p2p_daemon_process.stdout.readline()
+            if line.strip() == b"P2P_DAEMON_READY":
+                self.logger.info("P2P Daemon is ready.")
+                break
 
         # Connect to the P2P Daemon via WebSocket
         self.p2p_websocket_client = await websockets.connect(f"ws://localhost:{websocket_port}")
