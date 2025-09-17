@@ -36,35 +36,33 @@ We recognize that the development and operation of this software will be a colla
 
 *   **Implementation:** Documentation, APIs, and even commit messages should be written with both a human and an AI audience in mind. The system should be designed to be not just "user-friendly," but "teammate-friendly."
 
-## 2. P2P Layer Decision: From `py-libp2p` to `p2pd`
+## 2. P2P Layer Decision: From Python Libraries to External Daemon
 
-This section documents the decision to pivot from `py-libp2p` to `p2pd` for the P2P communication layer.
+This section documents the decision to pivot from Python-based P2P libraries to an external P2P daemon.
 
-### 2.1. Problem with `py-libp2p`
+### 2.1. Problem with Python P2P Libraries (`py-libp2p` and `p2pd`)
 
-Despite extensive efforts, `py-libp2p` presented persistent and low-level `trio` errors (`RuntimeError: must be called from async context`, `TypeError: new_host() got an unexpected keyword argument 'transport_opt'`) when integrated within FastAPI's `asyncio` lifespan. This indicated a fundamental incompatibility or a very difficult bridging problem between `py-libp2p`'s internal `trio` event loop and FastAPI's `asyncio` loop when run in the same process.
+Despite extensive efforts, both `py-libp2p` and `p2pd` presented persistent and low-level integration challenges (e.g., `trio`/`asyncio` conflicts, unstable APIs, unclear documentation). These issues consumed excessive 'attention resources' (Σ) and introduced high 'system tension' (τ), hindering progress on core 'Hive Host' and 'Agent' development.
 
-Furthermore, the initial dependency analysis revealed significant packaging hurdles for `py-libp2p`, with multiple core dependencies unavailable in Debian and a problematic git dependency.
-
-### 2.2. Solution: Pivot to `p2pd` with Separate Process Architecture
+### 2.2. Solution: Pivot to `go-libp2p-daemon` with Separate Process Architecture
 
 To resolve these issues, we have decided to:
 
-1.  **Abandon `py-libp2p`** due to its instability and integration challenges.
-2.  **Pivot to `p2pd`** as the P2P communication library. `p2pd` is a newer, `asyncio`-native library, which is expected to eliminate the event loop bridging issues.
-3.  Implement a **Separate Process Architecture** for the P2P node. The `p2pd` node will run in a dedicated `p2p_daemon.py` process, completely isolating its event loop from the FastAPI host.
+1.  **Abandon direct Python P2P library implementation** due to instability and integration challenges.
+2.  **Pivot to `go-libp2p-daemon`** (or a similar mature external daemon) as the P2P communication layer. This leverages a battle-tested, stable, and performant implementation.
+3.  Implement a **Separate Process Architecture** for the P2P node. The `go-libp2p-daemon` will run in a dedicated process, completely isolating its event loop from the FastAPI host.
 
 ### 2.3. Inter-Process Communication (IPC)
 
-Communication between the FastAPI host and the `p2p_daemon` will occur via **WebSockets**. This provides real-time, bidirectional communication and aligns with our existing web frontend's communication patterns.
+Communication between the FastAPI host and the `go-libp2p-daemon` will occur via its well-defined API (likely HTTP/WebSockets/gRPC). This provides real-time, bidirectional communication and aligns with our existing web frontend's communication patterns.
 
 ### 2.4. Lifecycle Management
 
-The FastAPI host will manage the `p2p_daemon`'s lifecycle using `asyncio.subprocess`.
+The FastAPI host will manage the `go-libp2p-daemon`'s lifecycle using `asyncio.subprocess`.
 
 ### 2.5. Impact on Project
 
-This pivot is a pragmatic decision that unblocks our progress and aligns with our architectural principles. It requires rewriting the `p2p_daemon.py` file and updating `pyproject.toml`.
+This pivot is a pragmatic decision that unblocks our progress and aligns with our architectural principles. It requires replacing the `p2p_daemon.py` file with a script that manages the external daemon and updating `pyproject.toml`.
 
 ## 3. Exploring the Concept of a "Self-Owned P2P Library"
 
@@ -83,9 +81,9 @@ While the idea of a library rewriting its own code is beyond current capabilitie
 *   **Observability:** It provides rich telemetry and introspection, allowing other agents to understand its internal state and influence its decisions.
 *   **Network Governance:** Its evolution is guided by a decentralized consensus mechanism (e.g., a DAO of network participants).
 
-### 3.3. Impact on `p2pd` Implementation
+### 3.3. Impact on `go-libp2p-daemon` Implementation
 
-When implementing with `p2pd`, we should prioritize features that enable these "self-owned" characteristics (e.g., robust configuration, plugin hooks, detailed metrics). This discussion provides a clear North Star for the P2P layer.
+When implementing with `go-libp2p-daemon`, we should prioritize features that enable these "self-owned" characteristics (e.g., robust configuration, plugin hooks, detailed metrics). This discussion provides a clear North Star for the P2P layer.
 
 ## 4. Integrating Remote AI Teammates
 
