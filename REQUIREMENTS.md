@@ -46,107 +46,95 @@ This phase focuses on implementing a hybrid P2P model. This approach provides a 
 
 ---
 
-### **3. Functional Requirements Document (FRD) - Revision 2**
+### **3. Functional Requirements Document (FRD) - Revision 3**
 
-#### **3.1. System Architecture: The Hybrid Model (Unchanged)**
+#### **3.1. System Architecture: The Hive Host & Agent Model**
 
-The overall hybrid architecture remains the same.
+The architecture will be refactored into a **Hive Host** and **Agent** model. The main application binary is the "Host," and all functionality, including the chat application itself, will be implemented as loadable "Agents."
 
 ```
-+---------+      WebSocket      +----------------+      libp2p      +--------------+
-| Browser | <-----------------> | FastAPI Server | <--------------> | libp2p Swarm |
-+---------+                     +----------------+                  +--------------+
-                                |  (p2p Gateway) |
-                                +----------------+
++----------------------------------------------------+
+| Hive Host Binary (Living Application)              |
+|                                                    |
+| +-----------------+   +--------------------------+ |
+| | Agent: Chat     |   | Agent: [Future Agent]    | |
+| +-------+---------+   +--------------------------+ |
+|         |                                          |
+| +-------v----------------------------------------+ |
+| | libp2p Network Stack (for all communication)   | |
+| +------------------------------------------------+ |
+|                                                    |
+| +------------------------------------------------+ |
+| | FastAPI (serving Frontend & Agent Mgmt API)     | |
+| +------------------------------------------------+ |
+|                                                    |
++----------------------------------------------------+
 ```
 
-*   **Component: Frontend:** Remains a single-page application served by FastAPI. No functional changes are required for this phase.
-*   **Component: FastAPI Gateway:**
-    *   Continues to serve the `index.html` and static files.
-    *   Manages WebSocket connections from browser clients.
-    *   Will instantiate and manage the lifecycle of a `Libp2pNode` object.
-*   **Component: libp2p Node:**
-    *   A Python object (`py-libp2p`) that will be initialized on application startup (via FastAPI's `lifespan` event).
-    *   It will subscribe to a designated pub/sub topic (e.g., `/hive-chat/1.0.0`).
-    *   It will have a callback function to process incoming messages from the p2p network.
+*   **Component: Hive Host:** The main executable. Its primary responsibilities are to manage the application lifecycle, load and unload agents, and provide core services like the libp2p network stack.
+*   **Component: Agent:** A self-contained module (e.g., a Python class or package) that implements a specific piece of functionality. The existing chat application will be refactored into the first agent.
+*   **Component: libp2p Stack:** All communication between agents, even if they are running in the same host, will occur over the libp2p network. This enforces the "dogfooding" principle and ensures location transparency.
+*   **Component: FastAPI:** This will now serve two purposes: serving the web frontend for the chat agent, and providing the `/api/v1` endpoints for system introspection and future agent management.
 
-#### **3.2. Data Flow: Human and AI Interaction**
+#### **3.2. Implementation Plan (Version 1.0)**
 
-The data flows are now expanded to include AI agents as first-class citizens.
+1.  **Create the Hive Host Runtime:**
+    *   Create a main `host.py` that will be the entry point for the application.
+    *   This host will be responsible for initializing the libp2p node and the FastAPI server.
+2.  **Refactor Chat into an Agent:**
+    *   The existing code in `chat.py` will be refactored into a `ChatAgent` class.
+    *   This agent will be loaded by the `host.py` on startup.
+3.  **Implement P2P Communication:**
+    *   The `ChatAgent` will use the libp2p node provided by the host to send and receive messages.
+4.  **Implement Introspection API:**
+    *   The host will expose the `/api/v1/status` endpoint.
 
-*   **Human User Interaction:** (Unchanged) Messages flow from Browser -> WebSocket -> FastAPI -> P2P Swarm.
-*   **AI Agent Interaction (New):**
-    1.  An authenticated AI agent makes a `POST` request to a new `/api/v1/messages` endpoint.
-    2.  The FastAPI server validates the request and creates a `Message` object.
-    3.  The message is saved to the database and published to the P2P network.
-
-#### **3.3. Implementation Pseudo-code (Revised)**
-
-This pseudo-code illustrates how `chat.py` would be modified to integrate the libp2p node and expose an API for AI teammates.
+#### **3.3. Pseudo-code for the Hive Host**
 
 ```python
-# chat.py - Revised High-Level Pseudo-code
+# host.py - NEW - The main entry point
 
-from fastapi import FastAPI, Depends
-from pydantic import BaseModel
+from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from database import init_db
-from libp2p.p2p_node import P2PNode # Hypothetical import
-from security import get_api_key # Hypothetical import for API security
+from libp2p.p2p_node import P2PNode
+from agents.chat_agent import ChatAgent # New agent structure
 
-# --- NEW: API for AI Teammates ---
+class HiveHost:
+    def __init__(self):
+        self.p2p_node = P2PNode()
+        self.agents = []
+        self.fastapi_app = FastAPI(lifespan=self.lifespan)
 
-class SystemStatus(BaseModel):
-    service_status: str
-    p2p_node_status: dict
-    active_web_clients: int
-    timestamp: str
+    async def lifespan(self, app: FastAPI):
+        # On startup
+        await self.p2p_node.start()
+        self.load_default_agents()
+        yield
+        # On shutdown
+        await self.p2p_node.stop()
 
-@app.get("/api/v1/status", response_model=SystemStatus)
-async def get_system_status():
-    """
-    Provides a structured status report for AI agents and monitoring tools.
-    This endpoint is the embodiment of the Principle of Legibility.
-    """
-    return {
-        "service_status": "running",
-        "p2p_node_status": await p2p_node.get_status(), # Assumes p2p_node has this method
-        "active_web_clients": len(manager.active_connections),
-        "timestamp": datetime.now().isoformat(),
-    }
+    def load_default_agents(self):
+        # The chat app is now just an agent loaded at startup
+        chat_agent = ChatAgent(self.p2p_node)
+        self.agents.append(chat_agent)
+        chat_agent.start()
 
-@app.post("/api/v1/messages")
-async def post_message_from_agent(message: Message, api_key: APIKey = Depends(get_api_key)):
-    """
-    Allows a trusted AI agent to post a message to the network.
-    This endpoint embodies the Principle of API-First Interaction.
-    """
-    await manager.add_message(message)
-    await p2p_node.publish("/hive-chat/1.0.0", message.model_dump_json())
-    return {"status": "message published"}
+    def setup_api_routes(self):
+        @self.fastapi_app.get("/api/v1/status")
+        async def get_system_status():
+            return { "status": "running", "agents": [agent.get_status() for agent in self.agents] }
 
-# ... (the rest of the file, including the lifespan manager and websocket endpoint) ...
+host = HiveHost()
+app = host.fastapi_app
 ```
 
 #### **3.4. Debian Packaging Impact & Risks (Unchanged)**
 
-*   **Critical Dependency:** This architecture introduces a hard dependency on the `py-libp2p` library.
-*   **Packaging Challenge:** `py-libp2p` has a large and complex dependency tree. The biggest challenge and risk for this project will be successfully mapping **all** of these Python dependencies to their corresponding `python3-*` Debian packages. A thorough dependency analysis is required before implementation.
+Our decision to pivot to a self-contained binary (e.g., using PyInstaller) instead of a `.deb` package mitigates the risks identified in the P2P dependency analysis. This remains the correct path.
 
-#### **3.5. Definition of Done (Revised)**
+#### **3.5. Definition of Done (Revised for V1.0)**
 
-*   The application functions as a hybrid P2P chat system.
+*   The application is refactored into a `HiveHost` and `ChatAgent` architecture.
+*   All chat messages are sent and received over the libp2p pub/sub topic.
 *   The system's state is legible through the `/api/v1/status` endpoint.
-*   An AI agent can post messages through the `/api/v1/messages` endpoint.
-*   All new code is written in accordance with the `ARCHITECTURE_PRINCIPLES.md`.
-
-#### **3.6. Agent Management API (Future - V2.0)**
-
-As per the consultation with our AI teammate Eddy, the long-term vision is to evolve this application into a "Single-Node Hive." This will be the focus of Version 2.0, and the requirements will be expanded to include a full agent management API.
-
-*   **Concept:** The application will expose a set of API endpoints for managing the lifecycle of other agents running within the same process.
-*   **Endpoints (for V2.0):**
-    *   `GET /api/v1/agents`: List all running agents.
-    *   `POST /api/v1/agents`: Deploy a new agent (e.g., by providing a URL to its code).
-    *   `GET /api/v1/agents/{agent_id}`: Get the status of a specific agent.
-    *   `DELETE /api/v1/agents/{agent_id}`: Stop a running agent.
+*   The entire application can be bundled into a single executable binary.

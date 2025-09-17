@@ -2,21 +2,21 @@
 
 This document outlines the high-level goals and planned features for the Hive Chat application.
 
-## Version 1.0: The Foundation
+## Version 1.0: The Hive Host
 
 *   [x] Basic real-time chat functionality
 *   [x] Initial packaging research and pivot to "Living Application" model
-*   [ ] Separate frontend assets (CSS/JS) from HTML
-*   [ ] Persistent message history with SQLite
-*   [ ] P2P messaging with libp2p (Hybrid Model)
-*   [ ] Basic machine-readable introspection API (`/api/v1/status`)
+*   [x] Establishment of Architectural Principles and multi-agent team
+*   [ ] **Core Hive Host Runtime:** Develop the main application binary that can dynamically load and manage agents.
+*   **Agent-based Refactor:** Refactor the existing chat application to be the first, default agent running on the Hive Host.
+*   **P2P Agent Communication:** Implement the underlying libp2p stack for all inter-agent communication.
+*   **Basic Introspection API:** Implement the initial `/api/v1/status` endpoint.
 
-## Version 2.0: The Single-Node Hive
+## Version 2.0: The Expanding Hive
 
-*   [ ] **Agent Management API:** Implement a full CRUD API (`/api/v1/agents`) for deploying, monitoring, and managing other agents within the application.
-*   **Inter-Agent Communication:** Use the underlying libp2p network for communication between hosted agents.
-*   **Enhanced Introspection:** The API will be expanded to allow agents to query the host's purpose, architecture, and source code integrity.
+*   [ ] **Agent Management API:** Implement the full CRUD API (`/api/v1/agents`) for deploying and managing agents at runtime.
 *   **Secure Update Mechanism:** Implement a robust, secure self-updating mechanism for the "Living Application" binary.
+*   **Enhanced Introspection:** Expand the API to allow agents to query the host's purpose, architecture, and source code integrity.
 
 ## Version 3.0: The Distributed Hive
 
