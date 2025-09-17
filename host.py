@@ -1,7 +1,6 @@
 import asyncio
 import logging
 from fastapi import FastAPI
-from contextlib import asynccontextmanager
 from p2p import P2PNode
 from agents.chat_agent import ChatAgent
 
@@ -11,7 +10,7 @@ class HiveHost:
         self.agents = []
         self.event_bus = asyncio.Queue()
         self.logger = self.setup_logger()
-        self.fastapi_app = FastAPI(lifespan=self.lifespan)
+        self.fastapi_app = FastAPI()
         self.setup_api_routes()
 
     def setup_logger(self):
@@ -23,14 +22,12 @@ class HiveHost:
         logger.addHandler(handler)
         return logger
 
-    @asynccontextmanager
-    async def lifespan(self, app: FastAPI):
-        # On startup
-        await self.p2p_node.start(callback=self.handle_p2p_message)
+    async def lifespan_startup(self, bootstrap_peer: str = None):
+        await self.p2p_node.start(callback=self.handle_p2p_message, bootstrap_peer=bootstrap_peer)
         self.load_default_agents()
         self.logger.info("Hive Host started.")
-        yield
-        # On shutdown
+
+    async def lifespan_shutdown(self):
         self.logger.info("Hive Host shutting down.")
         await self.p2p_node.stop()
 
@@ -41,8 +38,6 @@ class HiveHost:
         self.logger.info(f"Loaded agent: {chat_agent.get_status()['name']}")
 
     async def handle_p2p_message(self, msg):
-        # This is the callback for all p2p messages
-        # We can forward it to the event bus for agents to consume
         await self.event_bus.put(msg)
 
     def setup_api_routes(self):

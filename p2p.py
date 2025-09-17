@@ -5,6 +5,7 @@ from libp2p.peer.peerinfo import PeerInfo
 from libp2p.crypto.secp256k1 import create_new_key_pair
 from libp2p.pubsub.pubsub import Pubsub
 from libp2p.pubsub.gossipsub import GossipSub
+from multiaddr import Multiaddr
 
 class P2PNode:
     def __init__(self, port: int = 4001):
@@ -12,7 +13,7 @@ class P2PNode:
         self.host = None
         self.pubsub = None
 
-    async def start(self, callback):
+    async def start(self, callback, bootstrap_peer: str = None):
         key_pair = create_new_key_pair()
         self.host = BasicHost(key_pair)
         listen_addr = f"/ip4/0.0.0.0/tcp/{self.port}"
@@ -20,6 +21,11 @@ class P2PNode:
         self.pubsub = Pubsub(self.host, GossipSub([]))
         print(f"P2P Node started and listening on {listen_addr}")
         print(f"Peer ID: {self.host.get_id().pretty()}")
+
+        if bootstrap_peer:
+            bootstrap_addr = Multiaddr(bootstrap_peer)
+            await self.host.connect(bootstrap_addr)
+            print(f"Connected to bootstrap peer: {bootstrap_peer}")
 
     async def stop(self):
         if self.host:
