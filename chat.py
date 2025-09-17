@@ -1,7 +1,6 @@
 import uvicorn
 import argparse
 from host import app, host
-from database import init_db
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -10,20 +9,13 @@ if __name__ == "__main__":
     parser.add_argument("--bootstrap-peer", type=str, help="Address of a peer to bootstrap from")
     args = parser.parse_args()
 
-    host.p2p_node.port = args.p2p_port
-
-    init_db()
-
     async def startup():
-        await host.p2p_node.start(callback=host.handle_p2p_message, bootstrap_peer=args.bootstrap_peer)
-        host.load_default_agents()
-        host.logger.info("Hive Host started.")
+        await host.lifespan_startup(p2p_port=args.p2p_port, bootstrap_peer=args.bootstrap_peer)
 
     app.add_event_handler("startup", startup)
 
     async def shutdown():
-        await host.p2p_node.stop()
-        host.logger.info("Hive Host shutting down.")
+        await host.lifespan_shutdown()
 
     app.add_event_handler("shutdown", shutdown)
 
