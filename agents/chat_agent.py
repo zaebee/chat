@@ -1,3 +1,4 @@
+import asyncio
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -47,8 +48,7 @@ class ConnectionManager:
 
         # Уведомляем других пользователей о новом участнике
         await self.broadcast(
-            json.dumps({"type": "user_joined", "data": user.model_dump()}),
-            exclude_user_id=user_id,
+            json.dumps({"type": "user_joined", "data": user.model_dump()})
         )
         await self.broadcast(
             json.dumps(
@@ -56,8 +56,7 @@ class ConnectionManager:
                     "type": "user_list",
                     "data": [u.model_dump() for u in self.users.values()],
                 }
-            ),
-            exclude_user_id=user_id,
+            )
         )
 
         # Отправляем список активных пользователей
@@ -100,16 +99,19 @@ class ConnectionManager:
         conn.close()
 
 class ChatAgent:
-    def __init__(self, event_bus, logger, app: FastAPI):
+    def __init__(self, p2p_node, event_bus, logger, app: FastAPI):
+        self.p2p_node = p2p_node
         self.event_bus = event_bus
         self.logger = logger
         self.app = app
         self.manager = ConnectionManager()
         self.templates = Jinja2Templates(directory="templates")
+        self.chat_topic = "/hive-chat/1.0.0"
 
     def start(self):
         self.logger.info("ChatAgent started.")
         self.add_routes()
+        asyncio.create_task(self.listen_for_p2p_messages())
 
     def get_status(self):
         return {
@@ -117,6 +119,22 @@ class ChatAgent:
             "status": "running",
             "connected_users": len(self.manager.users)
         }
+
+    async def handle_p2p_message(self, msg):
+        if msg.topicIDs[0] == self.chat_topic:
+            # Avoid echoing our own messages
+            if msg.from_id != await self.p2p_node.get_id():
+                self.logger.info(f"Received message from P2P network: {msg.data.decode()}")
+                await self.manager.broadcast(msg.data.decode())
+
+    async def listen_for_p2p_messages(self):
+        await self.p2p_node.subscribe(self.chat_topic, self.handle_p2p_message)
+        while True:
+            try:
+                msg = await self.event_bus.get()
+                await self.handle_p2p_message(msg)
+            except asyncio.CancelledError:
+                break
 
     def add_routes(self):
         @self.app.get("/", response_class=HTMLResponse)
@@ -141,9 +159,7 @@ class ChatAgent:
                             is_bot=False,
                         )
                         await self.manager.add_message(message)
-                        await self.manager.broadcast(
-                            json.dumps({"type": "message", "data": message.model_dump()})
-                        )
+                        await self.p2p_node.publish(self.chat_topic, json.dumps({"type": "message", "data": message.model_dump()}))
 
             except WebSocketDisconnect:
                 await self.manager.broadcast(

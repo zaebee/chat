@@ -10,6 +10,8 @@ dependencies = [
     "python-multipart>=0.0.20",
     "uvicorn[standart]>=0.35.0",
     "websockets>=15.0.1",
+    "libp2p==0.2.9",
+    "multiaddr @ git+https://github.com/multiformats/py-multiaddr.git@b186e2ccadc22545dec4069ff313787bf29265e0"
 ]
 
 [tool.setuptools]
