@@ -24,7 +24,7 @@ This document serves as the detailed blueprint for implementing the Hive Host ar
 |                                                    |
 | +-----------------+   +--------------------------+ |
 | | Agent: Chat     |   | Agent: [Future Agent]    | |
-| +-------+---------+   +--------------------------+ |
+| +-------+---------+   --------------------------+ |
 |                                                    |
 +----------------------------------------------------+
          ^                                          ^
@@ -119,8 +119,8 @@ These services will be initialized by the Hive Host and passed to each agent upo
         def setup_logger(self):
             logger = logging.getLogger("hive")
             logger.setLevel(logging.INFO)
-            handler = logging.StreamHandler() # Or FileHandler, etc.
-            formatter = logging.Formatter('{"timestamp": "%(asctime)s", "level": "%(levelname)s", "message": "%(message)s", "agent": "%(name)s"}')
+            handler = StreamHandler() # Or FileHandler, etc.
+            formatter = Formatter('{"timestamp": "%(asctime)s", "level": "%(levelname)s", "message": "%(message)s", "agent": "%(name)s"}')
             handler.setFormatter(formatter)
             logger.addHandler(handler)
             return logger
