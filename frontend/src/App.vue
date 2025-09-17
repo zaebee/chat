@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { onMounted, ref, watchEffect } from 'vue'
-import { RouterView } from 'vue-router'
+import { RouterView, RouterLink } from 'vue-router'
 import { useChatStore } from '@/stores/chat'
 import { storeToRefs } from 'pinia'
 import LoginModal from '@/components/LoginModal.vue'
 
 const isCollapsed = ref(false)
 const chatStore = useChatStore()
-const { currentUser, theme } = storeToRefs(chatStore)
+const { currentUser, theme, language } = storeToRefs(chatStore)
 
 // On startup, check for saved username and theme
 onMounted(() => {
@@ -47,7 +47,15 @@ function handleLogin(username: string) {
           </li>
         </ul>
       </nav>
+      <nav class="main-nav">
+        <RouterLink to="/">Chat</RouterLink>
+        <RouterLink to="/playground">Playground</RouterLink>
+      </nav>
       <div class="sidebar-footer">
+        <div class="lang-switcher">
+          <button @click="chatStore.setLanguage('en')" :class="{ active: language === 'en' }">EN</button>
+          <button @click="chatStore.setLanguage('ru')" :class="{ active: language === 'ru' }">RU</button>
+        </div>
         <button @click="chatStore.toggleTheme" class="theme-toggle-btn">
           {{ theme === 'light' ? 'Dark' : 'Light' }} Mode
         </button>
@@ -135,10 +143,64 @@ function handleLogin(username: string) {
   flex-shrink: 0;
 }
 
+.main-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+
+.main-nav a {
+  color: var(--color-text);
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.main-nav a:hover {
+  background-color: var(--color-background-mute);
+}
+
+.main-nav a.router-link-exact-active {
+  background-color: #007bff;
+  color: white;
+}
+
 .sidebar-footer {
   margin-top: auto; /* Pushes the footer to the bottom */
   padding-top: 1rem;
   border-top: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.lang-switcher {
+  display: flex;
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.lang-switcher button {
+  flex: 1;
+  padding: 0.5rem;
+  border: none;
+  background-color: var(--color-background-mute);
+  color: var(--color-text-mute);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.lang-switcher button:hover {
+  background-color: var(--color-background-soft);
+}
+
+.lang-switcher button.active {
+  background-color: #007bff;
+  color: white;
 }
 
 .theme-toggle-btn {

@@ -25,10 +25,19 @@ export const useChatStore = defineStore('chat', () => {
   const isConnected = ref(false)
   const currentUser = ref<User | null>(null)
   const theme = ref('light')
+  const language = ref('en')
 
   let socket: WebSocket | null = null
 
   // --- ACTIONS ---
+
+  /**
+   * Sets the application language.
+   */
+  function setLanguage(lang: string) {
+    language.value = lang
+    localStorage.setItem('hive-chat-language', lang)
+  }
 
   /**
    * Toggles the color theme between light and dark.
@@ -104,6 +113,12 @@ export const useChatStore = defineStore('chat', () => {
    * Checks localStorage for a username and connects if found.
    */
   function init() {
+    // Check for saved language
+    const savedLang = localStorage.getItem('hive-chat-language')
+    if (savedLang) {
+      language.value = savedLang
+    }
+
     // Check for saved theme
     const savedTheme = localStorage.getItem('hive-chat-theme')
     if (savedTheme) {
@@ -132,5 +147,18 @@ export const useChatStore = defineStore('chat', () => {
     }
   }
 
-  return { users, messages, isConnected, currentUser, theme, connect, sendMessage, login, init, toggleTheme }
+  return {
+    users,
+    messages,
+    isConnected,
+    currentUser,
+    theme,
+    language,
+    connect,
+    sendMessage,
+    login,
+    init,
+    toggleTheme,
+    setLanguage,
+  }
 })
