@@ -1,8 +1,10 @@
 import asyncio
 import argparse
+import logging
 
 async def mock_p2p_daemon_main(websocket_port: int):
-    print(f"Mock P2P Daemon: Starting up on ws://localhost:{websocket_port}")
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+    logging.info(f"Mock P2P Daemon: Starting up on ws://localhost:{websocket_port}")
     print("P2P_DAEMON_READY") # Signal readiness to the host
     await asyncio.sleep(3600 * 24) # Run for 24 hours
 
