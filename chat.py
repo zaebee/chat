@@ -1,7 +1,6 @@
 import uvicorn
 import argparse
 import trio_asyncio
-trio_asyncio.patch_loop()
 from host import app, host
 from database import init_db
 
@@ -16,8 +15,6 @@ if __name__ == "__main__":
 
     init_db()
 
-    # This is a bit of a hack to pass the bootstrap peer to the lifespan context
-    # A cleaner solution would be to use a more sophisticated dependency injection system
     async def startup():
         await host.p2p_node.start(callback=host.handle_p2p_message, bootstrap_peer=args.bootstrap_peer)
         host.load_default_agents()
@@ -31,4 +28,4 @@ if __name__ == "__main__":
 
     app.add_event_handler("shutdown", shutdown)
 
-    uvicorn.run(app, host="0.0.0.0", port=args.port)
+    trio_asyncio.run(uvicorn.run(app, host="0.0.0.0", port=args.port))
