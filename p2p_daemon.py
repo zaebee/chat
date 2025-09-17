@@ -8,7 +8,6 @@ async def mock_p2p_daemon_main(websocket_port: int):
     print("P2P_DAEMON_READY") # Signal readiness to the host
     await asyncio.sleep(3600 * 24) # Run for 24 hours
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Mock P2P Daemon for Hive Chat")
     parser.add_argument("--websocket-port", type=int, default=5000, help="Port for WebSocket IPC with Hive Host")
