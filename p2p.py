@@ -9,7 +9,7 @@ from libp2p.pubsub.gossipsub import GossipSub
 from libp2p.transport.tcp.tcp import TCP
 from libp2p.transport.upgrader import TransportUpgrader
 from libp2p.stream_muxer.mplex.mplex import Mplex
-from libp2p.security.secio.secio import SECIO
+from libp2p.security.noise.noise import Noise
 from multiaddr import Multiaddr
 
 class P2PNode:
@@ -25,7 +25,7 @@ class P2PNode:
         peerstore = PeerStore()
         peerstore.add_key_pair(peer_id, key_pair)
 
-        upgrader = TransportUpgrader(SECIO({peer_id: key_pair}), Mplex())
+        upgrader = TransportUpgrader(Noise(key_pair), Mplex())
         transport = TCP()
         
         swarm = Swarm(peer_id, peerstore, upgrader, transport)
