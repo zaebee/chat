@@ -1,6 +1,5 @@
 import uvicorn
 import argparse
-import trio_asyncio
 from host import app, host
 from database import init_db
 
@@ -28,4 +27,4 @@ if __name__ == "__main__":
 
     app.add_event_handler("shutdown", shutdown)
 
-    trio_asyncio.run(uvicorn.run(app, host="0.0.0.0", port=args.port))
+    uvicorn.run(app, host="0.0.0.0", port=args.port)
