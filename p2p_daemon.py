@@ -1,12 +1,19 @@
 import trio
-from libp2p.p2p_node import P2PNode
+from libp2p import new_node
 import websockets
 import asyncio
 import argparse
+from multiaddr import Multiaddr
 
 async def p2p_daemon_main(websocket_port: int, p2p_port: int, bootstrap_peer: str = None):
-    node = P2PNode(port=p2p_port)
-    await node.start(bootstrap_peer=bootstrap_peer) # Starts the trio event loop internally
+    node = await new_node(transport_opt=[f"/ip4/0.0.0.0/tcp/{p2p_port}"])
+    await node.get_network().listen(f"/ip4/0.0.0.0/tcp/{p2p_port}")
+    print(f"P2P Node started with Peer ID: {node.get_id().pretty()}")
+
+    if bootstrap_peer:
+        bootstrap_addr = Multiaddr(bootstrap_peer)
+        await node.get_network().connect(bootstrap_addr)
+        print(f"Connected to bootstrap peer: {bootstrap_peer}")
 
     async def websocket_handler(websocket, path):
         # Handle messages from the Hive Host
@@ -20,7 +27,10 @@ async def p2p_daemon_main(websocket_port: int, p2p_port: int, bootstrap_peer: st
     async with websockets.serve(websocket_handler, "localhost", websocket_port):
         print(f"P2P Daemon WebSocket server listening on ws://localhost:{websocket_port}")
         print("P2P_DAEMON_READY")
-        await asyncio.Future() # Run forever
+        try:
+            await asyncio.Future() # Run forever
+        finally:
+            await node.close()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="P2P Daemon for Hive Chat")
