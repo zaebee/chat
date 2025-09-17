@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import sys
 from fastapi import FastAPI
 import websockets
 from agents.chat_agent import ChatAgent
@@ -28,7 +29,7 @@ class HiveHost:
 
         # Start the P2P Daemon process
         self.p2p_daemon_process = await asyncio.create_subprocess_exec(
-            "python", "p2p_daemon.py",
+            sys.executable, "p2p_daemon.py",
             "--websocket-port", str(websocket_port),
             "--p2p-port", str(p2p_port),
             *(("--bootstrap-peer", bootstrap_peer) if bootstrap_peer else ()),
