@@ -23,7 +23,7 @@ class HiveHost:
         logger.addHandler(handler)
         return logger
 
-    async def lifespan_startup(self, p2p_port: int, bootstrap_peer: str = None):
+    async def lifespan_startup(self):
         self.logger.info("Hive Host starting.")
         websocket_port = 5000 # Fixed port for p2p daemon IPC
 
@@ -31,8 +31,6 @@ class HiveHost:
         self.p2p_daemon_process = await asyncio.create_subprocess_exec(
             sys.executable, "p2p_daemon.py",
             "--websocket-port", str(websocket_port),
-            "--p2p-port", str(p2p_port),
-            *(("--bootstrap-peer", bootstrap_peer) if bootstrap_peer else ()),
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE
         )
@@ -95,8 +93,8 @@ class HiveHost:
         @self.fastapi_app.get("/api/v1/status")
         async def get_system_status():
             # Query daemon for p2p status
-            await self.p2p_websocket_client.send("get_status")
-            daemon_status = await self.p2p_websocket_client.recv()
+            await self.p2p_websocket_client.send(json.dumps({"command": "get_status"}))
+            daemon_status = json.loads(await self.p2p_websocket_client.recv())
             return {
                 "status": "running",
                 "p2p_daemon": daemon_status,
