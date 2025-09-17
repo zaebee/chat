@@ -11,9 +11,17 @@ import json
 import os
 import uuid
 from datetime import datetime
+from contextlib import asynccontextmanager
+from database import init_db, get_db_connection
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Initialisation de la base de données au démarrage
+    init_db()
+    yield
 
 # Инициализация FastAPI
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
 # Настройка шаблонов и статики
 templates = Jinja2Templates(directory="templates")
@@ -40,7 +48,6 @@ class ConnectionManager:
     def __init__(self):
         self.active_connections: Dict[str, WebSocket] = {}
         self.users: Dict[str, User] = {}
-        self.message_history: List[Message] = []
 
     async def connect(self, websocket: WebSocket, username: str):
         await websocket.accept()
@@ -51,9 +58,13 @@ class ConnectionManager:
         self.active_connections[user_id] = websocket
 
         # Отправляем историю сообщений новому пользователю
-        for message in self.message_history:
+        conn = get_db_connection()
+        messages = conn.execute("SELECT * FROM messages ORDER BY timestamp ASC").fetchall()
+        conn.close()
+
+        for message in messages:
             await self.send_personal_message(
-                json.dumps({"type": "message", "data": message.model_dump()}), websocket
+                json.dumps({"type": "message", "data": dict(message)}), websocket
             )
 
         # Уведомляем других пользователей о новом участнике
@@ -102,10 +113,13 @@ class ConnectionManager:
                     print("Unable send message:", e)
 
     async def add_message(self, message: Message):
-        self.message_history.append(message)
-        if len(self.message_history) > 100:  # Ограничиваем историю
-            self.message_history.pop(0)
-
+        conn = get_db_connection()
+        conn.execute(
+            "INSERT INTO messages (id, text, sender_id, sender_name, timestamp) VALUES (?, ?, ?, ?, ?)",
+            (message.id, message.text, message.sender_id, message.sender_name, message.timestamp)
+        )
+        conn.commit()
+        conn.close()
 
 manager = ConnectionManager()
 
