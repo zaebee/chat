@@ -86,3 +86,23 @@ While the idea of a library rewriting its own code is beyond current capabilitie
 ### 3.3. Impact on `p2pd` Implementation
 
 When implementing with `p2pd`, we should prioritize features that enable these "self-owned" characteristics (e.g., robust configuration, plugin hooks, detailed metrics). This discussion provides a clear North Star for the P2P layer.
+
+## 4. Integrating Remote AI Teammates
+
+This section outlines the strategy for integrating remote AI teammates (like the Mistral AI's `HiveGardenerAgent`) into the Hive Host architecture.
+
+### 4.1. Host as Remote Agent Manager
+
+The Hive Host will be responsible for instantiating and managing remote AI agents. This includes securely managing API keys and providing them to the agents.
+
+### 4.2. API-First Interaction for Remote Agents
+
+Local agents will interact with remote agents through the Host, using a defined API. This ensures a consistent and programmatic way for agents to delegate tasks and receive responses.
+
+### 4.3. Observability and Cost Monitoring
+
+The Host will log remote agent activity to the Structured Audit Logger. Mechanisms for cost monitoring will be explored to manage resource usage of remote AI services.
+
+### 4.4. Future: Remote Agent Spawning
+
+The concept of the Host dynamically provisioning remote agents (e.g., requesting a new `HiveGardenerAgent` instance from Mistral AI) will be added to the roadmap for future versions. This aligns with the "reproduction" aspect of the Living Application.

@@ -127,9 +127,8 @@ async def p2p_daemon_main(websocket_port: int, p2p_port: int, bootstrap_peer: st
         # Handle messages from the Hive Host
         async for message in websocket:
             # Process message (e.g., publish to p2pd topic)
-            # For now, just echo for testing
-            print(f"Received from host: {message}")
-            await websocket.send(f"Echo: {message}")
+            await node.publish("/hive-chat/1.0.0", message)
+            # Send response back to host if needed
 
     # Start WebSocket server for IPC
     async with websockets.serve(websocket_handler, "localhost", websocket_port):
