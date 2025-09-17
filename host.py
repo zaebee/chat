@@ -31,8 +31,8 @@ class HiveHost:
         self.p2p_daemon_process = await asyncio.create_subprocess_exec(
             sys.executable, "p2p_daemon.py",
             "--websocket-port", str(websocket_port),
-            stdout=None,
-            stderr=None
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
         )
         self.logger.info(f"P2P Daemon started with PID: {self.p2p_daemon_process.pid}")
 
