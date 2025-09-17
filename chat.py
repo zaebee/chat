@@ -18,14 +18,16 @@ if __name__ == "__main__":
     # This is a bit of a hack to pass the bootstrap peer to the lifespan context
     # A cleaner solution would be to use a more sophisticated dependency injection system
     async def startup():
-        await trio_asyncio.trio_as_asyncio(host.p2p_node.start(callback=host.handle_p2p_message, bootstrap_peer=args.bootstrap_peer))
+        trio_coro = host.p2p_node.start(callback=host.handle_p2p_message, bootstrap_peer=args.bootstrap_peer)
+        await trio_asyncio.run_trio_task(trio_coro)
         host.load_default_agents()
         host.logger.info("Hive Host started.")
 
     app.add_event_handler("startup", startup)
 
     async def shutdown():
-        await trio_asyncio.trio_as_asyncio(host.p2p_node.stop())
+        trio_coro = host.p2p_node.stop()
+        await trio_asyncio.run_trio_task(trio_coro)
         host.logger.info("Hive Host shutting down.")
 
     app.add_event_handler("shutdown", shutdown)
