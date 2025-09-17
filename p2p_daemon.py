@@ -4,9 +4,11 @@ import websockets
 import asyncio
 import argparse
 from multiaddr import Multiaddr
+from libp2p.crypto.secp256k1 import create_new_key_pair
 
 async def p2p_daemon_main(websocket_port: int, p2p_port: int, bootstrap_peer: str = None):
-    node = await new_host(transport_opt=[f"/ip4/0.0.0.0/tcp/{p2p_port}"])
+    key_pair = create_new_key_pair()
+    node = await new_host(key_pair=key_pair, transport_opt=[f"/ip4/0.0.0.0/tcp/{p2p_port}"])
     await node.get_network().listen(f"/ip4/0.0.0.0/tcp/{p2p_port}")
     print(f"P2P Node started with Peer ID: {node.get_id().pretty()}")
 
