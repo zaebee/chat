@@ -4,6 +4,18 @@ First off, thank you for considering contributing to Hive Chat! It's people like
 
 ## Getting Started
 
+### System-Level Prerequisites
+
+Before setting up the Python environment, please ensure you have the following system-level dependencies installed:
+
+```bash
+# For Debian-based systems (like Ubuntu)
+sudo apt-get update
+sudo apt-get install libgmp-dev
+```
+
+### Python Environment
+
 1.  **Fork the repository** on GitHub.
 2.  **Clone your fork** to your local machine:
     ```bash
