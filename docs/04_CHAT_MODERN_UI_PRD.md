@@ -8,21 +8,35 @@ This document outlines the product requirements for a new, modern user interface
 
 *   **Modernize the UI:** Replace the current basic UI with a modern, aesthetically pleasing design.
 *   **Improve User Experience:** Make the chat easier and more intuitive to use.
+*   **Support Educational Collaboration:** Provide tools for students and teachers to collaborate on learning programming in a fun and engaging way.
 *   **Increase Engagement:** Add features that encourage user interaction and collaboration.
 *   **Align with Vision:** Create a UI that reflects the project's core principles of sovereignty, modularity, and Human-AI symbiosis.
 
 ## 3. Target Audience
 
-The primary target audience is individuals and teams who value privacy, security, and decentralization. This includes:
+The primary target audience includes individuals and teams who value privacy, security, and decentralization, as well as educators and students in a learning environment.
 
-*   Developers
-*   Researchers
-*   Privacy-conscious individuals
-*   Teams collaborating on sensitive projects
+*   **Primary General Audience:**
+    *   Developers
+    *   Researchers
+    *   Privacy-conscious individuals
+    *   Teams collaborating on sensitive projects
+*   **Primary Educational Audience:**
+    *   **Teachers:** Looking for modern, interactive tools to teach programming.
+    *   **Students:** Children and beginners learning Python.
 
 ## 4. Key Features
 
-### 4.1. Modernized Layout
+### 4.1. Python Learning & Gamification Module
+
+A comprehensive module designed to make learning Python collaborative and fun. This is a major feature with its own detailed requirements document.
+
+*   **Core Components:** An in-browser code editor, a securely sandboxed Python runner (using WebAssembly/Pyodide), and a system for creating and managing coding challenges.
+*   **Gamification:** Students earn Experience Points (XP), levels, and badges for completing challenges, with leaderboards to foster friendly competition.
+*   **Teacher Tools:** Teachers can create, assign, and review coding exercises.
+*   **For a complete breakdown of this feature, see the detailed FRD:** [05_PYTHON_LEARNING_MODULE_FRD.md](./05_PYTHON_LEARNING_MODULE_FRD.md)
+
+### 4.2. Modernized Layout
 
 *   **Clean and Simple Design:** A minimalist design with a focus on readability and ease of use.
 *   **Responsive Layout:** The UI will be fully responsive and work seamlessly on all devices (desktop, tablet, and mobile).
