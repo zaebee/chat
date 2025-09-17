@@ -18,7 +18,7 @@ class HiveHost:
         logger = logging.getLogger("hive")
         logger.setLevel(logging.INFO)
         handler = logging.StreamHandler()
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        formatter = logging.Formatter('{"timestamp": "%(asctime)s", "level": "%(levelname)s", "message": "%(message)s", "agent": "%(name)s"}')
         handler.setFormatter(formatter)
         logger.addHandler(handler)
         return logger
@@ -41,6 +41,9 @@ class HiveHost:
         # Start a task to read stderr from the daemon
         asyncio.create_task(self._read_daemon_stderr())
 
+        # Start the event consumer task
+        asyncio.create_task(self._event_consumer())
+
         # Wait for daemon to signal readiness
         while True:
             line = await self.p2p_daemon_process.stdout.readline()
@@ -54,6 +57,11 @@ class HiveHost:
 
         self.load_default_agents()
         self.logger.info("Hive Host started.")
+
+    async def _event_consumer(self):
+        while True:
+            event = await self.event_bus.get()
+            self.logger.info(f"Event received: {event}")
 
     async def lifespan_shutdown(self):
         self.logger.info("Hive Host shutting down.")
