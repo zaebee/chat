@@ -1,4 +1,6 @@
 import asyncio
+
+from libp2p import create_mplex_muxer_option
 from libp2p.host.basic_host import BasicHost
 from libp2p.network.swarm import Swarm
 from libp2p.peer.id import ID as PeerID
@@ -9,7 +11,13 @@ from libp2p.pubsub.gossipsub import GossipSub
 from libp2p.transport.tcp.tcp import TCP
 from libp2p.transport.upgrader import TransportUpgrader
 from libp2p.stream_muxer.mplex.mplex import Mplex
-from libp2p.security.noise.transport import Noise
+# from libp2p.security.noise.transport import Noise
+# from libp2p.security.noise.transport import Transport
+# from libp2p.security.secio.transport import Transport
+from libp2p.security.noise.transport import (
+    PROTOCOL_ID as NOISE_PROTOCOL_ID,
+    Transport as NoiseTransport,
+)
 from multiaddr import Multiaddr
 
 class P2PNode:
@@ -25,7 +33,12 @@ class P2PNode:
         peerstore = PeerStore()
         peerstore.add_key_pair(peer_id, key_pair)
 
-        upgrader = TransportUpgrader(Noise(key_pair), Mplex())
+        secure_transports_by_protocol: Mapping[TProtocol, ISecureTransport] = {
+            NOISE_PROTOCOL_ID: NoiseTransport(
+                key_pair, noise_privkey=key_pair.private_key
+            ),
+        }
+        upgrader = TransportUpgrader(secure_transports_by_protocol, create_mplex_muxer_option())
         transport = TCP()
         
         swarm = Swarm(peer_id, peerstore, upgrader, transport)

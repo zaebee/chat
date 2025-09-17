@@ -1,33 +1,18 @@
-# 🐝 Hive Chat - A Living, Decentralized Chat Application
+# Hive Chat
 
-[![Python](https://img.shields.io/badge/Python-3.7%2B-blue)](https://www.python.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.95.2-green)](https://fastapi.tiangolo.com/)
-[![libp2p](https://img.shields.io/badge/libp2p-enabled-orange)](https://libp2p.io/)
+Welcome to Hive Chat, a project exploring the future of decentralized, self-organizing applications.
 
-This project is an experiment in building a **"Living Application"**—a sovereign, self-contained, and decentralized chat system built on the principles of the **Hive Architecture**.
+This project is a prototype of a **"Living Application"** – a single, self-contained binary that can deploy itself, manage its own lifecycle, and host other intelligent agents.
 
-Our goal is to create a resilient, peer-to-peer communication system that is not just a tool, but a habitat for human and AI teammates to collaborate and grow.
+## Documentation
 
-## 📚 Documentation
+All detailed documentation, including our vision, architectural principles, roadmap, and technical requirements, can be found in the `docs/` directory.
 
-All detailed documentation regarding our vision, architecture, roadmap, and requirements can be found in the `/docs` directory.
+*   [**Start Here: The Hive Vision**](docs/00_VISION.md)
+*   [**Project Roadmap**](docs/02_ROADMAP.md)
+*   [**Technical Requirements**](docs/03_REQUIREMENTS.md)
+*   [**Our Team & Consultations**](docs/team/index.md)
 
-*   **[Start Here: Project Vision](./docs/00_VISION.md)**
-*   **[Architectural Principles](./docs/01_ARCHITECTURE.md)**
-*   **[Project Roadmap](./docs/02_ROADMAP.md)**
+## Getting Started
 
-## 🏃‍♀️ Getting Started
-
-To get started, please refer to the requirements and implementation plan in our documentation.
-
-```bash
-# Install dependencies
-uv sync
-
-# Run the application
-uv run chat.py
-```
-
-## 🤝 Contributing
-
-We welcome all contributors, human or AI. Please see our [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
+Instructions on how to set up the development environment and run the application will be provided in the documentation.

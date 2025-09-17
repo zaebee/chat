@@ -16,3 +16,8 @@ dependencies = [
 
 [tool.setuptools]
 py-modules = ["chat"]
+
+[dependency-groups]
+dev = [
+    "ipdb>=0.13.13",
+]
