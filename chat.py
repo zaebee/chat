@@ -13,12 +13,15 @@ import uuid
 from datetime import datetime
 from contextlib import asynccontextmanager
 from database import init_db, get_db_connection
+import websockets.exceptions
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Initialisation de la base de données au démarrage
     init_db()
     yield
+
 
 # Инициализация FastAPI
 app = FastAPI(lifespan=lifespan)
@@ -44,14 +47,20 @@ class Message(BaseModel):
     is_bot: bool = False
 
 
+class ChallengeSolution(BaseModel):
+    user_id: str
+    challenge_id: str
+
+
 class ConnectionManager:
     def __init__(self):
         self.active_connections: Dict[str, WebSocket] = {}
         self.users: Dict[str, User] = {}
 
-    async def connect(self, websocket: WebSocket, username: str):
+    async def connect(self, websocket: WebSocket, username: str, user_id: Optional[str] = None):
         await websocket.accept()
-        user_id = str(uuid.uuid4())
+        if user_id is None:
+            user_id = str(uuid.uuid4())
         color = f"#{hash(username) % 0xFFFFFF:06x}"
         user = User(id=user_id, username=username, color=color)
         self.users[user_id] = user
@@ -59,7 +68,9 @@ class ConnectionManager:
 
         # Отправляем историю сообщений новому пользователю
         conn = get_db_connection()
-        messages = conn.execute("SELECT * FROM messages ORDER BY timestamp ASC").fetchall()
+        messages = conn.execute(
+            "SELECT * FROM messages ORDER BY timestamp ASC"
+        ).fetchall()
         conn.close()
 
         for message in messages:
@@ -109,17 +120,24 @@ class ConnectionManager:
             if user_id != exclude_user_id:
                 try:
                     await connection.send_text(message)
-                except RuntimeError as e:
+                except (RuntimeError, websockets.exceptions.ConnectionClosedOK, websockets.exceptions.ConnectionClosedError) as e:
                     print("Unable send message:", e)
 
     async def add_message(self, message: Message):
         conn = get_db_connection()
         conn.execute(
             "INSERT INTO messages (id, text, sender_id, sender_name, timestamp) VALUES (?, ?, ?, ?, ?)",
-            (message.id, message.text, message.sender_id, message.sender_name, message.timestamp)
+            (
+                message.id,
+                message.text,
+                message.sender_id,
+                message.sender_name,
+                message.timestamp,
+            ),
         )
         conn.commit()
         conn.close()
+
 
 manager = ConnectionManager()
 
@@ -130,10 +148,39 @@ async def get_chat_page(request: Request):
     return templates.TemplateResponse("chat.html", {"request": request})
 
 
+@app.post("/solve_challenge")
+async def solve_challenge(solution: ChallengeSolution):
+    conn = get_db_connection()
+    try:
+        conn.execute(
+            "INSERT INTO user_progress (user_id, challenge_id, solved_at) VALUES (?, ?, ?)",
+            (solution.user_id, solution.challenge_id, datetime.now().isoformat()),
+        )
+        conn.commit()
+        return {"message": "Challenge solution recorded successfully"}
+    except sqlite3.IntegrityError:
+        return {"message": "Challenge already solved by this user"}
+    finally:
+        conn.close()
+
+
+@app.get("/api/user_progress/{user_id}")
+async def get_user_progress(user_id: str):
+    conn = get_db_connection()
+    try:
+        cursor = conn.execute(
+            "SELECT challenge_id FROM user_progress WHERE user_id = ?", (user_id,)
+        )
+        solved_challenge_ids = [row[0] for row in cursor.fetchall()]
+        return {"user_id": user_id, "solved_challenge_ids": solved_challenge_ids}
+    finally:
+        conn.close()
+
+
 # WebSocket endpoint
 @app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket, username: str = "Гость"):
-    user = await manager.connect(websocket, username)
+async def websocket_endpoint(websocket: WebSocket, username: str = "Гость", user_id: Optional[str] = None):
+    user = await manager.connect(websocket, username, user_id)
     try:
         while True:
             data = await websocket.receive_text()

@@ -54,6 +54,23 @@ The application will be structured as a **Hive Host** that loads and manages one
 *   **Agents:** Modular, self-contained components that implement specific features. The chat functionality itself will be our first agent.
 *   **Communication:** All inter-agent communication will occur over the libp2p network stack, even between agents running in the same host process.
 
+### 2.3. Current Agents and Services
+
+As of the current implementation, the system consists of two primary agents:
+
+*   **Backend Agent (`chat.py`):**
+    *   **Role:** Serves as the primary backend service and a basic Hive Host.
+    *   **Functionality:** Manages WebSocket connections, broadcasts messages, and persists chat history to a SQLite database.
+    *   **Technology:** FastAPI (Python).
+
+*   **Frontend Agent (`/frontend`):**
+    *   **Role:** Provides the user interface and all client-side application logic.
+    *   **Functionality:** Renders the chat interface, login flow, and the Python Learning Playground. Manages its own state via Pinia stores.
+    *   **Key Services within the Agent:**
+        *   `pythonRunner.ts`: A crucial service that provides a secure, sandboxed Python execution environment by integrating with the Pyodide (Wasm) runtime. This allows for safe, client-side execution of user-submitted code.
+        *   `chat.ts` (Pinia Store): Manages all real-time state for the application, including the WebSocket connection, messages, user lists, and UI preferences (theme, language).
+    *   **Technology:** Vue.js 3 (Vite), TypeScript, Pinia.
+
 ---
 
 ## Appendix A: P2P Dependency Analysis
