@@ -55,7 +55,7 @@ export interface VisualEffect {
   duration: number
   intensity: number
   colors: string[]
-  synchronizedWith?: 'dialogue' | 'skill_unlock' | 'discovery_moment'
+  synchronizedWith?: 'dialogue' | 'skill_unlock' | 'discovery_moment' | 'level_transition'
 }
 
 export interface AudioElement {
