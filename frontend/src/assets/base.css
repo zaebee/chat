@@ -16,9 +16,12 @@
   --vt-c-divider-dark-2: rgba(84, 84, 84, 0.48);
 
   --vt-c-text-light-1: var(--vt-c-indigo);
-  --vt-c-text-light-2: rgba(60, 60, 60, 0.66);
+  --vt-c-text-light-2: rgba(60, 60, 60, 0.75);
   --vt-c-text-dark-1: var(--vt-c-white);
-  --vt-c-text-dark-2: rgba(235, 235, 235, 0.64);
+  --vt-c-text-dark-2: rgba(235, 235, 235, 0.75);
+
+  --color-background-ai: #e0f7fa; /* Light blue for AI messages */
+  --color-ai-accent: #00bcd4; /* Cyan accent for AI elements */
 }
 
 /* semantic color variables for this project */
@@ -32,6 +35,7 @@
 
   --color-heading: var(--vt-c-text-light-1);
   --color-text: var(--vt-c-text-light-1);
+  --color-text-mute: var(--vt-c-text-light-2);
 
   --section-gap: 160px;
 }
@@ -45,15 +49,11 @@
   --color-border-hover: var(--vt-c-divider-dark-1);
 
   --color-heading: var(--vt-c-text-dark-1);
-  --color-text: var(--vt-c-text-dark-2);
-}
+  --color-text: var(--vt-c-text-dark-1);
+  --color-text-mute: var(--vt-c-text-dark-2);
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  font-weight: normal;
+  --color-background-ai: #263238; /* Darker blue-grey for AI messages in dark theme */
+  --color-ai-accent: #00e5ff; /* Brighter cyan accent for AI elements in dark theme */
 }
 
 body {
