@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useChatStore, type Message } from '@/stores/chat'
-import { onMounted, ref, watch, nextTick, computed } from 'vue'
+import { onMounted, onUnmounted, ref, watch, nextTick, computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
@@ -9,10 +9,12 @@ import InteractiveCodeBlock from '@/components/InteractiveCodeBlock.vue'
 import DigitalBee from '@/components/DigitalBee.vue'
 import HeroMessage from '@/components/HeroMessage.vue'
 import BeeOrganella from '@/components/BeeOrganella.vue'
+import TeammatePresence from '@/components/TeammatePresence.vue'
+import RoomNavigation from '@/components/RoomNavigation.vue'
 
 
 const chatStore = useChatStore()
-const { messages, isConnected, currentUser, theme, isAiThinking, replyToMessageId } = storeToRefs(chatStore)
+const { messages, isConnected, currentUser, theme, isAiThinking, replyToMessageId, teammates, rooms, currentRoom } = storeToRefs(chatStore)
 
 const newMessage = ref('')
 const chatMessagesEl = ref<HTMLElement | null>(null)
@@ -45,205 +47,65 @@ const threadedMessages = computed(() => {
   return rootMessages
 })
 
-const renderer = new marked.Renderer();
+function renderMarkdown(text: string) {
+  const localMarked = new marked.Marked();
+  const renderer = new marked.Renderer();
 
-// Custom link renderer for images and new tabs
-renderer.link = (token) => {
-  const { href, title, text } = token;
-  // Guard against null or undefined href
-  if (!href) {
-    return text;
-  }
+  // Custom link renderer for images and new tabs
+  renderer.link = (token) => {
+    const { href, title, text } = token;
+    // Guard against null or undefined href
+    if (!href) {
+      return text;
+    }
 
-  const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg'];
-  const isImage = imageExtensions.some(ext => href.toLowerCase().endsWith(ext));
+    const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg'];
+    const isImage = imageExtensions.some(ext => href.toLowerCase().endsWith(ext));
 
-  if (isImage) {
-    const imageId = `img-${Math.random().toString(36).substring(2, 9)}`;
+    if (isImage) {
+      const imageId = `img-wrapper-${Math.random().toString(36).substring(2, 9)}`;
+      return `
+        <div id="${imageId}" class="chat-image-wrapper collapsed">
+          <img src="${href}" alt="${text}" title="${title || text}" class="chat-image" onclick="window.toggleImageExpansion('${imageId}')" />
+          <button class="expand-image-btn" onclick="window.toggleImageExpansion('${imageId}')">Expand</button>
+        </div>
+      `;
+    }
+
     const linkTitle = title || text;
+    return `<a href="${href}" title="${linkTitle}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+  };
+
+  // Custom code block renderer with a copy button
+  renderer.code = (token) => {
+    const { text: code, lang } = token;
+    const language = hljs.getLanguage(lang || '') ? lang : 'plaintext';
+    
+    // Ensure code is a string before highlighting
+    const highlightedCode = hljs.highlight(code || '', { language: language || 'plaintext' }).value;
+
+    // Use a unique ID to connect the button to the code
+    const codeId = `code-${Math.random().toString(36).substring(2, 9)}`;
+    const codeWrapperId = `code-wrapper-${Math.random().toString(36).substring(2, 9)}`;
+
     return `
-      <div id="image-wrapper-${imageId}" class="chat-image-wrapper collapsed">
-        <img src="${href}" alt="${text}" title="${linkTitle}" class="chat-image" onclick="window.toggleImageExpansion('image-wrapper-${imageId}')" />
-        <button class="expand-image-btn" onclick="window.toggleImageExpansion('image-wrapper-${imageId}')">Expand</button>
+      <div id="${codeWrapperId}" class="code-block-wrapper collapsed">
+        <button onclick="window.copyCodeToClipboardAndProvideFeedback('${codeId}', this)" class="copy-code-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Copy
+        </button>
+        <pre><code id="${codeId}" class="language-${language}">${highlightedCode}</code></pre>
+        <button class="expand-code-btn" onclick="window.toggleCodeExpansion('${codeWrapperId}')">Expand</button>
       </div>
     `;
-  }
-  
-  const linkTitle = title || text;
-  return `<a href="${href}" title="${linkTitle}" target="_blank" rel="noopener noreferrer">${text}</a>`;
-};
+  };
 
-// Global function for copying code (called from dynamically rendered HTML)
-declare global {
-  interface Window {
-    copyCodeToClipboardAndProvideFeedback: (codeId: string, buttonEl: HTMLElement) => void;
-    toggleImageExpansion: (wrapperId: string) => void;
-    toggleCodeExpansion: (wrapperId: string) => void;
-  }
-}
-
-window.copyCodeToClipboardAndProvideFeedback = (codeId: string, buttonEl: HTMLElement) => {
-  const codeElement = document.getElementById(codeId);
-  if (codeElement) {
-    navigator.clipboard.writeText(codeElement.innerText).then(() => {
-      const originalText = buttonEl.innerHTML;
-      buttonEl.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg> Copied!';
-      setTimeout(() => {
-        buttonEl.innerHTML = originalText;
-      }, 2000);
-    }).catch(err => {
-      console.error('Failed to copy text: ', err);
-    });
-  }
-};
-
-window.toggleImageExpansion = (wrapperId: string) => {
-  const wrapper = document.getElementById(wrapperId);
-  if (wrapper) {
-    const isExpanded = wrapper.classList.toggle('expanded');
-    const button = wrapper.querySelector('.expand-image-btn');
-    if (button) {
-      button.textContent = isExpanded ? 'Collapse' : 'Expand';
-    }
-
-    // Clear any existing timer for this image
-    const existingTimer = imageCollapseTimers.value.get(wrapperId);
-    if (existingTimer) {
-      clearTimeout(existingTimer);
-      imageCollapseTimers.value.delete(wrapperId);
-    }
-
-    // If expanded, set a new timer to auto-collapse
-    if (isExpanded) {
-      const timerId = setTimeout(() => {
-        wrapper.classList.remove('expanded');
-        if (button) {
-          button.textContent = 'Expand';
-        }
-        imageCollapseTimers.value.delete(wrapperId);
-      }, 10000); // Auto-collapse after 10 seconds
-      imageCollapseTimers.value.set(wrapperId, timerId as any); // Store timer ID
-    }
-  }
-};
-
-window.toggleCodeExpansion = (wrapperId: string) => {
-  const wrapper = document.getElementById(wrapperId);
-  if (wrapper) {
-    wrapper.classList.toggle('expanded');
-    const button = wrapper.querySelector('.expand-code-btn');
-    if (button) {
-      button.textContent = wrapper.classList.contains('expanded') ? 'Collapse' : 'Expand';
-    }
-  }
-};
-
-// Custom code block renderer with a copy button
-renderer.code = (token) => {
-  const { text: code, lang } = token;
-  const language = hljs.getLanguage(lang || '') ? lang : 'plaintext';
-  
-  // Ensure code is a string before highlighting
-  const highlightedCode = hljs.highlight(code || '', { language: language || 'plaintext' }).value;
-
-  // Use a unique ID to connect the button to the code
-  const codeId = `code-${Math.random().toString(36).substring(2, 9)}`;
-  const codeWrapperId = `code-wrapper-${Math.random().toString(36).substring(2, 9)}`;
-
-  return `
-    <div id="${codeWrapperId}" class="code-block-wrapper collapsed">
-      <button onclick="window.copyCodeToClipboardAndProvideFeedback('${codeId}', this)" class="copy-code-btn">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Copy
-      </button>
-      <pre><code id="${codeId}" class="language-${language}">${highlightedCode}</code></pre>
-      <button class="expand-code-btn" onclick="window.toggleCodeExpansion('${codeWrapperId}')">Expand</button>
-    </div>
-  `;
-};
-
-marked.use({ renderer });
-
-// Configure marked to use highlight.js for code blocks
-marked.setOptions({
-  gfm: true,
-  breaks: true,
-});
-
-// Watch for new messages and scroll to the bottom
-watch(
-  messages,
-  async () => {
-    await nextTick()
-    if (chatMessagesEl.value) {
-      // Apply highlighting to any new code blocks
-      chatMessagesEl.value.querySelectorAll('pre code').forEach((block) => {
-        hljs.highlightElement(block as HTMLElement)
-      })
-      chatMessagesEl.value.scrollTop = chatMessagesEl.value.scrollHeight
-
-      // Observe image wrappers for auto-collapse
-      const imageWrappers = chatMessagesEl.value.querySelectorAll('.chat-image-wrapper');
-      imageWrappers.forEach(wrapper => {
-        imageObserver.observe(wrapper);
-      });
-    }
-  },
-  { deep: true }
-)
-
-const imageObserver = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    const wrapper = entry.target as HTMLElement;
-    if (!entry.isIntersecting && wrapper.classList.contains('expanded')) {
-      // If an expanded image scrolls out of view, collapse it
-      wrapper.classList.remove('expanded');
-      const button = wrapper.querySelector('.expand-image-btn');
-      if (button) {
-        button.textContent = 'Expand';
-      }
-    }
+  localMarked.use({ renderer });
+  localMarked.setOptions({
+    gfm: true,
+    breaks: true,
   });
-}, { threshold: 0 }); // Trigger when 0% of the target is visible
 
-function handleKeydown(e: KeyboardEvent) {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault()
-    handleSendMessage()
-  }
-}
-
-function handleSendMessage() {
-  const messageText = newMessage.value.trim();
-  if (!messageText) return;
-
-  if (messageText.startsWith('/')) {
-    // It's a command
-    const command = messageText.substring(1);
-    chatStore.processCommand(command);
-  } else {
-    // It's a regular message
-    chatStore.sendMessage(messageText, replyToMessageId.value);
-  }
-
-  newMessage.value = '';
-  chatStore.setReplyToMessageId(null); // Clear reply state after sending
-}
-
-function handleReply(senderName: string, messageId: string) {
-  newMessage.value = `@${senderName} `
-  chatStore.setReplyToMessageId(messageId)
-  nextTick(() => {
-    chatInputRef.value?.focus()
-  })
-}
-
-function cancelReply() {
-  chatStore.setReplyToMessageId(null)
-  newMessage.value = ''
-}
-
-function renderMarkdown(text: string) {
-  const rawHtml = marked.parse(text, { gfm: true, breaks: true }) as string
+  const rawHtml = localMarked.parse(text) as string;
   const sanitizedHtml = DOMPurify.sanitize(rawHtml, { ADD_ATTR: ['target'] });
   return sanitizedHtml;
 }
@@ -258,6 +120,22 @@ watch(newMessage, async (val) => {
     el.style.height = `${el.scrollHeight}px`
   }
 })
+
+// Initialize teammates on mount and refresh periodically
+onMounted(() => {
+  // Initial fetch
+  chatStore.fetchTeammates()
+
+  // Refresh teammates every 30 seconds
+  const interval = setInterval(() => {
+    chatStore.fetchTeammates()
+  }, 30000)
+
+  // Cleanup interval on unmount
+  onUnmounted(() => {
+    clearInterval(interval)
+  })
+})
 </script>
 
 <template>
@@ -268,6 +146,8 @@ watch(newMessage, async (val) => {
         {{ isConnected ? 'Connected' : 'Disconnected' }}
       </span>
     </div>
+    <div class="chat-main">
+      <div class="chat-content">
     <div class="chat-messages" ref="chatMessagesEl">
       <template v-for="message in threadedMessages" :key="message.id">
         <div
@@ -336,23 +216,29 @@ watch(newMessage, async (val) => {
       </div>
       <DigitalBee :size="1.5" body-color="#FFA500" wing-color="#ADD8E6" has-sword animation-speed="fast" />
     </div>
-    <div class="chat-input-area">
-      <div v-if="replyToMessageId" class="reply-indicator">
-        Replying to message...
-        <button @click="cancelReply" class="cancel-reply-btn">x</button>
+        <div class="chat-input-area">
+          <div v-if="replyToMessageId" class="reply-indicator">
+            Replying to message...
+            <button @click="cancelReply" class="cancel-reply-btn">x</button>
+          </div>
+          <textarea
+            v-model="newMessage"
+            @keydown="handleKeydown"
+            placeholder="Message #general"
+            rows="1"
+            ref="chatInputRef"
+          ></textarea>
+          <button class="send-btn" @click="handleSendMessage" :disabled="!newMessage.trim()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+              <path fill="currentColor" d="M3.478 2.405c.126-.138.29-.22.468-.245l16.204 2.315c.28.04.51.238.594.512c.084.274.01.57-.184.764L13.3 12l7.387 6.26c.194.194.268.49.184.764c-.084.274-.314.472-.594.512l-16.204 2.315c-.178.025-.342-.057-.468-.245c-.126-.188-.15-.43-.063-.642l4.5-9.5l-4.5-9.5c-.087-.212-.063-.454.063-.642z"/>
+            </svg>
+          </button>
+        </div>
       </div>
-      <textarea
-        v-model="newMessage"
-        @keydown="handleKeydown"
-        placeholder="Message #general"
-        rows="1"
-        ref="chatInputRef"
-      ></textarea>
-      <button class="send-btn" @click="handleSendMessage" :disabled="!newMessage.trim()">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-          <path fill="currentColor" d="M3.478 2.405c.126-.138.29-.22.468-.245l16.204 2.315c.28.04.51.238.594.512c.084.274.01.57-.184.764L13.3 12l7.387 6.26c.194.194.268.49.184.764c-.084.274-.314.472-.594.512l-16.204 2.315c-.178.025-.342-.057-.468-.245c-.126-.188-.15-.43-.063-.642l4.5-9.5l-4.5-9.5c-.087-.212-.063-.454.063-.642z"/>
-        </svg>
-      </button>
+
+      <div class="chat-sidebar">
+        <TeammatePresence :teammates="teammates" />
+      </div>
     </div>
   </div>
 </template>
@@ -362,6 +248,34 @@ watch(newMessage, async (val) => {
   display: flex;
   flex-direction: column;
   height: 100%;
+}
+
+.chat-main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.chat-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.chat-sidebar {
+  width: 300px;
+  flex-shrink: 0;
+  border-left: 1px solid var(--color-border);
+  background-color: var(--color-background-soft);
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  .chat-sidebar {
+    display: none; /* Hide sidebar on mobile */
+  }
 }
 
 .chat-header {
