@@ -219,12 +219,24 @@ const formatDate = (dateString: string) => {
   gap: 1rem;
 }
 
+@keyframes organella-born {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 .organella-card {
   background: white;
   border-radius: 12px;
   padding: 1rem;
   border: 2px solid #e5e7eb;
   transition: all 0.3s ease;
+  animation: organella-born 0.5s ease-out forwards;
 }
 
 .organella-card:hover {
