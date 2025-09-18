@@ -11,6 +11,7 @@ import HeroMessage from '@/components/HeroMessage.vue'
 import BeeOrganella from '@/components/BeeOrganella.vue'
 import TeammatePresence from '@/components/TeammatePresence.vue'
 import RoomNavigation from '@/components/RoomNavigation.vue'
+import OrganellaPanel from '@/components/OrganellaPanel.vue'
 
 
 const chatStore = useChatStore()
@@ -283,6 +284,7 @@ onMounted(() => {
       </div>
 
       <div class="chat-sidebar">
+        <OrganellaPanel />
         <TeammatePresence :teammates="teammates" />
       </div>
     </div>
