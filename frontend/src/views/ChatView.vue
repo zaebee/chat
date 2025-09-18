@@ -501,10 +501,16 @@ onMounted(() => {
 
 .message-content {
   background-color: var(--color-background-soft);
-  padding: 0.5rem 1rem;
-  border-radius: 12px;
+  padding: 0.25rem 1rem;
+  border-radius: 8px;
   color: var(--color-text);
   word-wrap: break-word;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.own-message .message-content {
+  background-color: var(--color-border-hover);
+  color: var(--color-heading);
 }
 
 .message.ai-message .message-content {
