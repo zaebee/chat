@@ -47,8 +47,44 @@ const threadedMessages = computed(() => {
   return rootMessages
 })
 
+function handleKeydown(e: KeyboardEvent) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault()
+    handleSendMessage()
+  }
+}
+
+function handleSendMessage() {
+  const messageText = newMessage.value.trim();
+  if (!messageText) return;
+
+  if (messageText.startsWith('/')) {
+    // It's a command
+    const command = messageText.substring(1);
+    chatStore.processCommand(command);
+  } else {
+    // It's a regular message
+    chatStore.sendMessage(messageText, replyToMessageId.value);
+  }
+
+  newMessage.value = '';
+  chatStore.setReplyToMessageId(null); // Clear reply state after sending
+}
+
+function handleReply(senderName: string, messageId: string) {
+  newMessage.value = `@${senderName} `
+  chatStore.setReplyToMessageId(messageId)
+  nextTick(() => {
+    chatInputRef.value?.focus()
+  })
+}
+
+function cancelReply() {
+  chatStore.setReplyToMessageId(null)
+  newMessage.value = ''
+}
+
 function renderMarkdown(text: string) {
-  const localMarked = new marked.Marked();
   const renderer = new marked.Renderer();
 
   // Custom link renderer for images and new tabs
@@ -99,13 +135,11 @@ function renderMarkdown(text: string) {
     `;
   };
 
-  localMarked.use({ renderer });
-  localMarked.setOptions({
+  const rawHtml = marked.parse(text, {
     gfm: true,
     breaks: true,
-  });
-
-  const rawHtml = localMarked.parse(text) as string;
+    renderer: renderer
+  }) as string;
   const sanitizedHtml = DOMPurify.sanitize(rawHtml, { ADD_ATTR: ['target'] });
   return sanitizedHtml;
 }
@@ -121,10 +155,15 @@ watch(newMessage, async (val) => {
   }
 })
 
-// Initialize teammates on mount and refresh periodically
+function handleRoomSwitch(roomId: string) {
+  chatStore.switchRoom(roomId)
+}
+
+// Initialize teammates and rooms on mount and refresh periodically
 onMounted(() => {
   // Initial fetch
   chatStore.fetchTeammates()
+  chatStore.fetchRooms()
 
   // Refresh teammates every 30 seconds
   const interval = setInterval(() => {
@@ -141,12 +180,19 @@ onMounted(() => {
 <template>
   <div class="chat-view" :class="theme === 'dark' ? 'hljs-dark-theme' : 'hljs-light-theme'">
     <div class="chat-header">
-      <h2>#general</h2>
+      <h2>{{ rooms.find(r => r.id === currentRoom)?.name || '#general' }}</h2>
       <span class="connection-status" :class="{ connected: isConnected }">
         {{ isConnected ? 'Connected' : 'Disconnected' }}
       </span>
     </div>
     <div class="chat-main">
+      <div class="chat-rooms">
+        <RoomNavigation
+          :rooms="rooms"
+          :current-room="currentRoom"
+          @switch-room="handleRoomSwitch"
+        />
+      </div>
       <div class="chat-content">
     <div class="chat-messages" ref="chatMessagesEl">
       <template v-for="message in threadedMessages" :key="message.id">
@@ -256,6 +302,12 @@ onMounted(() => {
   overflow: hidden;
 }
 
+.chat-rooms {
+  width: 280px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
 .chat-content {
   display: flex;
   flex-direction: column;
@@ -272,7 +324,16 @@ onMounted(() => {
   overflow-y: auto;
 }
 
+@media (max-width: 1024px) {
+  .chat-rooms {
+    width: 220px;
+  }
+}
+
 @media (max-width: 768px) {
+  .chat-rooms {
+    display: none; /* Hide room navigation on mobile */
+  }
   .chat-sidebar {
     display: none; /* Hide sidebar on mobile */
   }
@@ -559,6 +620,18 @@ onMounted(() => {
   transition: max-height 0.3s ease-out;
 }
 
+@keyframes dance {
+  0%, 100% {
+    transform: rotate(0);
+  }
+  25% {
+    transform: rotate(-5deg);
+  }
+  75% {
+    transform: rotate(5deg);
+  }
+}
+
 :deep(.chat-image-wrapper) {
   position: relative;
   display: inline-block;
@@ -566,6 +639,7 @@ onMounted(() => {
   overflow: hidden;
   border-radius: 8px;
   margin-top: 0.5rem;
+  animation: message-born 0.3s ease-out forwards;
 }
 
 :deep(.chat-image-wrapper.collapsed .chat-image) {
@@ -573,12 +647,23 @@ onMounted(() => {
   width: auto; /* Allow width to adjust */
   object-fit: contain; /* Ensure image fits within bounds without cropping */
   cursor: pointer;
+  transform: scale(0.8);
+  opacity: 0.7;
+  transition: transform 0.3s ease-out, opacity 0.3s ease-out;
 }
 
 :deep(.chat-image-wrapper.expanded .chat-image) {
   max-height: none; /* Full height */
   width: 100%; /* Take full width */
   object-fit: contain;
+  transform: scale(1);
+  opacity: 1;
+}
+
+:deep(.chat-image-wrapper.collapsed:hover .chat-image) {
+  animation: dance 0.5s ease-in-out;
+  transform: scale(0.9);
+  opacity: 1;
 }
 
 :deep(.expand-image-btn) {
