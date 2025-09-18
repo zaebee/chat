@@ -13,9 +13,18 @@ import TeammatePresence from '@/components/TeammatePresence.vue'
 import RoomNavigation from '@/components/RoomNavigation.vue'
 import OrganellaPanel from '@/components/OrganellaPanel.vue'
 
-
 const chatStore = useChatStore()
-const { messages, isConnected, currentUser, theme, isAiThinking, replyToMessageId, teammates, rooms, currentRoom } = storeToRefs(chatStore)
+const {
+  messages,
+  isConnected,
+  currentUser,
+  theme,
+  isAiThinking,
+  replyToMessageId,
+  teammates,
+  rooms,
+  currentRoom,
+} = storeToRefs(chatStore)
 
 const newMessage = ref('')
 const chatMessagesEl = ref<HTMLElement | null>(null)
@@ -40,9 +49,13 @@ const threadedMessages = computed(() => {
   })
 
   // Sort root messages and their replies by timestamp
-  rootMessages.sort((a: Message, b: Message) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
-  rootMessages.forEach(rootMsg => {
-    rootMsg.replies.sort((a: Message, b: Message) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+  rootMessages.sort(
+    (a: Message, b: Message) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+  )
+  rootMessages.forEach((rootMsg) => {
+    rootMsg.replies.sort(
+      (a: Message, b: Message) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+    )
   })
 
   return rootMessages
@@ -56,20 +69,20 @@ function handleKeydown(e: KeyboardEvent) {
 }
 
 function handleSendMessage() {
-  const messageText = newMessage.value.trim();
-  if (!messageText) return;
+  const messageText = newMessage.value.trim()
+  if (!messageText) return
 
   if (messageText.startsWith('/')) {
     // It's a command
-    const command = messageText.substring(1);
-    chatStore.processCommand(command);
+    const command = messageText.substring(1)
+    chatStore.processCommand(command)
   } else {
     // It's a regular message
-    chatStore.sendMessage(messageText, replyToMessageId.value);
+    chatStore.sendMessage(messageText, replyToMessageId.value)
   }
 
-  newMessage.value = '';
-  chatStore.setReplyToMessageId(null); // Clear reply state after sending
+  newMessage.value = ''
+  chatStore.setReplyToMessageId(null) // Clear reply state after sending
 }
 
 function handleReply(senderName: string, messageId: string) {
@@ -86,44 +99,44 @@ function cancelReply() {
 }
 
 function renderMarkdown(text: string) {
-  const renderer = new marked.Renderer();
+  const renderer = new marked.Renderer()
 
   // Custom link renderer for images and new tabs
   renderer.link = (token) => {
-    const { href, title, text } = token;
+    const { href, title, text } = token
     // Guard against null or undefined href
     if (!href) {
-      return text;
+      return text
     }
 
-    const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg'];
-    const isImage = imageExtensions.some(ext => href.toLowerCase().endsWith(ext));
+    const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg']
+    const isImage = imageExtensions.some((ext) => href.toLowerCase().endsWith(ext))
 
     if (isImage) {
-      const imageId = `img-wrapper-${Math.random().toString(36).substring(2, 9)}`;
+      const imageId = `img-wrapper-${Math.random().toString(36).substring(2, 9)}`
       return `
         <div id="${imageId}" class="chat-image-wrapper collapsed">
           <img src="${href}" alt="${text}" title="${title || text}" class="chat-image" onclick="window.toggleImageExpansion('${imageId}')" />
           <button class="expand-image-btn" onclick="window.toggleImageExpansion('${imageId}')">Expand</button>
         </div>
-      `;
+      `
     }
 
-    const linkTitle = title || text;
-    return `<a href="${href}" title="${linkTitle}" target="_blank" rel="noopener noreferrer">${text}</a>`;
-  };
+    const linkTitle = title || text
+    return `<a href="${href}" title="${linkTitle}" target="_blank" rel="noopener noreferrer">${text}</a>`
+  }
 
   // Custom code block renderer with a copy button
   renderer.code = (token) => {
-    const { text: code, lang } = token;
-    const language = hljs.getLanguage(lang || '') ? lang : 'plaintext';
-    
+    const { text: code, lang } = token
+    const language = hljs.getLanguage(lang || '') ? lang : 'plaintext'
+
     // Ensure code is a string before highlighting
-    const highlightedCode = hljs.highlight(code || '', { language: language || 'plaintext' }).value;
+    const highlightedCode = hljs.highlight(code || '', { language: language || 'plaintext' }).value
 
     // Use a unique ID to connect the button to the code
-    const codeId = `code-${Math.random().toString(36).substring(2, 9)}`;
-    const codeWrapperId = `code-wrapper-${Math.random().toString(36).substring(2, 9)}`;
+    const codeId = `code-${Math.random().toString(36).substring(2, 9)}`
+    const codeWrapperId = `code-wrapper-${Math.random().toString(36).substring(2, 9)}`
 
     return `
       <div id="${codeWrapperId}" class="code-block-wrapper collapsed">
@@ -133,16 +146,16 @@ function renderMarkdown(text: string) {
         <pre><code id="${codeId}" class="language-${language}">${highlightedCode}</code></pre>
         <button class="expand-code-btn" onclick="window.toggleCodeExpansion('${codeWrapperId}')">Expand</button>
       </div>
-    `;
-  };
+    `
+  }
 
   const rawHtml = marked.parse(text, {
     gfm: true,
     breaks: true,
-    renderer: renderer
-  }) as string;
-  const sanitizedHtml = DOMPurify.sanitize(rawHtml, { ADD_ATTR: ['target'] });
-  return sanitizedHtml;
+    renderer: renderer,
+  }) as string
+  const sanitizedHtml = DOMPurify.sanitize(rawHtml, { ADD_ATTR: ['target'] })
+  return sanitizedHtml
 }
 
 // Auto-resize textarea
@@ -181,7 +194,7 @@ onMounted(() => {
 <template>
   <div class="chat-view" :class="theme === 'dark' ? 'hljs-dark-theme' : 'hljs-light-theme'">
     <div class="chat-header">
-      <h2>{{ rooms.find(r => r.id === currentRoom)?.name || '#general' }}</h2>
+      <h2>{{ rooms.find((r) => r.id === currentRoom)?.name || '#general' }}</h2>
       <span class="connection-status" :class="{ connected: isConnected }">
         {{ isConnected ? 'Connected' : 'Disconnected' }}
       </span>
@@ -195,74 +208,147 @@ onMounted(() => {
         />
       </div>
       <div class="chat-content">
-    <div class="chat-messages" ref="chatMessagesEl">
-      <template v-for="message in threadedMessages" :key="message.id">
-        <div
-          class="message"
-          :class="{ 'own-message': message.sender_id === currentUser?.id, 'ai-message': message.is_bot, 'peaking-message': message.isPeaking, 'decaying-message': message.isDecaying }"
-        >
-          <div class="message-sender">
-            <svg v-if="message.is_bot" class="ai-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-2-9h4v2h-4v-2zm0-4h4v2h-4V7z"/></svg>
-            {{ message.sender_name }}
+        <div class="chat-messages" ref="chatMessagesEl">
+          <template v-for="message in threadedMessages" :key="message.id">
+            <div
+              class="message"
+              :class="{
+                'own-message': message.sender_id === currentUser?.id,
+                'ai-message': message.is_bot,
+                'peaking-message': message.isPeaking,
+                'decaying-message': message.isDecaying,
+              }"
+            >
+              <div class="message-sender">
+                <svg
+                  v-if="message.is_bot"
+                  class="ai-icon"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  width="16"
+                  height="16"
+                >
+                  <path
+                    fill="currentColor"
+                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-2-9h4v2h-4v-2zm0-4h4v2h-4V7z"
+                  />
+                </svg>
+                {{ message.sender_name }}
+              </div>
+              <BeeOrganella
+                v-if="message.bee_organella_type"
+                :type="message.bee_organella_type"
+                :size="1.5"
+              />
+              <HeroMessage
+                v-else-if="message.hero_properties && message.dialogue_text"
+                :hero-properties="message.hero_properties"
+                :dialogue-text="message.dialogue_text"
+              />
+              <InteractiveCodeBlock
+                v-else-if="message.code_content"
+                :code-content="message.code_content"
+                :code-language="message.code_language"
+                :editor-id="`editor-${message.id}`"
+              />
+              <div v-else class="message-content" v-html="renderMarkdown(message.text)"></div>
+              <div class="message-timestamp">
+                {{ new Date(message.timestamp).toLocaleTimeString() }}
+              </div>
+              <button class="reply-btn" @click="handleReply(message.sender_name, message.id)">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  height="14"
+                  fill="currentColor"
+                  class="reply-icon"
+                >
+                  <path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z" />
+                </svg>
+                <span>Reply</span>
+              </button>
+            </div>
+            <div
+              v-for="reply in message.replies"
+              :key="reply.id"
+              class="message reply-message"
+              :class="{
+                'own-message': reply.sender_id === currentUser?.id,
+                'ai-message': reply.is_bot,
+                'peaking-message': reply.isPeaking,
+                'decaying-message': reply.isDecaying,
+              }"
+            >
+              <div class="message-sender">
+                <svg
+                  v-if="reply.is_bot"
+                  class="ai-icon"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  width="16"
+                  height="16"
+                >
+                  <path
+                    fill="currentColor"
+                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-2-9h4v2h-4v-2zm0-4h4v2h-4V7z"
+                  />
+                </svg>
+                {{ reply.sender_name }}
+              </div>
+              <InteractiveCodeBlock
+                v-if="reply.code_content"
+                :code-content="reply.code_content"
+                :code-language="reply.code_language"
+                :editor-id="`editor-${reply.id}`"
+              />
+              <div v-else class="message-content" v-html="renderMarkdown(reply.text)"></div>
+              <div class="message-timestamp">
+                {{ new Date(reply.timestamp).toLocaleTimeString() }}
+              </div>
+              <button class="reply-btn" @click="handleReply(reply.sender_name, reply.id)">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  height="14"
+                  fill="currentColor"
+                  class="reply-icon"
+                >
+                  <path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z" />
+                </svg>
+                <span>Reply</span>
+              </button>
+            </div>
+          </template>
+          <div v-if="isAiThinking" class="ai-thinking-indicator message ai-message">
+            <div class="message-sender">
+              <svg
+                class="ai-icon"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                width="16"
+                height="16"
+              >
+                <path
+                  fill="currentColor"
+                  d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-2-9h4v2h-4v-2zm0-4h4v2h-4V7z"
+                />
+              </svg>
+              AI Teammate
+            </div>
+            <div class="message-content">
+              <span>Thinking</span><span class="dot-animation">...</span>
+            </div>
           </div>
-          <BeeOrganella
-            v-if="message.bee_organella_type"
-            :type="message.bee_organella_type"
+          <DigitalBee
             :size="1.5"
+            body-color="#FFA500"
+            wing-color="#ADD8E6"
+            has-sword
+            animation-speed="fast"
           />
-          <HeroMessage
-            v-else-if="message.hero_properties && message.dialogue_text"
-            :hero-properties="message.hero_properties"
-            :dialogue-text="message.dialogue_text"
-          />
-          <InteractiveCodeBlock
-            v-else-if="message.code_content"
-            :code-content="message.code_content"
-            :code-language="message.code_language"
-            :editor-id="`editor-${message.id}`"
-          />
-          <div v-else class="message-content" v-html="renderMarkdown(message.text)"></div>
-          <div class="message-timestamp">{{ new Date(message.timestamp).toLocaleTimeString() }}</div>
-          <button class="reply-btn" @click="handleReply(message.sender_name, message.id)">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" class="reply-icon"><path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/></svg>
-            <span>Reply</span>
-          </button>
         </div>
-        <div
-          v-for="reply in message.replies"
-          :key="reply.id"
-          class="message reply-message"
-          :class="{ 'own-message': reply.sender_id === currentUser?.id, 'ai-message': reply.is_bot, 'peaking-message': reply.isPeaking, 'decaying-message': reply.isDecaying }"
-        >
-          <div class="message-sender">
-            <svg v-if="reply.is_bot" class="ai-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-2-9h4v2h-4v-2zm0-4h4v2h-4V7z"/></svg>
-            {{ reply.sender_name }}
-          </div>
-          <InteractiveCodeBlock
-            v-if="reply.code_content"
-            :code-content="reply.code_content"
-            :code-language="reply.code_language"
-            :editor-id="`editor-${reply.id}`"
-          />
-          <div v-else class="message-content" v-html="renderMarkdown(reply.text)"></div>
-          <div class="message-timestamp">{{ new Date(reply.timestamp).toLocaleTimeString() }}</div>
-          <button class="reply-btn" @click="handleReply(reply.sender_name, reply.id)">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" class="reply-icon"><path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/></svg>
-            <span>Reply</span>
-          </button>
-        </div>
-      </template>
-      <div v-if="isAiThinking" class="ai-thinking-indicator message ai-message">
-        <div class="message-sender">
-          <svg class="ai-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-2-9h4v2h-4v-2zm0-4h4v2h-4V7z"/></svg>
-          AI Teammate
-        </div>
-        <div class="message-content">
-          <span>Thinking</span><span class="dot-animation">...</span>
-        </div>
-      </div>
-      <DigitalBee :size="1.5" body-color="#FFA500" wing-color="#ADD8E6" has-sword animation-speed="fast" />
-    </div>
         <div class="chat-input-area">
           <div v-if="replyToMessageId" class="reply-indicator">
             Replying to message...
@@ -277,7 +363,10 @@ onMounted(() => {
           ></textarea>
           <button class="send-btn" @click="handleSendMessage" :disabled="!newMessage.trim()">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-              <path fill="currentColor" d="M3.478 2.405c.126-.138.29-.22.468-.245l16.204 2.315c.28.04.51.238.594.512c.084.274.01.57-.184.764L13.3 12l7.387 6.26c.194.194.268.49.184.764c-.084.274-.314.472-.594.512l-16.204 2.315c-.178.025-.342-.057-.468-.245c-.126-.188-.15-.43-.063-.642l4.5-9.5l-4.5-9.5c-.087-.212-.063-.454.063-.642z"/>
+              <path
+                fill="currentColor"
+                d="M3.478 2.405c.126-.138.29-.22.468-.245l16.204 2.315c.28.04.51.238.594.512c.084.274.01.57-.184.764L13.3 12l7.387 6.26c.194.194.268.49.184.764c-.084.274-.314.472-.594.512l-16.204 2.315c-.178.025-.342-.057-.468-.245c-.126-.188-.15-.43-.063-.642l4.5-9.5l-4.5-9.5c-.087-.212-.063-.454.063-.642z"
+              />
             </svg>
           </button>
         </div>
@@ -455,15 +544,22 @@ onMounted(() => {
 }
 
 @keyframes peaking-glow {
-  from { box-shadow: 0 0 4px var(--color-ai-accent); }
-  to { box-shadow: 0 0 12px var(--color-ai-accent); }
+  from {
+    box-shadow: 0 0 4px var(--color-ai-accent);
+  }
+  to {
+    box-shadow: 0 0 12px var(--color-ai-accent);
+  }
 }
 
 .message.decaying-message {
   opacity: 0.6;
   filter: grayscale(50%);
   font-size: 0.9em;
-  transition: opacity 0.5s ease-out, filter 0.5s ease-out, font-size 0.5s ease-out;
+  transition:
+    opacity 0.5s ease-out,
+    filter 0.5s ease-out,
+    font-size 0.5s ease-out;
 }
 
 .reply-btn {
@@ -477,7 +573,9 @@ onMounted(() => {
   cursor: pointer;
   padding: 0.2rem 0.5rem;
   border-radius: 12px;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
 .reply-btn:hover {
@@ -623,7 +721,8 @@ onMounted(() => {
 }
 
 @keyframes dance {
-  0%, 100% {
+  0%,
+  100% {
     transform: rotate(0);
   }
   25% {
@@ -645,7 +744,7 @@ onMounted(() => {
 }
 
 :deep(.chat-image-wrapper.collapsed .chat-image) {
-  max-height: 100px; /* Default thumbnail height */
+  max-height: 50px; /* Default thumbnail height */
   width: auto; /* Allow width to adjust */
   object-fit: contain; /* Ensure image fits within bounds without cropping */
   cursor: pointer;
