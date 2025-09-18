@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
-import { EditorView, basicSetup } from 'codemirror'
+import { EditorView } from '@codemirror/view'
+import { basicSetup } from 'codemirror'
 import { python } from '@codemirror/lang-python'
 import { oneDark } from '@codemirror/theme-one-dark'
 import { pythonRunner } from '@/services/pythonRunner'
@@ -17,21 +18,21 @@ const { theme, language } = storeToRefs(chatStore)
 
 const editorEl = ref<HTMLElement | null>(null)
 const output = ref('')
+const svgOutput = ref<string | null>(null)
 const isRunning = ref(false)
 const solutionResult = ref<'correct' | 'incorrect' | 'none'>('none')
 
-let view: EditorView
+let view: EditorView | null = null
 
 // Function to create or reconfigure the editor
 function createEditor(themeExtension: any[]) {
+  // Destroy existing view if it exists
   if (view) {
-    // If the view exists, just update the content and reconfigure
-    view.dispatch({
-      changes: { from: 0, to: view.state.doc.length, insert: props.challenge.startingCode },
-      effects: EditorView.reconfigure.of([basicSetup, python(), ...themeExtension]),
-    })
-  } else if (editorEl.value) {
-    // Otherwise, create a new editor instance
+    view.destroy()
+    view = null
+  }
+
+  if (editorEl.value) {
     view = new EditorView({
       doc: props.challenge.startingCode,
       extensions: [basicSetup, python(), ...themeExtension],
@@ -46,11 +47,23 @@ onMounted(() => {
   createEditor(themeExtension)
 })
 
-// Watch for theme changes and reconfigure the editor
+// Watch for theme changes and re-create the editor
 watch(theme, (newTheme) => {
   const themeExtension = newTheme === 'dark' ? [oneDark] : []
   createEditor(themeExtension)
 })
+
+// Watch for challenge changes and update the editor content
+watch(
+  () => props.challenge.id,
+  (newChallengeId, oldChallengeId) => {
+    if (newChallengeId !== oldChallengeId && view) {
+      view.dispatch({
+        changes: { from: 0, to: view.state.doc.length, insert: props.challenge.startingCode },
+      })
+    }
+  }
+)
 
 async function submitSolution() {
   if (isRunning.value) return
@@ -65,12 +78,19 @@ async function submitSolution() {
 
   const result = await pythonRunner.runChallenge(
     userCode,
-    challengeContent.testCode,
-    challengeContent.successMessage
+    challengeContent.testCases,
+    props.challenge.functionName,
+    challengeContent.successMessage,
+    props.challenge.visualOutput
   )
 
   output.value = result.output
+  svgOutput.value = result.svgOutput || null
   solutionResult.value = result.success ? 'correct' : 'incorrect'
+
+  if (result.success) {
+    chatStore.recordChallengeSolved(props.challenge.id)
+  }
 
   isRunning.value = false
 }
@@ -94,7 +114,8 @@ async function submitSolution() {
           {{ solutionResult === 'correct' ? '✔ Correct' : '❌ Incorrect' }}
         </span>
       </div>
-      <pre class="output-content">{{ output }}</pre>
+      <div v-if="svgOutput" class="visual-output" v-html="svgOutput"></div>
+      <pre class="output-content" v-else>{{ output }}</pre>
     </div>
   </div>
 </template>
@@ -176,6 +197,21 @@ async function submitSolution() {
   white-space: pre-wrap;
   word-wrap: break-word;
   overflow-y: auto;
+}
+
+.visual-output {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--color-background-mute);
+  overflow: hidden;
+}
+
+.visual-output :deep(svg) {
+  max-width: 100%;
+  max-height: 100%;
+  display: block;
 }
 
 /* Basic styling for the CodeMirror editor itself */

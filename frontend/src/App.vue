@@ -7,7 +7,7 @@ import LoginModal from '@/components/LoginModal.vue'
 
 const isCollapsed = ref(false)
 const chatStore = useChatStore()
-const { currentUser, theme, language } = storeToRefs(chatStore)
+const { currentUser, theme, language, totalXp, level } = storeToRefs(chatStore)
 
 // On startup, check for saved username and theme
 onMounted(() => {
@@ -36,6 +36,10 @@ function handleLogin(username: string) {
         <h2 v-if="!isCollapsed">Hive Chat</h2>
         <button @click="toggleSidebar" class="toggle-btn collapse-btn">‹</button>
       </div>
+      <div class="user-profile-summary">
+        <span class="username">{{ currentUser?.username }}</span>
+        <span class="xp-level">XP: {{ totalXp }} | Level: {{ level }}</span>
+      </div>
       <nav class="user-list">
         <h3>Users ({{ chatStore.users.length }})</h3>
         <ul>
@@ -50,6 +54,7 @@ function handleLogin(username: string) {
       <nav class="main-nav">
         <RouterLink to="/">Chat</RouterLink>
         <RouterLink to="/playground">Playground</RouterLink>
+        <RouterLink to="/journey">Journey</RouterLink>
       </nav>
       <div class="sidebar-footer">
         <div class="lang-switcher">
@@ -109,6 +114,26 @@ function handleLogin(username: string) {
   color: var(--color-heading);
   margin: 0;
   white-space: nowrap; /* Prevent title from wrapping during collapse */
+}
+
+.user-profile-summary {
+  background-color: var(--color-background-mute);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.user-profile-summary .username {
+  font-weight: bold;
+  color: var(--color-heading);
+}
+
+.user-profile-summary .xp-level {
+  font-size: 0.8rem;
+  color: var(--color-text-mute);
 }
 
 .user-list h3 {
