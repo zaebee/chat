@@ -82,3 +82,133 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* Collapsible content styles */
+@keyframes dance {
+  0%, 100% {
+    transform: rotate(0);
+  }
+  25% {
+    transform: rotate(-5deg);
+  }
+  75% {
+    transform: rotate(5deg);
+  }
+}
+
+.chat-image-wrapper {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  border-radius: 8px;
+  margin-top: 0.5rem;
+  animation: message-born 0.3s ease-out forwards;
+}
+
+.chat-image-wrapper.collapsed .chat-image {
+  max-height: 50px; /* Default thumbnail height */
+  width: auto; /* Allow width to adjust */
+  object-fit: contain; /* Ensure image fits within bounds without cropping */
+  cursor: pointer;
+  transform: scale(0.8);
+  opacity: 0.7;
+  transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+}
+
+.chat-image-wrapper.expanded .chat-image {
+  max-height: none; /* Full height */
+  width: 100%; /* Take full width */
+  object-fit: contain;
+  transform: scale(1);
+  opacity: 1;
+}
+
+.chat-image-wrapper.collapsed:hover .chat-image {
+  animation: dance 0.5s ease-in-out;
+  transform: scale(0.9);
+  opacity: 1;
+}
+
+.expand-image-btn {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.chat-image-wrapper.collapsed:hover .expand-image-btn {
+  opacity: 1;
+}
+
+.code-block-wrapper {
+  position: relative;
+  max-height: 200px; /* Default collapsed height */
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+  border-radius: 6px;
+  margin-top: 0.5rem;
+}
+
+.code-block-wrapper.expanded {
+  max-height: none; /* Full height when expanded */
+}
+
+.code-block-wrapper.collapsed::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 50px; /* Gradient height */
+  background: linear-gradient(to top, var(--color-background-soft), transparent);
+  pointer-events: none; /* Allow clicks to pass through */
+}
+
+.expand-code-btn {
+  position: absolute;
+  bottom: 0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 10; /* Ensure button is above gradient */
+}
+
+.code-block-wrapper.collapsed:hover .expand-code-btn {
+  opacity: 1;
+}
+
+.copy-code-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  border-radius: 6px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.code-block-wrapper:hover .copy-code-btn {
+  opacity: 1;
+}
