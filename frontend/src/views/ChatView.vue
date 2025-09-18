@@ -1,20 +1,49 @@
 <script setup lang="ts">
-import { useChatStore } from '@/stores/chat'
-import { onMounted, ref, watch, nextTick } from 'vue'
+import { useChatStore, type Message } from '@/stores/chat'
+import { onMounted, ref, watch, nextTick, computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import hljs from 'highlight.js'
+import InteractiveCodeBlock from '@/components/InteractiveCodeBlock.vue'
+import DigitalBee from '@/components/DigitalBee.vue'
+import HeroMessage from '@/components/HeroMessage.vue'
+import BeeOrganella from '@/components/BeeOrganella.vue'
 
-// Import highlight.js themes
-import 'highlight.js/styles/github.css'
-import 'highlight.js/styles/github-dark.css'
 
 const chatStore = useChatStore()
-const { messages, isConnected, currentUser, theme } = storeToRefs(chatStore)
+const { messages, isConnected, currentUser, theme, isAiThinking, replyToMessageId } = storeToRefs(chatStore)
 
 const newMessage = ref('')
 const chatMessagesEl = ref<HTMLElement | null>(null)
+const chatInputRef = ref<HTMLTextAreaElement | null>(null)
+const expandedImages = ref(new Map<string, boolean>())
+const imageCollapseTimers = ref(new Map<string, number>())
+
+const threadedMessages = computed(() => {
+  const messageMap = new Map<string, Message & { replies: Message[] }>()
+  const rootMessages: (Message & { replies: Message[] })[] = []
+
+  messages.value.forEach((msg: Message) => {
+    messageMap.set(msg.id, { ...msg, replies: [] })
+  })
+
+  messages.value.forEach((msg: Message) => {
+    if (msg.parent_id && messageMap.has(msg.parent_id)) {
+      messageMap.get(msg.parent_id)?.replies.push(messageMap.get(msg.id)!)
+    } else {
+      rootMessages.push(messageMap.get(msg.id)!)
+    }
+  })
+
+  // Sort root messages and their replies by timestamp
+  rootMessages.sort((a: Message, b: Message) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+  rootMessages.forEach(rootMsg => {
+    rootMsg.replies.sort((a: Message, b: Message) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+  })
+
+  return rootMessages
+})
 
 const renderer = new marked.Renderer();
 
@@ -30,7 +59,14 @@ renderer.link = (token) => {
   const isImage = imageExtensions.some(ext => href.toLowerCase().endsWith(ext));
 
   if (isImage) {
-    return `<img src="${href}" alt="${text}" class="chat-image" />`;
+    const imageId = `img-${Math.random().toString(36).substring(2, 9)}`;
+    const linkTitle = title || text;
+    return `
+      <div id="image-wrapper-${imageId}" class="chat-image-wrapper collapsed">
+        <img src="${href}" alt="${text}" title="${linkTitle}" class="chat-image" onclick="window.toggleImageExpansion('image-wrapper-${imageId}')" />
+        <button class="expand-image-btn" onclick="window.toggleImageExpansion('image-wrapper-${imageId}')">Expand</button>
+      </div>
+    `;
   }
   
   const linkTitle = title || text;
@@ -41,6 +77,8 @@ renderer.link = (token) => {
 declare global {
   interface Window {
     copyCodeToClipboardAndProvideFeedback: (codeId: string, buttonEl: HTMLElement) => void;
+    toggleImageExpansion: (wrapperId: string) => void;
+    toggleCodeExpansion: (wrapperId: string) => void;
   }
 }
 
@@ -59,6 +97,47 @@ window.copyCodeToClipboardAndProvideFeedback = (codeId: string, buttonEl: HTMLEl
   }
 };
 
+window.toggleImageExpansion = (wrapperId: string) => {
+  const wrapper = document.getElementById(wrapperId);
+  if (wrapper) {
+    const isExpanded = wrapper.classList.toggle('expanded');
+    const button = wrapper.querySelector('.expand-image-btn');
+    if (button) {
+      button.textContent = isExpanded ? 'Collapse' : 'Expand';
+    }
+
+    // Clear any existing timer for this image
+    const existingTimer = imageCollapseTimers.value.get(wrapperId);
+    if (existingTimer) {
+      clearTimeout(existingTimer);
+      imageCollapseTimers.value.delete(wrapperId);
+    }
+
+    // If expanded, set a new timer to auto-collapse
+    if (isExpanded) {
+      const timerId = setTimeout(() => {
+        wrapper.classList.remove('expanded');
+        if (button) {
+          button.textContent = 'Expand';
+        }
+        imageCollapseTimers.value.delete(wrapperId);
+      }, 10000); // Auto-collapse after 10 seconds
+      imageCollapseTimers.value.set(wrapperId, timerId as any); // Store timer ID
+    }
+  }
+};
+
+window.toggleCodeExpansion = (wrapperId: string) => {
+  const wrapper = document.getElementById(wrapperId);
+  if (wrapper) {
+    wrapper.classList.toggle('expanded');
+    const button = wrapper.querySelector('.expand-code-btn');
+    if (button) {
+      button.textContent = wrapper.classList.contains('expanded') ? 'Collapse' : 'Expand';
+    }
+  }
+};
+
 // Custom code block renderer with a copy button
 renderer.code = (token) => {
   const { text: code, lang } = token;
@@ -69,13 +148,15 @@ renderer.code = (token) => {
 
   // Use a unique ID to connect the button to the code
   const codeId = `code-${Math.random().toString(36).substring(2, 9)}`;
+  const codeWrapperId = `code-wrapper-${Math.random().toString(36).substring(2, 9)}`;
 
   return `
-    <div class="code-block-wrapper">
+    <div id="${codeWrapperId}" class="code-block-wrapper collapsed">
       <button onclick="window.copyCodeToClipboardAndProvideFeedback('${codeId}', this)" class="copy-code-btn">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Copy
       </button>
       <pre><code id="${codeId}" class="language-${language}">${highlightedCode}</code></pre>
+      <button class="expand-code-btn" onclick="window.toggleCodeExpansion('${codeWrapperId}')">Expand</button>
     </div>
   `;
 };
@@ -99,10 +180,30 @@ watch(
         hljs.highlightElement(block as HTMLElement)
       })
       chatMessagesEl.value.scrollTop = chatMessagesEl.value.scrollHeight
+
+      // Observe image wrappers for auto-collapse
+      const imageWrappers = chatMessagesEl.value.querySelectorAll('.chat-image-wrapper');
+      imageWrappers.forEach(wrapper => {
+        imageObserver.observe(wrapper);
+      });
     }
   },
   { deep: true }
 )
+
+const imageObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    const wrapper = entry.target as HTMLElement;
+    if (!entry.isIntersecting && wrapper.classList.contains('expanded')) {
+      // If an expanded image scrolls out of view, collapse it
+      wrapper.classList.remove('expanded');
+      const button = wrapper.querySelector('.expand-image-btn');
+      if (button) {
+        button.textContent = 'Expand';
+      }
+    }
+  });
+}, { threshold: 0 }); // Trigger when 0% of the target is visible
 
 function handleKeydown(e: KeyboardEvent) {
   if (e.key === 'Enter' && !e.shiftKey) {
@@ -112,15 +213,39 @@ function handleKeydown(e: KeyboardEvent) {
 }
 
 function handleSendMessage() {
-  if (newMessage.value.trim()) {
-    chatStore.sendMessage(newMessage.value.trim())
-    newMessage.value = ''
+  const messageText = newMessage.value.trim();
+  if (!messageText) return;
+
+  if (messageText.startsWith('/')) {
+    // It's a command
+    const command = messageText.substring(1);
+    chatStore.processCommand(command);
+  } else {
+    // It's a regular message
+    chatStore.sendMessage(messageText, replyToMessageId.value);
   }
+
+  newMessage.value = '';
+  chatStore.setReplyToMessageId(null); // Clear reply state after sending
+}
+
+function handleReply(senderName: string, messageId: string) {
+  newMessage.value = `@${senderName} `
+  chatStore.setReplyToMessageId(messageId)
+  nextTick(() => {
+    chatInputRef.value?.focus()
+  })
+}
+
+function cancelReply() {
+  chatStore.setReplyToMessageId(null)
+  newMessage.value = ''
 }
 
 function renderMarkdown(text: string) {
   const rawHtml = marked.parse(text, { gfm: true, breaks: true }) as string
-  return DOMPurify.sanitize(rawHtml, { ADD_ATTR: ['target'] })
+  const sanitizedHtml = DOMPurify.sanitize(rawHtml, { ADD_ATTR: ['target'] });
+  return sanitizedHtml;
 }
 
 // Auto-resize textarea
@@ -144,23 +269,84 @@ watch(newMessage, async (val) => {
       </span>
     </div>
     <div class="chat-messages" ref="chatMessagesEl">
-      <div
-        v-for="message in messages"
-        :key="message.id"
-        class="message"
-        :class="{ 'own-message': message.sender_id === currentUser?.id }"
-      >
-        <div class="message-sender">{{ message.sender_name }}</div>
-        <div class="message-content" v-html="renderMarkdown(message.text)"></div>
-        <div class="message-timestamp">{{ new Date(message.timestamp).toLocaleTimeString() }}</div>
+      <template v-for="message in threadedMessages" :key="message.id">
+        <div
+          class="message"
+          :class="{ 'own-message': message.sender_id === currentUser?.id, 'ai-message': message.is_bot, 'peaking-message': message.isPeaking, 'decaying-message': message.isDecaying }"
+        >
+          <div class="message-sender">
+            <svg v-if="message.is_bot" class="ai-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-2-9h4v2h-4v-2zm0-4h4v2h-4V7z"/></svg>
+            {{ message.sender_name }}
+          </div>
+          <BeeOrganella
+            v-if="message.bee_organella_type"
+            :type="message.bee_organella_type"
+            :size="1.5"
+          />
+          <HeroMessage
+            v-else-if="message.hero_properties && message.dialogue_text"
+            :hero-properties="message.hero_properties"
+            :dialogue-text="message.dialogue_text"
+          />
+          <InteractiveCodeBlock
+            v-else-if="message.code_content"
+            :code-content="message.code_content"
+            :code-language="message.code_language"
+            :editor-id="`editor-${message.id}`"
+          />
+          <div v-else class="message-content" v-html="renderMarkdown(message.text)"></div>
+          <div class="message-timestamp">{{ new Date(message.timestamp).toLocaleTimeString() }}</div>
+          <button class="reply-btn" @click="handleReply(message.sender_name, message.id)">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" class="reply-icon"><path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/></svg>
+            <span>Reply</span>
+          </button>
+        </div>
+        <div
+          v-for="reply in message.replies"
+          :key="reply.id"
+          class="message reply-message"
+          :class="{ 'own-message': reply.sender_id === currentUser?.id, 'ai-message': reply.is_bot, 'peaking-message': reply.isPeaking, 'decaying-message': reply.isDecaying }"
+        >
+          <div class="message-sender">
+            <svg v-if="reply.is_bot" class="ai-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-2-9h4v2h-4v-2zm0-4h4v2h-4V7z"/></svg>
+            {{ reply.sender_name }}
+          </div>
+          <InteractiveCodeBlock
+            v-if="reply.code_content"
+            :code-content="reply.code_content"
+            :code-language="reply.code_language"
+            :editor-id="`editor-${reply.id}`"
+          />
+          <div v-else class="message-content" v-html="renderMarkdown(reply.text)"></div>
+          <div class="message-timestamp">{{ new Date(reply.timestamp).toLocaleTimeString() }}</div>
+          <button class="reply-btn" @click="handleReply(reply.sender_name, reply.id)">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" class="reply-icon"><path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/></svg>
+            <span>Reply</span>
+          </button>
+        </div>
+      </template>
+      <div v-if="isAiThinking" class="ai-thinking-indicator message ai-message">
+        <div class="message-sender">
+          <svg class="ai-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-2-9h4v2h-4v-2zm0-4h4v2h-4V7z"/></svg>
+          AI Teammate
+        </div>
+        <div class="message-content">
+          <span>Thinking</span><span class="dot-animation">...</span>
+        </div>
       </div>
+      <DigitalBee :size="1.5" body-color="#FFA500" wing-color="#ADD8E6" has-sword animation-speed="fast" />
     </div>
     <div class="chat-input-area">
+      <div v-if="replyToMessageId" class="reply-indicator">
+        Replying to message...
+        <button @click="cancelReply" class="cancel-reply-btn">x</button>
+      </div>
       <textarea
         v-model="newMessage"
         @keydown="handleKeydown"
         placeholder="Message #general"
         rows="1"
+        ref="chatInputRef"
       ></textarea>
       <button class="send-btn" @click="handleSendMessage" :disabled="!newMessage.trim()">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
@@ -213,12 +399,24 @@ watch(newMessage, async (val) => {
   gap: 0.75rem;
 }
 
+@keyframes message-born {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 .message {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
   max-width: 80%;
   align-self: flex-start;
+  animation: message-born 0.3s ease-out forwards; /* Apply animation */
 }
 
 .own-message {
@@ -243,18 +441,107 @@ watch(newMessage, async (val) => {
   word-wrap: break-word;
 }
 
-.own-message .message-content {
-  background-color: #007bff;
-  color: white;
+.message.ai-message .message-content {
+  background-color: var(--color-background-ai);
+  border-left: 4px solid var(--color-ai-accent);
 }
 
-.message-timestamp {
-  font-size: 0.75rem;
+.ai-icon {
+  margin-right: 0.5rem;
+  color: var(--color-ai-accent);
+  vertical-align: middle;
+}
+
+.message.ai-message .message-sender {
+  display: flex;
+  align-items: center;
+}
+
+.message.ai-message {
+  align-self: flex-start;
+}
+
+.message.ai-message .message-timestamp {
+  align-self: flex-start;
+}
+
+.reply-message {
+  margin-left: 2rem;
+  border-left: 2px solid var(--color-border);
+  padding-left: 0.5rem;
+}
+
+.message.peaking-message {
+  animation: peaking-glow 1.5s ease-in-out infinite alternate;
+  border: 2px solid var(--color-ai-accent); /* Example: a subtle border */
+  box-shadow: 0 0 8px var(--color-ai-accent); /* Example: a subtle glow */
+}
+
+@keyframes peaking-glow {
+  from { box-shadow: 0 0 4px var(--color-ai-accent); }
+  to { box-shadow: 0 0 12px var(--color-ai-accent); }
+}
+
+.message.decaying-message {
+  opacity: 0.6;
+  filter: grayscale(50%);
+  font-size: 0.9em;
+  transition: opacity 0.5s ease-out, filter 0.5s ease-out, font-size 0.5s ease-out;
+}
+
+.reply-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: none;
+  border: none;
   color: var(--color-text-mute);
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+  border-radius: 12px;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-.own-message .message-timestamp {
-  align-self: flex-end;
+.reply-btn:hover {
+  background-color: var(--color-background-mute);
+  color: var(--color-text);
+}
+
+.reply-icon {
+  transform: scaleX(-1); /* Flip horizontally */
+}
+
+.reply-indicator {
+  position: absolute;
+  bottom: 100%; /* Position above the textarea */
+  left: 0;
+  right: 0;
+  background-color: var(--color-background-soft);
+  padding: 0.5rem 1rem;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  border: 1px solid var(--color-border);
+  border-bottom: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--color-text);
+  font-size: 0.9rem;
+}
+
+.cancel-reply-btn {
+  background: none;
+  border: none;
+  color: var(--color-text-mute);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.2rem;
+  border-radius: 4px;
+}
+
+.cancel-reply-btn:hover {
+  background-color: var(--color-background-mute);
 }
 
 .chat-input-area {
@@ -263,6 +550,7 @@ watch(newMessage, async (val) => {
   display: flex;
   align-items: flex-end;
   gap: 0.5rem;
+  position: relative; /* Needed for absolute positioning of reply-indicator */
 }
 
 .chat-input-area textarea {
@@ -354,10 +642,93 @@ watch(newMessage, async (val) => {
   max-height: 300px;
   border-radius: 8px;
   margin-top: 0.5rem;
+  transition: max-height 0.3s ease-out;
+}
+
+:deep(.chat-image-wrapper) {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  border-radius: 8px;
+  margin-top: 0.5rem;
+}
+
+:deep(.chat-image-wrapper.collapsed .chat-image) {
+  max-height: 100px; /* Default thumbnail height */
+  width: auto; /* Allow width to adjust */
+  object-fit: contain; /* Ensure image fits within bounds without cropping */
+  cursor: pointer;
+}
+
+:deep(.chat-image-wrapper.expanded .chat-image) {
+  max-height: none; /* Full height */
+  width: 100%; /* Take full width */
+  object-fit: contain;
+}
+
+:deep(.expand-image-btn) {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+:deep(.chat-image-wrapper.collapsed:hover .expand-image-btn) {
+  opacity: 1;
 }
 
 :deep(.code-block-wrapper) {
   position: relative;
+  max-height: 200px; /* Default collapsed height */
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+  border-radius: 6px;
+  margin-top: 0.5rem;
+}
+
+:deep(.code-block-wrapper.expanded) {
+  max-height: none; /* Full height when expanded */
+}
+
+:deep(.code-block-wrapper.collapsed::after) {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 50px; /* Gradient height */
+  background: linear-gradient(to top, var(--color-background-soft), transparent);
+  pointer-events: none; /* Allow clicks to pass through */
+}
+
+:deep(.expand-code-btn) {
+  position: absolute;
+  bottom: 0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 10; /* Ensure button is above gradient */
+}
+
+:deep(.code-block-wrapper.collapsed:hover .expand-code-btn) {
+  opacity: 1;
 }
 
 :deep(.copy-code-btn) {
@@ -379,11 +750,5 @@ watch(newMessage, async (val) => {
   opacity: 1;
 }
 
-/* Use the correct highlight.js theme based on the parent class */
-.hljs-light-theme :deep(.message-content pre code) {
-  @import 'highlight.js/styles/github.css';
-}
-.hljs-dark-theme :deep(.message-content pre code) {
-  @import 'highlight.js/styles/github-dark.css';
-}
+/* Highlight.js themes are now imported globally in main.ts */
 </style>
