@@ -10,9 +10,7 @@
     <div v-if="isExpanded" class="panel-content">
       <div v-if="organellas.length === 0" class="no-organellas">
         <p>No organellas yet! Complete challenges to attract your first bee companion.</p>
-        <button @click="createNewOrganella" class="create-btn">
-          Create First Organella
-        </button>
+        <button @click="createNewOrganella" class="create-btn">Create First Organella</button>
       </div>
 
       <div v-else class="organellas-list">
@@ -29,16 +27,30 @@
             <div class="organella-info">
               <h4>{{ organella.name }}</h4>
               <span class="organella-type">{{ organella.type }} {{ organella.stage }}</span>
+              <em class="organella-description">"{{ organella.description }}"</em>
             </div>
             <div class="organella-level">
               <span class="level">Lv. {{ organella.level }}</span>
               <div class="xp-bar">
-                <div
-                  class="xp-fill"
-                  :style="{ width: `${getXpProgress(organella)}%` }"
-                ></div>
+                <div class="xp-fill" :style="{ width: `${getXpProgress(organella)}%` }"></div>
               </div>
               <span class="xp-text">{{ organella.experience_points }} XP</span>
+            </div>
+          </div>
+
+          <div class="organella-details">
+            <div class="organella-appearance">
+              <h5>Mystical Appearance</h5>
+              <p>{{ organella.mystical_appearance }}</p>
+            </div>
+
+            <div class="organella-sacred-skills">
+              <h5>Sacred Skills</h5>
+              <ul>
+                <li v-for="(description, skill) in organella.sacred_skills" :key="skill">
+                  <strong>{{ skill }}:</strong> {{ description }}
+                </li>
+              </ul>
             </div>
           </div>
 
@@ -108,7 +120,13 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { useChatStore, type Organella, type TaleChapter, type OrganellaType, type OrganellaStage } from '@/stores/chat'
+import {
+  useChatStore,
+  type Organella,
+  type TaleChapter,
+  type OrganellaType,
+  type OrganellaStage,
+} from '@/stores/chat'
 
 const chatStore = useChatStore()
 const isExpanded = ref(true)
@@ -131,9 +149,9 @@ const getOrganellaIcon = (type: OrganellaType, stage: OrganellaStage) => {
     worker: { egg: '🥚', larva: '🐛', pupa: '🛡️', adult: '🐝' },
     scout: { egg: '🥚', larva: '🐛', pupa: '🛡️', adult: '🔍' },
     guard: { egg: '🥚', larva: '🐛', pupa: '🛡️', adult: '🛡️' },
-    queen: { egg: '🥚', larva: '🐛', pupa: '🛡️', adult: '👑' }
-  };
-  return icons[type]?.[stage] || '🐝';
+    queen: { egg: '🥚', larva: '🐛', pupa: '🛡️', adult: '👑' },
+  }
+  return icons[type]?.[stage] || '🐝'
 }
 
 const getXpProgress = (organella: Organella) => {
@@ -244,10 +262,18 @@ const formatDate = (dateString: string) => {
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
 }
 
-.organella-card.type-worker { border-color: #fbbf24; }
-.organella-card.type-scout { border-color: #06b6d4; }
-.organella-card.type-guard { border-color: #ef4444; }
-.organella-card.type-queen { border-color: #a855f7; }
+.organella-card.type-worker {
+  border-color: #fbbf24;
+}
+.organella-card.type-scout {
+  border-color: #06b6d4;
+}
+.organella-card.type-guard {
+  border-color: #ef4444;
+}
+.organella-card.type-queen {
+  border-color: #a855f7;
+}
 
 .organella-header {
   display: flex;
@@ -275,6 +301,42 @@ const formatDate = (dateString: string) => {
 .organella-level {
   margin-left: auto;
   text-align: right;
+}
+
+.organella-description {
+  font-size: 0.8rem;
+  color: #666;
+  font-style: italic;
+}
+
+.organella-details {
+  margin-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 1rem;
+}
+
+.organella-appearance h5,
+.organella-sacred-skills h5 {
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.organella-appearance p {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.organella-sacred-skills ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.organella-sacred-skills li {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 0.5rem;
 }
 
 .level {
@@ -384,9 +446,15 @@ const formatDate = (dateString: string) => {
   border-left: 4px solid #3b82f6;
 }
 
-.tale-card.mood-mystical { border-left-color: #8b5cf6; }
-.tale-card.mood-triumphant { border-left-color: #f59e0b; }
-.tale-card.mood-transformative { border-left-color: #10b981; }
+.tale-card.mood-mystical {
+  border-left-color: #8b5cf6;
+}
+.tale-card.mood-triumphant {
+  border-left-color: #f59e0b;
+}
+.tale-card.mood-transformative {
+  border-left-color: #10b981;
+}
 
 .tale-header {
   display: flex;
@@ -427,25 +495,25 @@ const formatDate = (dateString: string) => {
 }
 
 /* Dark theme support */
-[data-theme="dark"] .organella-panel {
+[data-theme='dark'] .organella-panel {
   background: rgba(17, 24, 39, 0.95);
 }
 
-[data-theme="dark"] .organella-card {
+[data-theme='dark'] .organella-card {
   background: #1f2937;
   border-color: #374151;
 }
 
-[data-theme="dark"] .organella-info h4,
-[data-theme="dark"] .level {
+[data-theme='dark'] .organella-info h4,
+[data-theme='dark'] .level {
   color: #f3f4f6;
 }
 
-[data-theme="dark"] .tale-card {
+[data-theme='dark'] .tale-card {
   background: linear-gradient(135deg, #1f2937, #111827);
 }
 
-[data-theme="dark"] .tale-header h4 {
+[data-theme='dark'] .tale-header h4 {
   color: #f3f4f6;
 }
 </style>

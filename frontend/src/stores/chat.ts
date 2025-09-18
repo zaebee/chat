@@ -37,8 +37,8 @@ export interface Room {
   is_archived: boolean
 }
 
-export type OrganellaType = 'worker' | 'scout' | 'guard' | 'queen';
-export type OrganellaStage = 'egg' | 'larva' | 'pupa' | 'adult';
+export type OrganellaType = 'worker' | 'scout' | 'guard' | 'queen'
+export type OrganellaStage = 'egg' | 'larva' | 'pupa' | 'adult'
 
 export interface Organella {
   id: string
@@ -57,6 +57,9 @@ export interface Organella {
   personality_traits: {
     [key: string]: number
   }
+  description: string
+  mystical_appearance: string
+  sacred_skills: Record<string, string>
 }
 
 export interface TaleChapter {
@@ -84,18 +87,18 @@ export interface Message {
   code_language?: string
   editor_id?: string
   hero_properties?: {
-    skinColor?: string;
-    shirtColor?: string;
-    swordBladeColor?: string;
-    swordGuardColor?: string;
-    strokeColor?: string;
-    size?: number;
-    animateSwing?: boolean;
-  };
-  dialogue_text?: string;
-  isPeaking?: boolean; // Temporary for testing "Peak" effect
-  isDecaying?: boolean; // Temporary for testing "Decay" effect
-  bee_organella_type?: 'worker' | 'scout' | 'queen' | 'guard';
+    skinColor?: string
+    shirtColor?: string
+    swordBladeColor?: string
+    swordGuardColor?: string
+    strokeColor?: string
+    size?: number
+    animateSwing?: boolean
+  }
+  dialogue_text?: string
+  isPeaking?: boolean // Temporary for testing "Peak" effect
+  isDecaying?: boolean // Temporary for testing "Decay" effect
+  bee_organella_type?: 'worker' | 'scout' | 'queen' | 'guard'
 }
 
 export const useChatStore = defineStore('chat', () => {
@@ -157,7 +160,7 @@ export const useChatStore = defineStore('chat', () => {
       sender_id: 'python_runtime',
       sender_name: 'Python',
       timestamp: new Date().toISOString(),
-      is_bot: true
+      is_bot: true,
     }
     messages.value.push(message)
   }
@@ -240,7 +243,10 @@ export const useChatStore = defineStore('chat', () => {
   /**
    * Creates a new organella for the user.
    */
-  const createOrganella = async (type: 'worker' | 'scout' | 'guard' | 'queen', userName: string) => {
+  const createOrganella = async (
+    type: 'worker' | 'scout' | 'guard' | 'queen',
+    userName: string,
+  ) => {
     if (!currentUser.value) {
       console.error('Cannot create organella: user not logged in.')
       return
@@ -353,7 +359,7 @@ export const useChatStore = defineStore('chat', () => {
         case 'user_joined':
           users.value.push(data)
           break
-        case 'user_left':
+        case 'user_departed':
           users.value = users.value.filter((user) => user.id !== data.id)
           break
         case 'rooms':
@@ -432,7 +438,9 @@ export const useChatStore = defineStore('chat', () => {
     }
   }
 
-  const setReplyToMessageId = (id: string | null) => { replyToMessageId.value = id }
+  const setReplyToMessageId = (id: string | null) => {
+    replyToMessageId.value = id
+  }
 
   const fetchTeammates = async () => {
     try {
@@ -468,19 +476,21 @@ export const useChatStore = defineStore('chat', () => {
       messages.value = [] // Clear current messages
 
       // Send room switch message to server
-      socket.send(JSON.stringify({
-        type: 'switch_room',
-        data: { room_id: roomId }
-      }))
+      socket.send(
+        JSON.stringify({
+          type: 'switch_room',
+          data: { room_id: roomId },
+        }),
+      )
     }
   }
 
   // const setBackgroundTheme = (themeName: string) => { backgroundTheme.value = backgroundTheme.value = themeName }
 
   const processCommand = (command: string) => {
-    const parts = command.split('.');
+    const parts = command.split('.')
     if (parts.length >= 2 && parts[0] === 'bee') {
-      const beeType = parts[1]; // e.g., 'queen', 'worker'
+      const beeType = parts[1] // e.g., 'queen', 'worker'
       // For now, let's just spawn a bee of that type
       messages.value.push({
         id: generateUUID(),
@@ -491,7 +501,7 @@ export const useChatStore = defineStore('chat', () => {
         is_bot: true,
         bee_organella_type: beeType as any, // Cast to any for now, will refine type later
         dialogue_text: `A ${beeType} bee organella has been born!`,
-      });
+      })
     } else {
       messages.value.push({
         id: generateUUID(),
@@ -500,13 +510,13 @@ export const useChatStore = defineStore('chat', () => {
         sender_name: 'System',
         timestamp: new Date().toISOString(),
         is_bot: true,
-      });
+      })
     }
-  };
+  }
 
   const loadScene = (sceneName: string) => {
     // Clear existing messages for a fresh scene
-    messages.value = [];
+    messages.value = []
 
     switch (sceneName) {
       case 'forest_clearing':
@@ -530,8 +540,9 @@ export const useChatStore = defineStore('chat', () => {
             size: 1.2,
             animateSwing: true,
           },
-          dialogue_text: 'Welcome, brave adventurer, to the Forest Clearing! A new quest awaits you.',
-        });
+          dialogue_text:
+            'Welcome, brave adventurer, to the Forest Clearing! A new quest awaits you.',
+        })
 
         // Spawn some worker bees
         messages.value.push({
@@ -543,7 +554,7 @@ export const useChatStore = defineStore('chat', () => {
           is_bot: true,
           bee_organella_type: 'worker',
           dialogue_text: 'Buzzing with energy, ready to work!',
-        });
+        })
         messages.value.push({
           id: generateUUID(),
           text: '',
@@ -553,8 +564,8 @@ export const useChatStore = defineStore('chat', () => {
           is_bot: true,
           bee_organella_type: 'worker',
           dialogue_text: 'Collecting pollen for the Hive!',
-        });
-        break;
+        })
+        break
       case 'mountain_pass':
         // Set background
         // setBackgroundTheme('mountains');
@@ -569,8 +580,8 @@ export const useChatStore = defineStore('chat', () => {
           is_bot: true,
           bee_organella_type: 'scout',
           dialogue_text: 'The path ahead is treacherous, but the view is grand!',
-        });
-        break;
+        })
+        break
       default:
         // Default scene (e.g., clear background, no special characters)
         // setBackgroundTheme('default');
@@ -581,10 +592,10 @@ export const useChatStore = defineStore('chat', () => {
           sender_name: 'System',
           timestamp: new Date().toISOString(),
           is_bot: true,
-        });
-        break;
+        })
+        break
     }
-  };
+  }
 
   return {
     users,
