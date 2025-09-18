@@ -60,6 +60,7 @@ export interface Organella {
   description: string
   mystical_appearance: string
   sacred_skills: Record<string, string>
+  unlocked_sections: string[]
 }
 
 export interface TaleChapter {

@@ -41,16 +41,18 @@
           <div class="organella-details">
             <div class="organella-appearance">
               <h5>Mystical Appearance</h5>
-              <p>{{ organella.mystical_appearance }}</p>
+              <p v-if="isSectionVisible(organella.id, 'appearance')">{{ organella.mystical_appearance }}</p>
+              <button v-else @click="startStudy(organella.id, 'appearance')" class="study-btn">Study</button>
             </div>
 
             <div class="organella-sacred-skills">
               <h5>Sacred Skills</h5>
-              <ul>
+              <ul v-if="isSectionVisible(organella.id, 'sacred_skills')">
                 <li v-for="(description, skill) in organella.sacred_skills" :key="skill">
                   <strong>{{ skill }}:</strong> {{ description }}
                 </li>
               </ul>
+              <button v-else @click="startStudy(organella.id, 'sacred_skills')" class="study-btn">Study</button>
             </div>
           </div>
 
@@ -133,6 +135,30 @@ const isExpanded = ref(true)
 
 const organellas = computed(() => chatStore.organellas)
 const tales = computed(() => chatStore.tales)
+
+const studying_sections = ref(new Map<string, number>());
+
+const startStudy = (organellaId: string, section: string) => {
+  const key = `${organellaId}-${section}`;
+  
+  // Clear any existing timer for this section
+  if (studying_sections.value.has(key)) {
+    clearTimeout(studying_sections.value.get(key));
+  }
+
+  // Set a new timer to hide the section after 3 minutes
+  const timerId = setTimeout(() => {
+    studying_sections.value.delete(key);
+  }, 180000); // 3 minutes
+
+  // Add the section to the studying map
+  studying_sections.value.set(key, timerId);
+};
+
+const isSectionVisible = (organellaId: string, section: string) => {
+  const key = `${organellaId}-${section}`;
+  return studying_sections.value.has(key);
+};
 
 const toggleExpanded = () => {
   isExpanded.value = !isExpanded.value
@@ -229,6 +255,21 @@ const formatDate = (dateString: string) => {
 .create-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+}
+
+.study-btn {
+  background: #4a5568;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: all 0.3s ease;
+}
+
+.study-btn:hover {
+  background: #2d3748;
 }
 
 .organellas-list {
