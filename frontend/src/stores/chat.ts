@@ -35,6 +35,8 @@ export const useChatStore = defineStore('chat', () => {
   const theme = ref('light')
   const language = ref('en')
   const solvedChallenges = ref<string[]>([])
+  const inputPrompt = ref<string | null>(null)
+  const inputResolver = ref<((value: string) => void) | null>(null)
 
   // Gamification constants
   const XP_PER_CHALLENGE = 100
@@ -52,6 +54,42 @@ export const useChatStore = defineStore('chat', () => {
   let socket: WebSocket | null = null
 
   // --- ACTIONS ---
+
+  /**
+   * Sends input to a waiting Python script.
+   */
+  const sendPythonInput = (text: string) => {
+    if (inputResolver.value) {
+      inputResolver.value(text)
+      inputPrompt.value = null
+      inputResolver.value = null
+    } else {
+      console.warn('No Python input requested.')
+    }
+  }
+
+  /**
+   * Adds a Python output message to the chat.
+   */
+  const addPythonOutputMessage = (text: string) => {
+    const message: Message = {
+      id: generateUUID(),
+      text: text,
+      sender_id: 'python_runtime',
+      sender_name: 'Python',
+      timestamp: new Date().toISOString(),
+      is_bot: true
+    }
+    messages.value.push(message)
+  }
+
+  /**
+   * Requests Python input from the user.
+   */
+  const requestPythonInput = (prompt: string, resolve: (value: string) => void) => {
+    inputPrompt.value = prompt
+    inputResolver.value = resolve
+  }
 
   /**
    * Sets the application language.
@@ -250,5 +288,9 @@ export const useChatStore = defineStore('chat', () => {
     fetchSolvedChallenges,
     totalXp,
     level,
+    inputPrompt,
+    sendPythonInput,
+    addPythonOutputMessage,
+    requestPythonInput,
   }
 })

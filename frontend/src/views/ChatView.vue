@@ -38,6 +38,12 @@ renderer.link = (token) => {
 };
 
 // Global function for copying code (called from dynamically rendered HTML)
+declare global {
+  interface Window {
+    copyCodeToClipboardAndProvideFeedback: (codeId: string, buttonEl: HTMLElement) => void;
+  }
+}
+
 window.copyCodeToClipboardAndProvideFeedback = (codeId: string, buttonEl: HTMLElement) => {
   const codeElement = document.getElementById(codeId);
   if (codeElement) {
@@ -59,7 +65,7 @@ renderer.code = (token) => {
   const language = hljs.getLanguage(lang || '') ? lang : 'plaintext';
   
   // Ensure code is a string before highlighting
-  const highlightedCode = hljs.highlight(code || '', { language }).value;
+  const highlightedCode = hljs.highlight(code || '', { language: language || 'plaintext' }).value;
 
   // Use a unique ID to connect the button to the code
   const codeId = `code-${Math.random().toString(36).substring(2, 9)}`;
@@ -113,7 +119,7 @@ function handleSendMessage() {
 }
 
 function renderMarkdown(text: string) {
-  const rawHtml = marked.parse(text, { gfm: true, breaks: true })
+  const rawHtml = marked.parse(text, { gfm: true, breaks: true }) as string
   return DOMPurify.sanitize(rawHtml, { ADD_ATTR: ['target'] })
 }
 

@@ -24,6 +24,20 @@ const solutionResult = ref<'correct' | 'incorrect' | 'none'>('none')
 
 let view: EditorView | null = null
 
+// Set up I/O handlers for the Python runner
+pythonRunner.setIoHandlers(
+  (text: string) => {
+    // This will be called by Python's print()
+    chatStore.addPythonOutputMessage(text)
+  },
+  (prompt: string) => {
+    // This will be called by Python's input()
+    return new Promise((resolve) => {
+      chatStore.requestPythonInput(prompt, resolve)
+    })
+  }
+)
+
 // Function to create or reconfigure the editor
 function createEditor(themeExtension: any[]) {
   // Destroy existing view if it exists
@@ -72,7 +86,7 @@ async function submitSolution() {
   solutionResult.value = 'none'
   output.value = 'Running tests...'
 
-  const userCode = view.state.doc.toString()
+  const userCode = view?.state.doc.toString() || ''
   const currentLang = language.value || 'en'
   const challengeContent = props.challenge.content[currentLang] || props.challenge.content.en
 

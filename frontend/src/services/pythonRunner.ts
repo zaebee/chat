@@ -86,6 +86,17 @@ class PythonRunner {
     return pyodidePromise
   }
 
+  private onOutputHandler: ((text: string) => void) | null = null
+  private onInputRequestHandler: ((prompt: string) => Promise<string>) | null = null
+
+  public setIoHandlers(
+    onOutput: (text: string) => void,
+    onInputRequest: (prompt: string) => Promise<string>
+  ) {
+    this.onOutputHandler = onOutput
+    this.onInputRequestHandler = onInputRequest
+  }
+
   public async runChallenge(
     userCode: string,
     testCases: Array<[any, any]>,
@@ -98,8 +109,37 @@ class PythonRunner {
       let output = ''
       let svgOutput: string | undefined
 
-      pyodide.setStdout({ batched: (str) => (output += str + '\n') })
-      pyodide.setStderr({ batched: (str) => (output += str + '\n') })
+      // Redirect stdout and stderr to our handler
+      pyodide.setStdout({
+        batched: (str: string) => {
+          output += str + '\n'
+          if (this.onOutputHandler) {
+            this.onOutputHandler(str)
+          }
+        }
+      })
+      pyodide.setStderr({
+        batched: (str: string) => {
+          output += str + '\n'
+          if (this.onOutputHandler) {
+            this.onOutputHandler(str)
+          }
+        }
+      })
+
+      // Redirect stdin to our handler
+      pyodide.setStdin({
+        stdin: () => {
+          if (this.onInputRequestHandler) {
+            // For now, return a simple prompt - this will need improvement for full async support
+            const result = prompt('Python input requested:') || ''
+            return result
+          } else {
+            console.warn('Input requested but no handler set.')
+            return '' // Return empty string if no handler
+          }
+        }
+      })
 
       if (captureSvg) {
         // Install micropip and pyodide-turtlegraphics
