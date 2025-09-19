@@ -63,6 +63,7 @@ const getOrganellaIcon = (type: OrganellaType, stage: OrganellaStage) => {
     scout: { egg: "🥚", larva: "🐛", pupa: "🛡️", adult: "🔍" },
     guard: { egg: "🥚", larva: "🐛", pupa: "🛡️", adult: "🛡️" },
     queen: { egg: "🥚", larva: "🐛", pupa: "🛡️", adult: "👑" },
+    chronicler: { egg: "🥚", larva: "🐛", pupa: "🛡️", adult: "📜" },
   };
   return `data:image/svg+xml,${encodeURIComponent(
     `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><text x="0" y="15">${

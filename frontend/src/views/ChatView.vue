@@ -1,142 +1,150 @@
 <script setup lang="ts">
-import { useChatStore, type Message } from '@/stores/chat'
-import { onMounted, onUnmounted, ref, watch, nextTick, computed } from 'vue'
-import { storeToRefs } from 'pinia'
-import { marked } from 'marked'
-import DOMPurify from 'dompurify'
-import hljs from 'highlight.js'
-import InteractiveCodeBlock from '@/components/InteractiveCodeBlock.vue'
-import DigitalBee from '@/components/DigitalBee.vue'
-import HeroMessage from '@/components/HeroMessage.vue'
-import BeeOrganella from '@/components/BeeOrganella.vue'
-import TeammatePresence from '@/components/TeammatePresence.vue'
-import RoomNavigation from '@/components/RoomNavigation.vue'
-import OrganellaPanel from '@/components/OrganellaPanel.vue'
+import { useChatStore } from "@/stores/chat";
+import { useMessagesStore, type Message } from "@/stores/messages";
+import { useUserStore } from "@/stores/user";
+import { useTeammatesStore } from "@/stores/teammates";
+import { useGameStore } from "@/stores/game";
+import { useSettingsStore } from "@/stores/settings";
+import { onMounted, onUnmounted, ref, watch, nextTick, computed } from "vue";
+import { storeToRefs } from "pinia";
+import { marked } from "marked";
+import DOMPurify from "dompurify";
+import hljs from "highlight.js";
+import InteractiveCodeBlock from "@/components/InteractiveCodeBlock.vue";
+import DigitalBee from "@/components/DigitalBee.vue";
+import HeroMessage from "@/components/HeroMessage.vue";
+import BeeOrganella from "@/components/BeeOrganella.vue";
+import TeammatePresence from "@/components/TeammatePresence.vue";
+import RoomNavigation from "@/components/RoomNavigation.vue";
+import HexagonalRoomNavigation from "@/components/HexagonalRoomNavigation.vue";
+import OrganellaPanel from "@/components/OrganellaPanel.vue";
 
-const chatStore = useChatStore()
-const {
-  messages,
-  isConnected,
-  currentUser,
-  theme,
-  isAiThinking,
-  replyToMessageId,
-  teammates,
-  rooms,
-  currentRoom,
-} = storeToRefs(chatStore)
+const chatStore = useChatStore();
+const messagesStore = useMessagesStore();
+const userStore = useUserStore();
+const teammatesStore = useTeammatesStore();
+const gameStore = useGameStore();
+const settingsStore = useSettingsStore();
 
-const newMessage = ref('')
-const chatMessagesEl = ref<HTMLElement | null>(null)
-const chatInputRef = ref<HTMLTextAreaElement | null>(null)
-const expandedImages = ref(new Map<string, boolean>())
-const imageCollapseTimers = ref(new Map<string, number>())
+const { messages, isAiThinking, replyToMessageId } = storeToRefs(messagesStore);
+const { isConnected } = storeToRefs(chatStore);
+const { currentUser } = storeToRefs(userStore);
+const { teammates } = storeToRefs(teammatesStore);
+const { rooms, currentRoom } = storeToRefs(gameStore);
+const { theme } = storeToRefs(settingsStore); // Added
+
+// Toggle between hexagonal and traditional room layout
+const useHexagonalLayout = ref(true); // Default to hexagonal layout
+
+const newMessage = ref("");
+const chatMessagesEl = ref<HTMLElement | null>(null);
+const chatInputRef = ref<HTMLTextAreaElement | null>(null);
 
 const threadedMessages = computed(() => {
-  const messageMap = new Map<string, Message & { replies: Message[] }>()
-  const rootMessages: (Message & { replies: Message[] })[] = []
+  const messageMap = new Map<string, Message & { replies: Message[] }>();
+  const rootMessages: (Message & { replies: Message[] })[] = [];
 
   messages.value.forEach((msg: Message) => {
-    messageMap.set(msg.id, { ...msg, replies: [] })
-  })
+    messageMap.set(msg.id, { ...msg, replies: [] });
+  });
 
   messages.value.forEach((msg: Message) => {
     if (msg.parent_id && messageMap.has(msg.parent_id)) {
-      messageMap.get(msg.parent_id)?.replies.push(messageMap.get(msg.id)!)
+      messageMap.get(msg.parent_id)?.replies.push(messageMap.get(msg.id)!);
     } else {
-      rootMessages.push(messageMap.get(msg.id)!)
+      rootMessages.push(messageMap.get(msg.id)!);
     }
-  })
+  });
 
   // Sort root messages and their replies by timestamp
   rootMessages.sort(
     (a: Message, b: Message) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
-  )
+  );
   rootMessages.forEach((rootMsg) => {
     rootMsg.replies.sort(
       (a: Message, b: Message) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
-    )
-  })
+    );
+  });
 
-  return rootMessages
-})
+  return rootMessages;
+});
 
 function handleKeydown(e: KeyboardEvent) {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault()
-    handleSendMessage()
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    handleSendMessage();
   }
 }
 
 function handleSendMessage() {
-  const messageText = newMessage.value.trim()
-  if (!messageText) return
+  const messageText = newMessage.value.trim();
+  if (!messageText) return;
 
-  if (messageText.startsWith('/')) {
+  if (messageText.startsWith("/")) {
     // It's a command
-    const command = messageText.substring(1)
-    chatStore.processCommand(command)
+    const command = messageText.substring(1);
+    messagesStore.processCommand(command);
   } else {
     // It's a regular message
-    chatStore.sendMessage(messageText, replyToMessageId.value)
+    messagesStore.sendMessage(messageText, replyToMessageId.value);
   }
 
-  newMessage.value = ''
-  chatStore.setReplyToMessageId(null) // Clear reply state after sending
+  newMessage.value = "";
+  messagesStore.setReplyToMessageId(null); // Clear reply state after sending
 }
 
 function handleReply(senderName: string, messageId: string) {
-  newMessage.value = `@${senderName} `
-  chatStore.setReplyToMessageId(messageId)
+  newMessage.value = `@${senderName} `;
+  messagesStore.setReplyToMessageId(messageId);
   nextTick(() => {
-    chatInputRef.value?.focus()
-  })
+    chatInputRef.value?.focus();
+  });
 }
 
 function cancelReply() {
-  chatStore.setReplyToMessageId(null)
-  newMessage.value = ''
+  messagesStore.setReplyToMessageId(null);
+  newMessage.value = "";
 }
 
 function renderMarkdown(text: string) {
-  const renderer = new marked.Renderer()
+  const renderer = new marked.Renderer();
 
   // Custom link renderer for images and new tabs
   renderer.link = (token) => {
-    const { href, title, text } = token
+    const { href, title, text } = token;
     // Guard against null or undefined href
     if (!href) {
-      return text
+      return text;
     }
 
-    const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg']
-    const isImage = imageExtensions.some((ext) => href.toLowerCase().endsWith(ext))
+    const imageExtensions = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg"];
+    const isImage = imageExtensions.some((ext) => href.toLowerCase().endsWith(ext));
 
     if (isImage) {
-      const imageId = `img-wrapper-${Math.random().toString(36).substring(2, 9)}`
+      const imageId = `img-wrapper-${Math.random().toString(36).substring(2, 9)}`;
       return `
         <div id="${imageId}" class="chat-image-wrapper collapsed">
           <img src="${href}" alt="${text}" title="${title || text}" class="chat-image" onclick="window.toggleImageExpansion('${imageId}')" />
           <button class="expand-image-btn" onclick="window.toggleImageExpansion('${imageId}')">Expand</button>
         </div>
-      `
+      `;
     }
 
-    const linkTitle = title || text
-    return `<a href="${href}" title="${linkTitle}" target="_blank" rel="noopener noreferrer">${text}</a>`
-  }
+    const linkTitle = title || text;
+    return `<a href="${href}" title="${linkTitle}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+  };
 
   // Custom code block renderer with a copy button
   renderer.code = (token) => {
-    const { text: code, lang } = token
-    const language = hljs.getLanguage(lang || '') ? lang : 'plaintext'
+    const { text: code, lang } = token;
+    const language = hljs.getLanguage(lang || "") ? lang : "plaintext";
 
     // Ensure code is a string before highlighting
-    const highlightedCode = hljs.highlight(code || '', { language: language || 'plaintext' }).value
+    const highlightedCode = hljs.highlight(code || "", { language: language || "plaintext" }).value;
 
     // Use a unique ID to connect the button to the code
-    const codeId = `code-${Math.random().toString(36).substring(2, 9)}`
-    const codeWrapperId = `code-wrapper-${Math.random().toString(36).substring(2, 9)}`
+    const codeId = `code-${Math.random().toString(36).substring(2, 9)}`;
+    const codeWrapperId = `code-wrapper-${Math.random().toString(36).substring(2, 9)}`;
 
     return `
       <div id="${codeWrapperId}" class="code-block-wrapper collapsed">
@@ -146,62 +154,74 @@ function renderMarkdown(text: string) {
         <pre><code id="${codeId}" class="language-${language}">${highlightedCode}</code></pre>
         <button class="expand-code-btn" onclick="window.toggleCodeExpansion('${codeWrapperId}')">Expand</button>
       </div>
-    `
-  }
+    `;
+  };
 
   const rawHtml = marked.parse(text, {
     gfm: true,
     breaks: true,
     renderer: renderer,
-  }) as string
-  const sanitizedHtml = DOMPurify.sanitize(rawHtml, { ADD_ATTR: ['target'] })
-  return sanitizedHtml
+  }) as string;
+  const sanitizedHtml = DOMPurify.sanitize(rawHtml, { ADD_ATTR: ["target"] });
+  return sanitizedHtml;
 }
 
 // Auto-resize textarea
-watch(newMessage, async (val) => {
+watch(newMessage, async () => {
   // Reset height to shrink if text is deleted
-  const el = document.querySelector('.chat-input-area textarea') as HTMLTextAreaElement
+  const el = document.querySelector(".chat-input-area textarea") as HTMLTextAreaElement;
   if (el) {
-    el.style.height = 'auto'
-    await nextTick()
-    el.style.height = `${el.scrollHeight}px`
+    el.style.height = "auto";
+    await nextTick();
+    el.style.height = `${el.scrollHeight}px`;
   }
-})
+});
 
 function handleRoomSwitch(roomId: string) {
-  chatStore.switchRoom(roomId)
+  chatStore.switchRoom(roomId);
 }
 
 // Initialize teammates and rooms on mount and refresh periodically
 onMounted(() => {
   // Initial fetch
-  chatStore.fetchTeammates()
-  chatStore.fetchRooms()
-
-  // Refresh teammates every 30 seconds
-  const interval = setInterval(() => {
-    chatStore.fetchTeammates()
-  }, 30000)
+  teammatesStore.fetchTeammates();
+  gameStore.fetchRooms();
 
   // Cleanup interval on unmount
   onUnmounted(() => {
-    clearInterval(interval)
-  })
-})
+    // No interval to clear, but keeping the hook for future use
+  });
+});
 </script>
 
 <template>
   <div class="chat-view" :class="theme === 'dark' ? 'hljs-dark-theme' : 'hljs-light-theme'">
     <div class="chat-header">
-      <h2>{{ rooms.find((r) => r.id === currentRoom)?.name || '#general' }}</h2>
+      <h2>{{ rooms?.find((r) => r.id === currentRoom)?.name || "#general" }}</h2>
       <span class="connection-status" :class="{ connected: isConnected }">
-        {{ isConnected ? 'Connected' : 'Disconnected' }}
+        {{ isConnected ? "Connected" : "Disconnected" }}
       </span>
     </div>
     <div class="chat-main">
       <div class="chat-rooms">
+        <div class="room-layout-toggle">
+          <button
+            @click="useHexagonalLayout = !useHexagonalLayout"
+            class="layout-toggle-btn"
+            :title="useHexagonalLayout ? 'Switch to list view' : 'Switch to hexagonal view'"
+          >
+            {{ useHexagonalLayout ? '📋' : '⬢' }}
+          </button>
+        </div>
+
+        <HexagonalRoomNavigation
+          v-if="useHexagonalLayout"
+          :rooms="rooms"
+          :current-room="currentRoom"
+          @switch-room="handleRoomSwitch"
+        />
         <RoomNavigation
+          v-else
           :rooms="rooms"
           :current-room="currentRoom"
           @switch-room="handleRoomSwitch"
@@ -397,6 +417,37 @@ onMounted(() => {
   width: 280px;
   flex-shrink: 0;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.room-layout-toggle {
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-background);
+  display: flex;
+  justify-content: center;
+}
+
+.layout-toggle-btn {
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: all 0.2s ease;
+  color: var(--color-text);
+}
+
+.layout-toggle-btn:hover {
+  background-color: var(--color-background-mute);
+  border-color: var(--color-border-hover);
+  transform: scale(1.05);
 }
 
 .chat-content {
@@ -717,6 +768,4 @@ onMounted(() => {
 .own-message :deep(.message-content code) {
   background-color: rgba(0, 0, 0, 0.2);
 }
-
-
 </style>

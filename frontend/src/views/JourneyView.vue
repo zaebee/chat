@@ -1,55 +1,37 @@
 <script setup lang="ts">
-import { useChatStore } from '@/stores/chat'
-import { storeToRefs } from 'pinia'
-import { computed } from 'vue'
-import HexaLevel from '@/components/HexaLevel.vue'
+import { useOrganellasStore, type Organella } from "@/stores/organellas";
+import { useUserStore } from "@/stores/user";
+import { storeToRefs } from "pinia";
+import { computed, onMounted, ref } from "vue";
+import HexaLevel from "@/components/HexaLevel.vue";
+import QuestPanel from "@/components/QuestPanel.vue";
 
-const chatStore = useChatStore()
-const { level, solvedChallenges, organellas } = storeToRefs(chatStore)
+const organellasStore = useOrganellasStore();
+const userStore = useUserStore();
+const { organellas } = storeToRefs(organellasStore);
+const { currentUser } = storeToRefs(userStore);
 
-// Define the mapping of levels to challenge IDs (example, needs to be expanded)
-// For now, we'll just map the first few levels to our existing challenges
-const levelChallengeMap: { [key: number]: string[] } = {
-  1: ['1', '2'], // Level 1: Add, Multiply
-  2: ['3'], // Level 2: Check if Even
-  3: ['4'], // Level 3: Draw a Square
-  // ... more levels and challenges
-}
+const isGenesisQuestVisible = ref(false);
+
+onMounted(() => {
+  // Fetch organellas for the current user
+  if (currentUser.value?.id) {
+    organellasStore.fetchOrganellas(currentUser.value.id);
+  }
+});
 
 const organellasByLevel = computed(() => {
-  const result: { [key: number]: any[] } = {}
-  for (const organella of organellas.value) {
+  const result: { [key: number]: Organella[] } = {};
+  // Add defensive check to ensure organellas.value is an array
+  const organellaArray = organellas.value || [];
+  for (const organella of organellaArray) {
     if (!result[organella.level]) {
-      result[organella.level] = []
+      result[organella.level] = [];
     }
-    result[organella.level].push(organella)
+    result[organella.level].push(organella);
   }
-  return result
-})
-
-function getHexClass(hexLevel: number) {
-  let classes = 'hex'
-  if (hexLevel === level.value) {
-    classes += ' current-level'
-  } else if (hexLevel < level.value) {
-    // Check if all challenges for this level are solved
-    const challengesForLevel = levelChallengeMap[hexLevel] || []
-    const allSolved = challengesForLevel.every((id) => solvedChallenges.value.includes(id))
-    if (allSolved) {
-      classes += ' solved-level'
-    } else {
-      classes += ' past-level'
-    }
-  } else {
-    classes += ' locked-level'
-  }
-  return classes
-}
-
-function isLevelSolved(hexLevel: number) {
-  const challengesForLevel = levelChallengeMap[hexLevel] || []
-  return challengesForLevel.every((id) => solvedChallenges.value.includes(id))
-}
+  return result;
+});
 </script>
 
 <template>
@@ -133,8 +115,15 @@ function isLevelSolved(hexLevel: number) {
           :y="275"
           :organellas="organellasByLevel[1] || []"
         />
+
+        <!-- Quest marker: GENESIS:x:y -->
+        <g class="pulse" transform="translate(500,220)" @click="isGenesisQuestVisible = !isGenesisQuestVisible">
+          <circle r="18" fill="var(--color-quest)" />
+          <text x="0" y="4" font-size="20" text-anchor="middle" fill="#fff">?</text>
+        </g>
       </svg>
     </div>
+    <QuestPanel v-if="isGenesisQuestVisible" @close="isGenesisQuestVisible = false" />
   </div>
 </template>
 

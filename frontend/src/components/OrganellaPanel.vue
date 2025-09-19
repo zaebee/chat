@@ -3,7 +3,7 @@
     <div class="panel-header">
       <h3>🐝 My Organellas</h3>
       <button @click="toggleExpanded" class="toggle-btn">
-        {{ isExpanded ? '−' : '+' }}
+        {{ isExpanded ? "−" : "+" }}
       </button>
     </div>
 
@@ -41,18 +41,23 @@
           <div class="organella-details">
             <div class="organella-appearance">
               <h5>Mystical Appearance</h5>
-              <p v-if="isSectionVisible(organella.id, 'appearance')">{{ organella.mystical_appearance }}</p>
-              <button v-else @click="startStudy(organella.id, 'appearance')" class="study-btn">Study</button>
+              <p v-if="isSectionVisible(organella.id, 'appearance')">
+                {{ organella.mystical_appearance }}
+              </p>
+              <button v-else @click="startStudy(organella.id, 'appearance')" class="study-btn">
+                Study
+              </button>
             </div>
 
-            <div class="organella-sacred-skills">
-              <h5>Sacred Skills</h5>
-              <ul v-if="isSectionVisible(organella.id, 'sacred_skills')">
-                <li v-for="(description, skill) in organella.sacred_skills" :key="skill">
-                  <strong>{{ skill }}:</strong> {{ description }}
-                </li>
-              </ul>
-              <button v-else @click="startStudy(organella.id, 'sacred_skills')" class="study-btn">Study</button>
+            <div class="organella-experience">
+              <h5>Experience</h5>
+              <div v-if="isSectionVisible(organella.id, 'experience')">
+                <p><strong>Experience Points:</strong> {{ organella.experience_points }}</p>
+                <p><strong>Level:</strong> {{ organella.level }}</p>
+              </div>
+              <button v-else @click="startStudy(organella.id, 'experience')" class="study-btn">
+                Study
+              </button>
             </div>
           </div>
 
@@ -121,26 +126,29 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed } from "vue";
 import {
-  useChatStore,
+  useOrganellasStore,
   type Organella,
-  type TaleChapter,
   type OrganellaType,
   type OrganellaStage,
-} from '@/stores/chat'
+} from "@/stores/organellas";
+import { useTalesStore } from "@/stores/tales";
+import { useUserStore } from "@/stores/user";
 
-const chatStore = useChatStore()
-const isExpanded = ref(true)
+const organellasStore = useOrganellasStore();
+const talesStore = useTalesStore();
+const userStore = useUserStore();
+const isExpanded = ref(true);
 
-const organellas = computed(() => chatStore.organellas)
-const tales = computed(() => chatStore.tales)
+const organellas = computed(() => organellasStore.organellas);
+const tales = computed(() => talesStore.tales);
 
 const studying_sections = ref(new Map<string, number>());
 
 const startStudy = (organellaId: string, section: string) => {
   const key = `${organellaId}-${section}`;
-  
+
   // Clear any existing timer for this section
   if (studying_sections.value.has(key)) {
     clearTimeout(studying_sections.value.get(key));
@@ -161,34 +169,37 @@ const isSectionVisible = (organellaId: string, section: string) => {
 };
 
 const toggleExpanded = () => {
-  isExpanded.value = !isExpanded.value
-}
+  isExpanded.value = !isExpanded.value;
+};
 
 const createNewOrganella = async () => {
-  if (chatStore.currentUser) {
-    await chatStore.createOrganella('worker', chatStore.currentUser.username)
+  if (userStore.currentUser) {
+    await organellasStore.createOrganella(userStore.currentUser.id, {
+      type: "worker",
+      name: `${userStore.currentUser.username}'s Worker`
+    });
   }
-}
+};
 
 const getOrganellaIcon = (type: OrganellaType, stage: OrganellaStage) => {
   const icons: Record<OrganellaType, Record<OrganellaStage, string>> = {
-    worker: { egg: '🥚', larva: '🐛', pupa: '🛡️', adult: '🐝' },
-    scout: { egg: '🥚', larva: '🐛', pupa: '🛡️', adult: '🔍' },
-    guard: { egg: '🥚', larva: '🐛', pupa: '🛡️', adult: '🛡️' },
-    queen: { egg: '🥚', larva: '🐛', pupa: '🛡️', adult: '👑' },
-  }
-  return icons[type]?.[stage] || '🐝'
-}
+    worker: { egg: "🥚", larva: "🐛", pupa: "🛡️", adult: "🐝" },
+    scout: { egg: "🥚", larva: "🐛", pupa: "🛡️", adult: "🔍" },
+    guard: { egg: "🥚", larva: "🐛", pupa: "🛡️", adult: "🛡️" },
+    queen: { egg: "🥚", larva: "🐛", pupa: "🛡️", adult: "👑" },
+    chronicler: { egg: "🥚", larva: "🐛", pupa: "🛡️", adult: "📜" },
+  };
+  return icons[type]?.[stage] || "🐝";
+};
 
 const getXpProgress = (organella: Organella) => {
-  const xpForNextLevel = organella.level * 100
-  const currentLevelXp = organella.experience_points % 100
-  return (currentLevelXp / 100) * 100
-}
+  const currentLevelXp = organella.experience_points % 100;
+  return (currentLevelXp / 100) * 100;
+};
 
 const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString()
-}
+  return new Date(dateString).toLocaleDateString();
+};
 </script>
 
 <style scoped>
@@ -536,25 +547,25 @@ const formatDate = (dateString: string) => {
 }
 
 /* Dark theme support */
-[data-theme='dark'] .organella-panel {
+[data-theme="dark"] .organella-panel {
   background: rgba(17, 24, 39, 0.95);
 }
 
-[data-theme='dark'] .organella-card {
+[data-theme="dark"] .organella-card {
   background: #1f2937;
   border-color: #374151;
 }
 
-[data-theme='dark'] .organella-info h4,
-[data-theme='dark'] .level {
+[data-theme="dark"] .organella-info h4,
+[data-theme="dark"] .level {
   color: #f3f4f6;
 }
 
-[data-theme='dark'] .tale-card {
+[data-theme="dark"] .tale-card {
   background: linear-gradient(135deg, #1f2937, #111827);
 }
 
-[data-theme='dark'] .tale-header h4 {
+[data-theme="dark"] .tale-header h4 {
   color: #f3f4f6;
 }
 </style>
