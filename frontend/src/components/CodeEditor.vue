@@ -1,49 +1,56 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
-import { EditorView } from '@codemirror/view'
-import { basicSetup } from 'codemirror'
-import { python } from '@codemirror/lang-python'
-import { oneDark } from '@codemirror/theme-one-dark'
-import { pythonRunner } from '@/services/pythonRunner'
-import { useChatStore } from '@/stores/chat'
-import { storeToRefs } from 'pinia'
-import type { Challenge } from '@/challenges'
+import { ref, onMounted, watch } from "vue";
+import { EditorView } from "@codemirror/view";
+import { basicSetup } from "codemirror";
+import { python } from "@codemirror/lang-python";
+import { oneDark } from "@codemirror/theme-one-dark";
+import { pythonRunner } from "@/services/pythonRunner";
+import { useChatStore } from "@/stores/chat";
+import { useMessagesStore } from "@/stores/messages";
+import { useSettingsStore } from "@/stores/settings";
+import { storeToRefs } from "pinia";
+import type { Challenge } from "@/challenges";
 
 const props = defineProps<{
-  challenge: Challenge
-}>()
+  challenge: Challenge;
+  isQuestMode?: boolean;
+}>();
 
-const chatStore = useChatStore()
-const { theme, language } = storeToRefs(chatStore)
+const chatStore = useChatStore();
+const messagesStore = useMessagesStore();
+const settingsStore = useSettingsStore();
+const { theme, language } = storeToRefs(settingsStore);
 
-const editorEl = ref<HTMLElement | null>(null)
-const output = ref('')
-const svgOutput = ref<string | null>(null)
-const isRunning = ref(false)
-const solutionResult = ref<'correct' | 'incorrect' | 'none'>('none')
+const editorEl = ref<HTMLElement | null>(null);
+const output = ref("");
+const svgOutput = ref<string | null>(null);
+const isRunning = ref(false);
+const solutionResult = ref<"correct" | "incorrect" | "none">("none");
 
-let view: EditorView | null = null
+let view: EditorView | null = null;
 
 // Set up I/O handlers for the Python runner
 pythonRunner.setIoHandlers(
   (text: string) => {
     // This will be called by Python's print()
-    chatStore.addPythonOutputMessage(text)
+    messagesStore.addPythonOutputMessage(text);
   },
   (prompt: string) => {
     // This will be called by Python's input()
     return new Promise((resolve) => {
-      chatStore.requestPythonInput(prompt, resolve)
-    })
-  }
-)
+      messagesStore.requestPythonInput(prompt, resolve);
+    });
+  },
+);
 
 // Function to create or reconfigure the editor
-function createEditor(themeExtension: any[]) {
+import type { Extension } from "@codemirror/state";
+
+function createEditor(themeExtension: Extension[]) {
   // Destroy existing view if it exists
   if (view) {
-    view.destroy()
-    view = null
+    view.destroy();
+    view = null;
   }
 
   if (editorEl.value) {
@@ -51,21 +58,21 @@ function createEditor(themeExtension: any[]) {
       doc: props.challenge.startingCode,
       extensions: [basicSetup, python(), ...themeExtension],
       parent: editorEl.value,
-    })
+    });
   }
 }
 
 // Create the editor when the component is mounted
 onMounted(() => {
-  const themeExtension = theme.value === 'dark' ? [oneDark] : []
-  createEditor(themeExtension)
-})
+  const themeExtension = theme.value === "dark" ? [oneDark] : [];
+  createEditor(themeExtension);
+});
 
 // Watch for theme changes and re-create the editor
 watch(theme, (newTheme) => {
-  const themeExtension = newTheme === 'dark' ? [oneDark] : []
-  createEditor(themeExtension)
-})
+  const themeExtension = newTheme === "dark" ? [oneDark] : [];
+  createEditor(themeExtension);
+});
 
 // Watch for challenge changes and update the editor content
 watch(
@@ -74,39 +81,48 @@ watch(
     if (newChallengeId !== oldChallengeId && view) {
       view.dispatch({
         changes: { from: 0, to: view.state.doc.length, insert: props.challenge.startingCode },
-      })
+      });
     }
-  }
-)
+  },
+);
 
 async function submitSolution() {
-  if (isRunning.value) return
+  if (isRunning.value) return;
 
-  isRunning.value = true
-  solutionResult.value = 'none'
-  output.value = 'Running tests...'
+  isRunning.value = true;
+  solutionResult.value = "none";
+  output.value = "Running...";
 
-  const userCode = view?.state.doc.toString() || ''
-  const currentLang = language.value || 'en'
-  const challengeContent = props.challenge.content[currentLang] || props.challenge.content.en
+  const userCode = view?.state.doc.toString() || "";
 
-  const result = await pythonRunner.runChallenge(
-    userCode,
-    challengeContent.testCases,
-    props.challenge.functionName,
-    challengeContent.successMessage,
-    props.challenge.visualOutput
-  )
+  if (props.isQuestMode) {
+    const result = await pythonRunner.runScript(userCode);
+    output.value = result.output;
+    // For quests, we don't have a simple correct/incorrect badge.
+    // The success is conveyed in the output itself.
+    solutionResult.value = "none";
+  } else {
+    const currentLang = language.value || "en";
+    const challengeContent = props.challenge.content[currentLang] || props.challenge.content.en;
 
-  output.value = result.output
-  svgOutput.value = result.svgOutput || null
-  solutionResult.value = result.success ? 'correct' : 'incorrect'
+    const result = await pythonRunner.runChallenge(
+      userCode,
+      challengeContent.testCases,
+      props.challenge.functionName,
+      challengeContent.successMessage,
+      props.challenge.visualOutput,
+    );
 
-  if (result.success) {
-    chatStore.recordChallengeSolved(props.challenge.id)
+    output.value = result.output;
+    svgOutput.value = result.svgOutput || null;
+    solutionResult.value = result.success ? "correct" : "incorrect";
+
+    if (result.success) {
+      chatStore.recordChallengeSolved(props.challenge.id);
+    }
   }
 
-  isRunning.value = false
+  isRunning.value = false;
 }
 </script>
 
@@ -116,7 +132,7 @@ async function submitSolution() {
       <div class="editor-header">
         <span>Python Code</span>
         <button @click="submitSolution" :disabled="isRunning">
-          {{ isRunning ? 'Submitting...' : 'Submit Solution' }}
+          {{ isRunning ? "Running..." : (isQuestMode ? "Run Ritual" : "Submit Solution") }}
         </button>
       </div>
       <div ref="editorEl" class="editor"></div>
@@ -125,7 +141,7 @@ async function submitSolution() {
       <div class="output-header">
         <span>Output</span>
         <span v-if="solutionResult !== 'none'" :class="`result-badge ${solutionResult}`">
-          {{ solutionResult === 'correct' ? '✔ Correct' : '❌ Incorrect' }}
+          {{ solutionResult === "correct" ? "✔ Correct" : "❌ Incorrect" }}
         </span>
       </div>
       <div v-if="svgOutput" class="visual-output" v-html="svgOutput"></div>
@@ -142,7 +158,8 @@ async function submitSolution() {
   gap: 1rem;
 }
 
-.editor-panel, .output-panel {
+.editor-panel,
+.output-panel {
   display: flex;
   flex-direction: column;
   border: 1px solid var(--color-border);
@@ -158,7 +175,8 @@ async function submitSolution() {
   flex: 2; /* Takes up less space */
 }
 
-.editor-header, .output-header {
+.editor-header,
+.output-header {
   padding: 0.5rem 1rem;
   background-color: var(--color-background-soft);
   border-bottom: 1px solid var(--color-border);

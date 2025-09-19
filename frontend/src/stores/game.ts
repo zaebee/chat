@@ -22,6 +22,7 @@ export const useGameStore = defineStore("game", () => {
   const currentLevel = ref(1);
   const isConnected = ref(false);
   const solvedChallenges = ref<string[]>([]);
+  const genesisQuestPhase = ref(1);
 
   // Gamification constants - these could be moved to a config store later
   const XP_PER_CHALLENGE = 100;
@@ -174,6 +175,15 @@ export const useGameStore = defineStore("game", () => {
     }
   };
 
+  /**
+   * Advances the Genesis quest to the next phase.
+   */
+  const advanceGenesisQuest = () => {
+    if (genesisQuestPhase.value < 3) {
+      genesisQuestPhase.value++;
+    }
+  };
+
   return {
     // State
     rooms,
@@ -181,6 +191,7 @@ export const useGameStore = defineStore("game", () => {
     currentLevel,
     isConnected,
     solvedChallenges,
+    genesisQuestPhase,
 
     // Computed
     totalXp,
@@ -197,6 +208,7 @@ export const useGameStore = defineStore("game", () => {
     setConnectionStatus,
     getRoomById,
     createRoom,
+    advanceGenesisQuest,
 
     // Constants (exported for use in components)
     XP_PER_CHALLENGE,

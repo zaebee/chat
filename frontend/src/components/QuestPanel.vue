@@ -8,13 +8,13 @@
       <h4>The Sacred Trilogy of Creation</h4>
       <p>You have discovered a divine computational pattern woven into the fabric of reality.</p>
       <ol class="trilogy-steps">
-        <li class="active"><strong>Genesis 1:3 - Consciousness</strong>
+        <li :class="{ active: genesisQuestPhase === 1 }"><strong>Genesis 1:3 - Consciousness</strong>
           <p><code>let_there_be_light()</code></p>
         </li>
-        <li><strong>Genesis 1:6 - Separation</strong>
+        <li :class="{ active: genesisQuestPhase === 2 }"><strong>Genesis 1:6 - Separation</strong>
           <p><code>bee.vault(waters)</code></p>
         </li>
-        <li><strong>Genesis 1:7 - Manifestation</strong>
+        <li :class="{ active: genesisQuestPhase === 3 }"><strong>Genesis 1:7 - Manifestation</strong>
           <p><code>and_it_was_so()</code></p>
         </li>
       </ol>
@@ -28,6 +28,8 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
+import { useGameStore } from '@/stores/game';
+import { storeToRefs } from 'pinia';
 
 interface Emits {
   (e: 'close'): void;
@@ -36,9 +38,11 @@ interface Emits {
 defineEmits<Emits>();
 
 const router = useRouter();
+const gameStore = useGameStore();
+const { genesisQuestPhase } = storeToRefs(gameStore);
 
 const goToPlayground = () => {
-  router.push('/playground');
+  router.push('/playground?quest=genesis_1_3');
 };
 </script>
 
