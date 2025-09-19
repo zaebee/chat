@@ -14,6 +14,7 @@ import InteractiveCodeBlock from "@/components/InteractiveCodeBlock.vue";
 import DigitalBee from "@/components/DigitalBee.vue";
 import HeroMessage from "@/components/HeroMessage.vue";
 import BeeOrganella from "@/components/BeeOrganella.vue";
+import ChroniclerOrganella from "@/components/ChroniclerOrganella.vue";
 import TeammatePresence from "@/components/TeammatePresence.vue";
 import RoomNavigation from "@/components/RoomNavigation.vue";
 import HexagonalRoomNavigation from "@/components/HexagonalRoomNavigation.vue";
@@ -255,8 +256,12 @@ onMounted(() => {
                 </svg>
                 {{ message.sender_name }}
               </div>
+              <ChroniclerOrganella
+                v-if="message.bee_organella_type === 'chronicler'"
+                :is-recording="message.divine_action_type === 'pattern_recording'"
+              />
               <BeeOrganella
-                v-if="message.bee_organella_type"
+                v-else-if="message.bee_organella_type"
                 :type="message.bee_organella_type"
                 :size="1.5"
               />
