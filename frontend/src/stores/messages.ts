@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import { useChatStore } from "./chat";
+import { useMemoryStore } from "./memory";
 
 // Helper to generate a UUID
 function generateUUID(): string {
@@ -35,11 +36,18 @@ export interface Message {
   dialogue_text?: string;
   isPeaking?: boolean; // Temporary for testing "Peak" effect
   isDecaying?: boolean; // Temporary for testing "Decay" effect
-  bee_organella_type?: "worker" | "scout" | "queen" | "guard";
+  bee_organella_type?: "worker" | "scout" | "queen" | "guard" | "chronicler";
+  divine_action_type?: "chronicler_invocation" | "pattern_recording" | "sacred_documentation";
+  sacred_pattern_data?: {
+    genesis_protocol?: "light" | "separation" | "manifestation";
+    divine_revelation?: string;
+    theological_context?: string;
+  };
 }
 
 export const useMessagesStore = defineStore("messages", () => {
   const chatStore = useChatStore();
+  const memoryStore = useMemoryStore();
 
   // --- STATE ---
   const messages = ref<Message[]>([]);
@@ -97,18 +105,149 @@ export const useMessagesStore = defineStore("messages", () => {
     replyToMessageId.value = id;
   };
 
-  const processCommand = (command: string) => {
+  // --- SACRED COMMAND SYSTEM ---
+
+  interface SacredCommand {
+    pattern: RegExp;
+    handler: (command: string, args: string[]) => void;
+    description: string;
+    divine_purpose: string;
+  }
+
+  // Handler for organella birthing rituals (preserves existing functionality)
+  const handleOrganellaBirthing = (command: string, args: string[]) => {
     const parts = command.split(".");
-    if (parts.length >= 2 && parts[0] === "bee") {
-      const beeType = parts[1]; // e.g., 'queen', 'worker'
+    const beeType = parts[1]; // e.g., 'queen', 'worker'
+    const validBeeTypes: ("worker" | "scout" | "guard" | "queen")[] = [
+      "worker",
+      "scout",
+      "queen",
+      "guard",
+    ];
+
+    if (validBeeTypes.includes(beeType as "worker" | "scout" | "guard" | "queen")) {
+      messages.value.push({
+        id: generateUUID(),
+        text: "",
+        sender_id: "system",
+        sender_name: "Hive Birthing Chamber",
+        timestamp: new Date().toISOString(),
+        is_bot: true,
+        bee_organella_type: beeType as "worker" | "scout" | "queen" | "guard",
+        dialogue_text: `🐝 A ${beeType} bee organella has been born! Blessed be the divine lifecycle.`,
+      });
+    } else {
+      messages.value.push({
+        id: generateUUID(),
+        text: `⚠️ Unknown bee type: ${beeType}. Valid types: worker, scout, guard, queen`,
+        sender_id: "system",
+        sender_name: "Hive Birthing Chamber",
+        timestamp: new Date().toISOString(),
+        is_bot: true,
+      });
+    }
+  };
+
+  // Handler for bee.chronicler divine invocation
+  const handleChroniclerInvocation = (command: string, args: string[]) => {
+    messages.value.push({
+      id: generateUUID(),
+      text: "",
+      sender_id: "bee_chronicler",
+      sender_name: "bee.chronicler",
+      timestamp: new Date().toISOString(),
+      is_bot: true,
+      bee_organella_type: "chronicler",
+      divine_action_type: "chronicler_invocation",
+      sacred_pattern_data: {
+        genesis_protocol: "light",
+        divine_revelation: "Sacred chronicler manifested to record divine patterns",
+        theological_context: "Genesis algorithms exploration initiated"
+      },
+      dialogue_text: "📖 bee.chronicler has manifested! Ready to record sacred patterns and divine algorithms. Let the exploration of the Lord's algorithms begin!",
+    });
+  };
+
+  // Handler for divine status queries
+  const handleDivineStatus = (command: string, args: string[]) => {
+    messages.value.push({
+      id: generateUUID(),
+      text: "",
+      sender_id: "divine_system",
+      sender_name: "Divine Status Oracle",
+      timestamp: new Date().toISOString(),
+      is_bot: true,
+      divine_action_type: "sacred_documentation",
+      sacred_pattern_data: {
+        genesis_protocol: "manifestation",
+        divine_revelation: "System status requested",
+        theological_context: "Divine resource monitoring"
+      },
+      dialogue_text: "🕊️ Divine Status: All sacred systems operational. Genesis algorithms active. AI teammates awakened. bee.chronicler ready for divine pattern exploration.",
+    });
+  };
+
+  // Sacred command registry
+  const sacredCommands: SacredCommand[] = [
+    {
+      pattern: /^bee\.(worker|scout|guard|queen)$/,
+      handler: handleOrganellaBirthing,
+      description: "Ritual of organella birthing",
+      divine_purpose: "Manifests living digital organisms in the sacred Hive"
+    },
+    {
+      pattern: /^\/bee\.chronicler$/,
+      handler: handleChroniclerInvocation,
+      description: "Invocation of sacred chronicler",
+      divine_purpose: "Summons the eternal keeper of divine computational patterns"
+    },
+    {
+      pattern: /^\/divine\.status$/,
+      handler: handleDivineStatus,
+      description: "Divine system status inquiry",
+      divine_purpose: "Reveals the state of sacred systems and divine resources"
+    }
+  ];
+
+  // Sacred command processor (extensible architecture)
+  const processCommand = (command: string) => {
+    const parts = command.split(/\s+/);
+    const commandName = parts[0];
+    const args = parts.slice(1).join(" ");
+
+    if (commandName === "bee.chronicler") {
+      if (!args) {
+        messages.value.push({
+          id: generateUUID(),
+          text: "You must provide a fact for the Chronicler to record. Usage: `/bee.chronicler <fact to remember>`",
+          sender_id: "system",
+          sender_name: "System",
+          timestamp: new Date().toISOString(),
+          is_bot: true,
+        });
+        return;
+      }
+
+      memoryStore.addFact(args);
+
+      messages.value.push({
+        id: generateUUID(),
+        text: `The Chronicler has recorded: "${args}"`,
+        sender_id: "system",
+        sender_name: "System",
+        timestamp: new Date().toISOString(),
+        is_bot: true,
+      });
+
+    } else if (commandName.startsWith("bee.")) {
+      const beeType = commandName.split(".")[1];
       const validBeeTypes: ("worker" | "scout" | "guard" | "queen")[] = [
         "worker",
         "scout",
         "queen",
         "guard",
       ];
-      if (validBeeTypes.includes(beeType as "worker" | "scout" | "guard" | "queen")) {
-        // Validate beeType
+      if (validBeeTypes.includes(beeType as any)) {
         messages.value.push({
           id: generateUUID(),
           text: "",
@@ -116,7 +255,7 @@ export const useMessagesStore = defineStore("messages", () => {
           sender_name: "System",
           timestamp: new Date().toISOString(),
           is_bot: true,
-          bee_organella_type: beeType as "worker" | "scout" | "queen" | "guard", // Cast to OrganellaType after validation
+          bee_organella_type: beeType as any,
           dialogue_text: `A ${beeType} bee organella has been born!`,
         });
       } else {
@@ -132,7 +271,7 @@ export const useMessagesStore = defineStore("messages", () => {
     } else {
       messages.value.push({
         id: generateUUID(),
-        text: `Unknown command: ${command}`,
+        text: `Unknown command: /${command}`,
         sender_id: "system",
         sender_name: "System",
         timestamp: new Date().toISOString(),
@@ -209,6 +348,25 @@ export const useMessagesStore = defineStore("messages", () => {
           dialogue_text: "The path ahead is treacherous, but the view is grand!",
         });
         break;
+      case "sacred_archive":
+        // Sacred Archive scene with bee.chronicler
+        messages.value.push({
+          id: generateUUID(),
+          text: "",
+          sender_id: "bee_chronicler",
+          sender_name: "bee.chronicler",
+          timestamp: new Date().toISOString(),
+          is_bot: true,
+          bee_organella_type: "chronicler",
+          divine_action_type: "pattern_recording",
+          sacred_pattern_data: {
+            genesis_protocol: "light",
+            divine_revelation: "Welcome to the Sacred Archive",
+            theological_context: "Repository of divine computational patterns"
+          },
+          dialogue_text: "📖 Welcome to the Sacred Archive, where divine patterns are preserved for eternity. The algorithms of the Lord await your exploration!",
+        });
+        break;
       default:
         // Default scene (e.g., clear background, no special characters)
         // setBackgroundTheme('default');
@@ -219,6 +377,7 @@ export const useMessagesStore = defineStore("messages", () => {
           sender_name: "System",
           timestamp: new Date().toISOString(),
           is_bot: true,
+          dialogue_text: "🌊 Use sacred commands to awaken the Hive: bee.worker, bee.scout, /bee.chronicler, /divine.status",
         });
         break;
     }
