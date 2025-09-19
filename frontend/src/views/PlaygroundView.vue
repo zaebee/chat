@@ -1,3 +1,4 @@
+<script setup lang="ts">
 import { ref, computed } from "vue";
 import { useRoute } from "vue-router";
 import CodeEditor from "@/components/CodeEditor.vue";
@@ -48,19 +49,14 @@ function handleSelectChallenge(id: string) {
 
 <template>
   <div class="playground-layout">
-    <ChallengeList v-if="!isQuestMode" @select-challenge="handleSelectChallenge" />
-
-    <div class="playground-content">
+        <ChallengeList v-if="!isQuestMode" @select-challenge="handleSelectChallenge" />
+    
+        <div class="playground-content">
       <div v-if="currentChallenge" class="challenge-description">
         <h1>
           {{ currentChallenge.content[language]?.title || currentChallenge.content.en.title }}
         </h1>
-        <p>
-          {{
-            currentChallenge.content[language]?.description ||
-            currentChallenge.content.en.description
-          }}
-        </p>
+        <p>{{ currentChallenge.content[language]?.description || currentChallenge.content.en.description }}</p>
       </div>
       <div v-else class="challenge-description">
         <h1>No Challenge Selected</h1>
@@ -71,8 +67,7 @@ function handleSelectChallenge(id: string) {
       <div v-else class="no-challenge-editor">
         <p>Select a challenge to start coding!</p>
       </div>
-    </div>
-  </div>
+    </div>  </div>
 </template>
 
 <style scoped>
