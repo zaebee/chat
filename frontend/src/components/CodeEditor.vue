@@ -10,6 +10,7 @@ import { useMessagesStore } from "@/stores/messages";
 import { useSettingsStore } from "@/stores/settings";
 import { storeToRefs } from "pinia";
 import type { Challenge } from "@/challenges";
+import XpFlowAnimation from "./XpFlowAnimation.vue";
 
 const props = defineProps<{
   challenge: Challenge;
@@ -26,6 +27,7 @@ const output = ref("");
 const svgOutput = ref<string | null>(null);
 const isRunning = ref(false);
 const solutionResult = ref<"correct" | "incorrect" | "none">("none");
+const showXpAnimation = ref(false);
 
 let view: EditorView | null = null;
 
@@ -86,6 +88,15 @@ watch(
   },
 );
 
+// Watch to reset the animation trigger
+watch(showXpAnimation, (newVal) => {
+  if (newVal) {
+    setTimeout(() => {
+      showXpAnimation.value = false;
+    }, 100); // Reset after a short delay
+  }
+});
+
 async function submitSolution() {
   if (isRunning.value) return;
 
@@ -119,6 +130,7 @@ async function submitSolution() {
 
     if (result.success) {
       chatStore.recordChallengeSolved(props.challenge.id);
+      showXpAnimation.value = true; // Trigger animation
     }
   }
 
@@ -128,11 +140,12 @@ async function submitSolution() {
 
 <template>
   <div class="code-editor-container">
+    <XpFlowAnimation :start="showXpAnimation" />
     <div class="editor-panel">
       <div class="editor-header">
         <span>Python Code</span>
         <button @click="submitSolution" :disabled="isRunning">
-          {{ isRunning ? "Running..." : (isQuestMode ? "Run Ritual" : "Submit Solution") }}
+          {{ isRunning ? "Running..." : isQuestMode ? "Run Ritual" : "Submit Solution" }}
         </button>
       </div>
       <div ref="editorEl" class="editor"></div>
