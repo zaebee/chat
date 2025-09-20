@@ -17,6 +17,11 @@ export default defineConfig({
   },
   server: {
     host: true, // This is equivalent to --host 0.0.0.0
-    allowedHosts: ['chat.zae.life'],
+    allowedHosts: [
+      'chat.zae.life',
+      '.gitpod.dev',
+      '.gitpod.io',
+      'localhost'
+    ],
   },
 })

@@ -10,10 +10,12 @@ from typing import List, Dict, Optional
 import json
 import os
 import uuid
+import argparse
 from datetime import datetime
 from contextlib import asynccontextmanager
 from database import init_db, get_db_connection
 import websockets.exceptions
+from host import HiveHost
 
 
 @asynccontextmanager
@@ -226,6 +228,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--port", type=int, default=8000, help="Port to run the web server on")
     args = parser.parse_args()
+
+    # Create HiveHost instance
+    host = HiveHost()
 
     async def startup():
         await host.lifespan_startup()
