@@ -20,6 +20,7 @@
           class="organella-card"
           :class="`type-${organella.type} stage-${organella.stage}`"
         >
+          <OrganellaEvolutionCeremony :start="evolvingOrganellaId === organella.id" />
           <div class="organella-header">
             <div class="organella-icon">
               {{ getOrganellaIcon(organella.type, organella.stage) }}
@@ -126,7 +127,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import {
   useOrganellasStore,
   type Organella,
@@ -135,6 +136,7 @@ import {
 } from "@/stores/organellas";
 import { useTalesStore } from "@/stores/tales";
 import { useUserStore } from "@/stores/user";
+import OrganellaEvolutionCeremony from "./OrganellaEvolutionCeremony.vue";
 
 const organellasStore = useOrganellasStore();
 const talesStore = useTalesStore();
@@ -143,6 +145,25 @@ const isExpanded = ref(true);
 
 const organellas = computed(() => organellasStore.organellas);
 const tales = computed(() => talesStore.tales);
+
+const evolvingOrganellaId = ref<string | null>(null);
+
+watch(organellas, (newOrganellas, oldOrganellas) => {
+  if (!oldOrganellas || oldOrganellas.length === 0) return;
+
+  for (const newOrganella of newOrganellas) {
+    const oldOrganella = oldOrganellas.find(o => o.id === newOrganella.id);
+    if (oldOrganella && newOrganella.level > oldOrganella.level) {
+      evolvingOrganellaId.value = newOrganella.id;
+      // Reset after the animation duration to allow re-triggering
+      setTimeout(() => {
+        if (evolvingOrganellaId.value === newOrganella.id) {
+          evolvingOrganellaId.value = null;
+        }
+      }, 2000);
+    }
+  }
+}, { deep: true });
 
 const studying_sections = ref(new Map<string, number>());
 
@@ -176,7 +197,7 @@ const createNewOrganella = async () => {
   if (userStore.currentUser) {
     await organellasStore.createOrganella(userStore.currentUser.id, {
       type: "worker",
-      name: `${userStore.currentUser.username}'s Worker`
+      name: `${userStore.currentUser.username}'s Worker`,
     });
   }
 };
@@ -301,6 +322,7 @@ const formatDate = (dateString: string) => {
 }
 
 .organella-card {
+  position: relative; /* Container for the ceremony overlay */
   background: white;
   border-radius: 12px;
   padding: 1rem;
