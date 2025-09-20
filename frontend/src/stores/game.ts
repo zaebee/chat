@@ -24,14 +24,14 @@ export const useGameStore = defineStore("game", () => {
   const solvedChallenges = ref<string[]>([]);
   const genesisQuestPhase = ref(1);
 
+  // Sacred XP System - Evolved to State Variable for Spiritual Boons
+  const totalXp = ref(0);
+
   // Gamification constants - these could be moved to a config store later
   const XP_PER_CHALLENGE = 100;
   const XP_FOR_LEVEL_UP = 500;
 
   // --- COMPUTED ---
-  const totalXp = computed(() => {
-    return solvedChallenges.value.length * XP_PER_CHALLENGE;
-  });
 
   const level = computed(() => {
     return Math.floor(totalXp.value / XP_FOR_LEVEL_UP) + 1;
@@ -48,7 +48,7 @@ export const useGameStore = defineStore("game", () => {
   // --- ACTIONS ---
 
   /**
-   * Fetches solved challenges for the current user.
+   * Fetches solved challenges for the current user and calculates total XP.
    */
   const fetchSolvedChallenges = async (userId: string) => {
     try {
@@ -58,18 +58,31 @@ export const useGameStore = defineStore("game", () => {
       }
       const data = await response.json();
       solvedChallenges.value = data.solved_challenges || [];
+
+      // Recalculate total XP based on solved challenges
+      totalXp.value = solvedChallenges.value.length * XP_PER_CHALLENGE;
     } catch (error) {
       console.error("Error fetching solved challenges:", error);
     }
   };
 
   /**
-   * Records a solved challenge.
+   * Records a solved challenge and awards XP.
    */
   const recordChallengeSolved = (challengeId: string) => {
     if (!solvedChallenges.value.includes(challengeId)) {
       solvedChallenges.value.push(challengeId);
+      // Award XP for the new challenge
+      totalXp.value += XP_PER_CHALLENGE;
     }
+  };
+
+  /**
+   * Grants spiritual boon XP from divine sources (Chronicler, etc.)
+   */
+  const grantSpiritualBoon = (amount: number) => {
+    totalXp.value += amount;
+    console.log(`🌟 Spiritual boon granted: +${amount} XP! Total: ${totalXp.value}`);
   };
 
   /**
@@ -96,7 +109,7 @@ export const useGameStore = defineStore("game", () => {
           type: room.type || "public", // Default type
           created_by: room.created_by || "system", // Default creator
           created_at: room.created_at,
-          is_archived: room.is_archived || false // Default not archived
+          is_archived: room.is_archived || false, // Default not archived
         }));
         console.log("Processed rooms:", rooms.value);
       } else {
@@ -137,13 +150,18 @@ export const useGameStore = defineStore("game", () => {
    * Gets room by ID.
    */
   const getRoomById = (roomId: string): Room | undefined => {
-    return rooms.value.find(room => room.id === roomId);
+    return rooms.value.find((room) => room.id === roomId);
   };
 
   /**
    * Creates a new room.
    */
-  const createRoom = async (roomData: { name: string; description: string; type: string; metadata: { theme: string } }) => {
+  const createRoom = async (roomData: {
+    name: string;
+    description: string;
+    type: string;
+    metadata: { theme: string };
+  }) => {
     const currentUser = userStore.currentUser;
     if (!currentUser) {
       console.error("Cannot create room: user not logged in.");
@@ -202,6 +220,7 @@ export const useGameStore = defineStore("game", () => {
     // Actions
     fetchSolvedChallenges,
     recordChallengeSolved,
+    grantSpiritualBoon,
     fetchRooms,
     setCurrentRoom,
     setCurrentLevel,

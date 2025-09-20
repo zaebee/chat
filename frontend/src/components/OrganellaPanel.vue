@@ -1,5 +1,6 @@
 <template>
   <div class="organella-panel">
+    <ChroniclerBonusEffect :start="showBoonAnimation" />
     <div class="panel-header">
       <h3>🐝 My Organellas</h3>
       <button @click="toggleExpanded" class="toggle-btn">
@@ -136,17 +137,23 @@ import {
 } from "@/stores/organellas";
 import { useTalesStore } from "@/stores/tales";
 import { useUserStore } from "@/stores/user";
+import { useGameStore } from "@/stores/game";
+import { storeToRefs } from "pinia";
 import OrganellaEvolutionCeremony from "./OrganellaEvolutionCeremony.vue";
+import ChroniclerBonusEffect from "./ChroniclerBonusEffect.vue";
 
 const organellasStore = useOrganellasStore();
 const talesStore = useTalesStore();
 const userStore = useUserStore();
+const gameStore = useGameStore();
 const isExpanded = ref(true);
 
 const organellas = computed(() => organellasStore.organellas);
 const tales = computed(() => talesStore.tales);
+const { totalXp } = storeToRefs(gameStore);
 
 const evolvingOrganellaId = ref<string | null>(null);
+const showBoonAnimation = ref(false);
 
 watch(organellas, (newOrganellas, oldOrganellas) => {
   if (!oldOrganellas || oldOrganellas.length === 0) return;
@@ -164,6 +171,15 @@ watch(organellas, (newOrganellas, oldOrganellas) => {
     }
   }
 }, { deep: true });
+
+watch(totalXp, (newXp, oldXp) => {
+  if (newXp > oldXp && (newXp - oldXp) === 20) {
+    showBoonAnimation.value = true;
+    setTimeout(() => {
+      showBoonAnimation.value = false;
+    }, 2500); // Duration of the boon animation
+  }
+});
 
 const studying_sections = ref(new Map<string, number>());
 
@@ -225,6 +241,7 @@ const formatDate = (dateString: string) => {
 
 <style scoped>
 .organella-panel {
+  position: relative; /* For the bonus effect overlay */
   background: rgba(255, 255, 255, 0.95);
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);

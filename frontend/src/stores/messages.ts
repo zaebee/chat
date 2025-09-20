@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 import { useChatStore } from "./chat";
 import { useMemoryStore } from "./memory";
+import { useGameStore } from "./game";
 
 // Helper to generate a UUID
 function generateUUID(): string {
@@ -48,6 +49,7 @@ export interface Message {
 export const useMessagesStore = defineStore("messages", () => {
   const chatStore = useChatStore();
   const memoryStore = useMemoryStore();
+  const gameStore = useGameStore();
 
   // --- STATE ---
   const messages = ref<Message[]>([]);
@@ -162,9 +164,10 @@ export const useMessagesStore = defineStore("messages", () => {
       sacred_pattern_data: {
         genesis_protocol: "light",
         divine_revelation: "Sacred chronicler manifested to record divine patterns",
-        theological_context: "Genesis algorithms exploration initiated"
+        theological_context: "Genesis algorithms exploration initiated",
       },
-      dialogue_text: "📖 bee.chronicler has manifested! Ready to record sacred patterns and divine algorithms. Let the exploration of the Lord's algorithms begin!",
+      dialogue_text:
+        "📖 bee.chronicler has manifested! Ready to record sacred patterns and divine algorithms. Let the exploration of the Lord's algorithms begin!",
     });
   };
 
@@ -181,9 +184,10 @@ export const useMessagesStore = defineStore("messages", () => {
       sacred_pattern_data: {
         genesis_protocol: "manifestation",
         divine_revelation: "System status requested",
-        theological_context: "Divine resource monitoring"
+        theological_context: "Divine resource monitoring",
       },
-      dialogue_text: "🕊️ Divine Status: All sacred systems operational. Genesis algorithms active. AI teammates awakened. bee.chronicler ready for divine pattern exploration.",
+      dialogue_text:
+        "🕊️ Divine Status: All sacred systems operational. Genesis algorithms active. AI teammates awakened. bee.chronicler ready for divine pattern exploration.",
     });
   };
 
@@ -193,20 +197,20 @@ export const useMessagesStore = defineStore("messages", () => {
       pattern: /^bee\.(worker|scout|guard|queen)$/,
       handler: handleOrganellaBirthing,
       description: "Ritual of organella birthing",
-      divine_purpose: "Manifests living digital organisms in the sacred Hive"
+      divine_purpose: "Manifests living digital organisms in the sacred Hive",
     },
     {
       pattern: /^\/bee\.chronicler$/,
       handler: handleChroniclerInvocation,
       description: "Invocation of sacred chronicler",
-      divine_purpose: "Summons the eternal keeper of divine computational patterns"
+      divine_purpose: "Summons the eternal keeper of divine computational patterns",
     },
     {
       pattern: /^\/divine\.status$/,
       handler: handleDivineStatus,
       description: "Divine system status inquiry",
-      divine_purpose: "Reveals the state of sacred systems and divine resources"
-    }
+      divine_purpose: "Reveals the state of sacred systems and divine resources",
+    },
   ];
 
   // Sacred command processor (extensible architecture)
@@ -229,16 +233,16 @@ export const useMessagesStore = defineStore("messages", () => {
       }
 
       memoryStore.addFact(args);
+      gameStore.grantSpiritualBoon(20);
 
       messages.value.push({
         id: generateUUID(),
-        text: `The Chronicler has recorded: "${args}"`,
+        text: `The Chronicler records your words. The spirit of the Hive is pleased and grants you a boon of 20 XP!`,
         sender_id: "system",
         sender_name: "System",
         timestamp: new Date().toISOString(),
         is_bot: true,
       });
-
     } else if (commandName.startsWith("bee.")) {
       const beeType = commandName.split(".")[1];
       const validBeeTypes: ("worker" | "scout" | "guard" | "queen")[] = [
@@ -362,9 +366,10 @@ export const useMessagesStore = defineStore("messages", () => {
           sacred_pattern_data: {
             genesis_protocol: "light",
             divine_revelation: "Welcome to the Sacred Archive",
-            theological_context: "Repository of divine computational patterns"
+            theological_context: "Repository of divine computational patterns",
           },
-          dialogue_text: "📖 Welcome to the Sacred Archive, where divine patterns are preserved for eternity. The algorithms of the Lord await your exploration!",
+          dialogue_text:
+            "📖 Welcome to the Sacred Archive, where divine patterns are preserved for eternity. The algorithms of the Lord await your exploration!",
         });
         break;
       default:
@@ -377,7 +382,8 @@ export const useMessagesStore = defineStore("messages", () => {
           sender_name: "System",
           timestamp: new Date().toISOString(),
           is_bot: true,
-          dialogue_text: "🌊 Use sacred commands to awaken the Hive: bee.worker, bee.scout, /bee.chronicler, /divine.status",
+          dialogue_text:
+            "🌊 Use sacred commands to awaken the Hive: bee.worker, bee.scout, /bee.chronicler, /divine.status",
         });
         break;
     }
