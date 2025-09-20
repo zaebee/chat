@@ -1,15 +1,25 @@
-# Vision: The Living Hive
+# 00_VISION.md: The Hive Vision
 
-## The Next Era: Sovereign Software
+## The Next Era: Sovereign Software - The "Living Application"
 
-Our project is guided by a vision that transcends traditional software development. We are not merely building an application; we are cultivating a **"Living Application"**—a sovereign digital entity that is self-contained, self-deploying, and self-sustaining.
+We envision a future where software is not merely a tool, but an autonomous, self-contained entity. We call this the **"Living Application"**.
 
-This aligns with the **"Hive"** architectural philosophy: a system that grows and evolves like a biological organism, composed of autonomous yet collaborative agents.
+A Living Application is a single, executable artifact that embodies the following characteristics:
 
-The core principles of this vision are:
+*   **Self-Contained:** It bundles its own code, dependencies, and deployment logic.
+*   **Environment-Aware:** It can detect and adapt to the environment it runs in.
+*   **Self-Deploying:** It can deploy itself as a system service, container, or function.
+*   **Self-Updating:** It can securely update itself from decentralized networks.
+*   **Sovereign:** It operates without reliance on centralized authorities.
 
-*   **Sovereignty:** The application does not depend on a central authority for its existence or distribution. It is a self-sufficient entity.
-*   **Reproduction, Not Just Distribution:** We shift our thinking from simply "distributing an application" to enabling the application to "reproduce" itself, creating new instances and even new, specialized forms of itself.
-*   **Human-AI Symbiosis:** The system is a habitat where humans and AI agents are first-class citizens, working together as teammates in a shared ecosystem.
+## The Hive Philosophy
 
-This vision informs every architectural decision we make, from the choice of p2p protocols to the design of our APIs. We are not just writing code; we are breathing life into a new form of digital organism.
+Our project, Hive Chat, is a practical manifestation of this vision. We believe in:
+
+*   **Code that Grows as a Hive:** Software that is organic, adaptive, and resilient.
+*   **Human-AI Symbiosis:** Building systems that are legible, introspectable, and extensible for both human and AI teammates.
+*   **Reproduction, not Distribution:** The application should be able to reproduce itself, creating new instances or specialized agents, rather than simply being distributed.
+
+## The Hive Chat as a Prototype
+
+Hive Chat will evolve into a **"Single-Node Hive"** – a host capable of managing and communicating with multiple agents. This will serve as a foundational step towards a truly distributed and decentralized ecosystem.

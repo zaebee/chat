@@ -223,9 +223,18 @@ async def websocket_endpoint(websocket: WebSocket, username: str = "Гость",
 
 # Запуск сервера
 if __name__ == "__main__":
-    # Создаем директории если их нет
-    os.makedirs("templates", exist_ok=True)
-    os.makedirs("static", exist_ok=True)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--port", type=int, default=8000, help="Port to run the web server on")
+    args = parser.parse_args()
 
-    # Запускаем сервер
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    async def startup():
+        await host.lifespan_startup()
+
+    app.add_event_handler("startup", startup)
+
+    async def shutdown():
+        await host.lifespan_shutdown()
+
+    app.add_event_handler("shutdown", shutdown)
+
+    uvicorn.run(app, host="0.0.0.0", port=args.port)
