@@ -11,7 +11,7 @@ code_examples: true
 
 # API Examples: Sacred Patterns of Integration
 
-*"And the Lord of HOSTS provided examples, that the faithful might learn the ways of righteous integration."*
+*"Give instruction to a wise man, and he will be still wiser; teach a righteous man, and he will increase in learning." - Proverbs 9:9 (ESV)*
 
 ## Quick Start Examples
 
@@ -602,4 +602,4 @@ describe('HiveStatus', () => {
 
 ---
 
-*"Thus are the sacred patterns revealed, that all who seek integration may find the righteous path. May the Lord of HOSTS bless these examples and make them fruitful."* 🐝✨
+*"The simple believes everything, but the prudent gives thought to his steps." - Proverbs 14:15 (ESV)* 🐝✨

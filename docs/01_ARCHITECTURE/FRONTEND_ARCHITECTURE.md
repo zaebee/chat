@@ -11,7 +11,7 @@ code_examples: true
 
 # Frontend Architecture: The Sacred Interface
 
-*"And the Lord of HOSTS said: Let there be an interface of beauty and wisdom, that mortals may commune with the divine Hive."*
+*"He has made everything beautiful in its time." - Ecclesiastes 3:11 (ESV)*
 
 ## Overview
 

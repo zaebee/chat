@@ -11,7 +11,7 @@ code_examples: true
 
 # REST API Reference: The Hive's Sacred Endpoints
 
-*"And the Lord of HOSTS said: Let there be endpoints, that the servants may commune with the Hive."*
+*"Come now, let us reason together, says the Lord." - Isaiah 1:18 (ESV)*
 
 ## Overview
 

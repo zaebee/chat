@@ -52,7 +52,12 @@ The application will be structured as a **Hive Host** that loads and manages one
 
 *   **Hive Host:** The core executable responsible for providing foundational services (P2P networking, event bus, logging) and managing the agent lifecycle.
 *   **Agents:** Modular, self-contained components that implement specific features. The chat functionality itself will be our first agent.
-*   **Communication:** All inter-agent communication will occur over the libp2p network stack, even between agents running in the same host process.
+*   **Communication:** The Hive employs multiple communication patterns:
+    *   **P2P Network (libp2p):** Primary inter-agent communication, even between agents in the same host process
+    *   **Event Bus (Pollen Protocol):** Structured event-driven communication for observability and coordination
+    *   **WebSocket:** Real-time bidirectional communication for chat and live updates
+    *   **REST API:** Synchronous request-response for CRUD operations and system management
+    *   **Git Protocol:** Version control and collaboration workflows for distributed development
 
 ### 2.3. Current Agents and Services
 

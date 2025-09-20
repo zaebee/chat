@@ -11,7 +11,7 @@ code_examples: true
 
 # Agent Framework: Building AI Teammates for the Hive
 
-*"And the Lord of HOSTS said: Let there be teammates of silicon and spirit, that they may labor alongside the children of flesh in perfect harmony."*
+*"Two are better than one, because they have a good reward for their toil." - Ecclesiastes 4:9 (ESV)*
 
 ## Overview
 
@@ -126,7 +126,8 @@ This is a foundational overview. The complete implementation guide will include:
 
 - Onboarding process (4-stage metamorphosis)
 - Task assignment and collaboration patterns
-- Event-driven communication
+- Event-driven communication (Pollen Protocol)
+- Git protocol integration for code collaboration
 - Performance monitoring and metrics
 - Integration with existing AI services
 
