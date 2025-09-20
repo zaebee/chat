@@ -13,9 +13,10 @@ In an increasingly centralized digital world, there is a growing need for commun
 #### **1.4. Success Metrics**
 
 The success of this initiative will be measured by the following outcomes:
-*   **Resilience:** The chat application can continue to function between connected peers even if a central bootstrap or discovery server is temporarily unavailable.
-*   **Architectural Foundation:** The new architecture serves as a solid, extensible foundation for future decentralized features (e.g., decentralized identity, file storage).
-*   **User Sovereignty:** Users have more control over their data and communication channels, reducing reliance on a single service provider.
+
+- **Resilience:** The chat application can continue to function between connected peers even if a central bootstrap or discovery server is temporarily unavailable.
+- **Architectural Foundation:** The new architecture serves as a solid, extensible foundation for future decentralized features (e.g., decentralized identity, file storage).
+- **User Sovereignty:** Users have more control over their data and communication channels, reducing reliance on a single service provider.
 
 ---
 
@@ -27,22 +28,22 @@ This phase focuses on implementing a hybrid P2P model. This approach provides a 
 
 #### **2.2. User Stories**
 
-*   **As a user,** I want to send and receive messages in real-time, knowing that my messages are being broadcast across a peer-to-peer network, making the system more robust.
-*   **As a user,** I want my chat history to be loaded from my local database when I start the application, ensuring my data is persistent and under my control.
-*   **As a developer,** I want the application to function as a hybrid system, where the web UI is served by a traditional server, but real-time messaging is handled by an underlying p2p network.
+- **As a user,** I want to send and receive messages in real-time, knowing that my messages are being broadcast across a peer-to-peer network, making the system more robust.
+- **As a user,** I want my chat history to be loaded from my local database when I start the application, ensuring my data is persistent and under my control.
+- **As a developer,** I want the application to function as a hybrid system, where the web UI is served by a traditional server, but real-time messaging is handled by an underlying p2p network.
 
 #### **2.3. Features**
 
-| Feature ID | Feature Name | Description | Priority |
-| :--- | :--- | :--- | :--- |
-| P2P-01 | P2P Message Broadcasting | The backend will connect to a libp2p pub/sub topic. Messages sent by users will be published to this topic, and the backend will subscribe to receive messages from other peers. | Must-have |
-| P2P-02 | FastAPI as a P2P Gateway | The existing FastAPI server will be maintained to serve the frontend application and act as a bridge between the browser's WebSocket connection and the backend's libp2p node. | Must-have |
+| Feature ID | Feature Name             | Description                                                                                                                                                                      | Priority  |
+| :--------- | :----------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------- |
+| P2P-01     | P2P Message Broadcasting | The backend will connect to a libp2p pub/sub topic. Messages sent by users will be published to this topic, and the backend will subscribe to receive messages from other peers. | Must-have |
+| P2P-02     | FastAPI as a P2P Gateway | The existing FastAPI server will be maintained to serve the frontend application and act as a bridge between the browser's WebSocket connection and the backend's libp2p node.   | Must-have |
 
 #### **2.4. Out of Scope (for this iteration)**
 
-*   Pure browser-to-p2p communication (i.e., removing the FastAPI gateway).
-*   Decentralized Identity (DIDs). Users will still be identified by a simple username.
-*   Advanced p2p features like direct, encrypted messaging between two peers. All messages will be public on the pub/sub topic for now.
+- Pure browser-to-p2p communication (i.e., removing the FastAPI gateway).
+- Decentralized Identity (DIDs). Users will still be identified by a simple username.
+- Advanced p2p features like direct, encrypted messaging between two peers. All messages will be public on the pub/sub topic for now.
 
 ---
 
@@ -75,11 +76,11 @@ The architecture will be refactored into a **Hive Host** and **Agent** model. Th
 +----------------------------------------------------+
 ```
 
-*   **Component: Hive Host:** The main executable. Its primary responsibilities are to manage the application lifecycle, load and unload agents, and provide core services.
-*   **Component: Foundational Services:** The Host will provide a shared **Async Event Bus** and a **Structured Audit Logger** to all agents.
-*   **Component: Agent:** A self-contained module that implements a specific piece of functionality. The existing chat application will be refactored into the first agent.
-*   **Component: libp2p Stack:** All communication between agents will occur over the libp2p network.
-*   **Component: FastAPI:** Serves the web frontend and the `/api/v1` endpoints.
+- **Component: Hive Host:** The main executable. Its primary responsibilities are to manage the application lifecycle, load and unload agents, and provide core services.
+- **Component: Foundational Services:** The Host will provide a shared **Async Event Bus** and a **Structured Audit Logger** to all agents.
+- **Component: Agent:** A self-contained module that implements a specific piece of functionality. The existing chat application will be refactored into the first agent.
+- **Component: libp2p Stack:** All communication between agents will occur over the libp2p network.
+- **Component: FastAPI:** Serves the web frontend and the `/api/v1` endpoints.
 
 #### **3.2. Implementation Plan (Version 1.0)**
 
@@ -144,9 +145,9 @@ Our decision to pivot to a self-contained binary (e.g., using PyInstaller) inste
 
 #### **3.5. Definition of Done (Final)**
 
-*   The application is refactored into a `HiveHost` and `ChatAgent` architecture, aligned with the **ATCG-Genome**.
-*   The Host provides a shared event bus and structured logger to all agents.
-*   Basic **τ (System Tension) monitoring** is implemented and exposed via the status API.
-*   All chat messages are sent and received over the libp2p pub/sub topic.
-*   A simple CLI exists for the user to view the hive's status.
-*   The entire application can be bundled into a single executable binary.
+- The application is refactored into a `HiveHost` and `ChatAgent` architecture, aligned with the **ATCG-Genome**.
+- The Host provides a shared event bus and structured logger to all agents.
+- Basic **τ (System Tension) monitoring** is implemented and exposed via the status API.
+- All chat messages are sent and received over the libp2p pub/sub topic.
+- A simple CLI exists for the user to view the hive's status.
+- The entire application can be bundled into a single executable binary.
