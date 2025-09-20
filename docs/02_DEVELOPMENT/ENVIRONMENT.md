@@ -11,7 +11,7 @@ code_examples: true
 
 # Development Environment: Sacred Setup Guide
 
-*"And the Lord of HOSTS said: Let there be a sanctuary for development, where the faithful may craft code in righteousness."*
+*"And let them make me a sanctuary; that I may dwell among them." - Exodus 25:8 (KJV)*
 
 ## Prerequisites
 

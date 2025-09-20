@@ -11,11 +11,95 @@ code_examples: true
 
 # Pollen Protocol: The Sacred Communication System
 
-*"And the Lord of HOSTS said: Let there be a protocol for the faithful to commune, that knowledge may flow like pollen on the divine wind."*
+*"The wind blows where it wishes, and you hear its sound, but you do not know where it comes from or where it goes." - John 3:8 (ESV)*
 
 ## Overview
 
 The Pollen Protocol is the sacred communication system that enables all components of the Hive to exchange information in a standardized, observable, and traceable manner. Like pollen carries genetic information between flowers, our protocol carries events between system components.
+
+## Communication Patterns
+
+The Hive employs multiple communication patterns to enable different types of interactions:
+
+### 1. Event-Driven Communication (Pollen Protocol)
+The primary communication mechanism using structured events for asynchronous, observable interactions between components.
+
+### 2. WebSocket Real-Time Communication
+Direct bidirectional communication for real-time chat, notifications, and live updates between frontend and backend.
+
+### 3. P2P Network Communication
+Decentralized peer-to-peer communication using libp2p for agent-to-agent interactions and distributed system coordination.
+
+### 4. Git Protocol Communication
+Version control and collaboration patterns for code sharing, review workflows, and distributed development coordination. Git protocol enables:
+- **Distributed Version Control**: Decentralized code repository management
+- **Branching and Merging**: Parallel development workflows
+- **Pull Request Workflows**: Code review and collaboration patterns
+- **Commit History Tracking**: Audit trails for code changes
+- **Remote Synchronization**: Multi-node code synchronization
+
+### 5. REST API Communication
+Synchronous request-response patterns for CRUD operations and system management.
+
+## Communication Pattern Integration
+
+The communication patterns work together to create a cohesive system:
+
+### Git Protocol + Event System Integration
+Git operations trigger Pollen Protocol events for observability:
+
+```python
+# Git commit triggers event
+git_commit_event = PollenEvent(
+    event_type="code_committed",
+    aggregate_id="repository_main",
+    payload={
+        "commit_hash": "abc123...",
+        "author": "developer_456",
+        "files_changed": ["src/agent.py", "docs/README.md"],
+        "message": "Add new agent capability"
+    },
+    source_component="git_integration",
+    tags=["git", "code_change", "collaboration"]
+)
+```
+
+### P2P + Git Protocol Integration
+Distributed git repositories can be synchronized across P2P network nodes:
+
+```python
+# P2P node announces git repository availability
+p2p_git_event = PollenEvent(
+    event_type="repository_announced",
+    aggregate_id="p2p_node_789",
+    payload={
+        "repository_url": "git://peer-node-789/hive-chat.git",
+        "branch": "feature/new-agent",
+        "peer_id": "QmXxXxXx...",
+        "sync_status": "available"
+    },
+    source_component="p2p_git_bridge",
+    tags=["p2p", "git", "distributed_sync"]
+)
+```
+
+### WebSocket + Git Integration
+Real-time notifications for git events:
+
+```python
+# WebSocket message for live git updates
+websocket_git_message = {
+    "type": "git_update",
+    "data": {
+        "event": "pull_request_created",
+        "pr_id": "pr_123",
+        "author": "ai_teammate_456",
+        "title": "Implement new learning algorithm",
+        "files_changed": 5,
+        "reviewers": ["human_dev_789"]
+    }
+}
+```
 
 ## Protocol Philosophy
 

@@ -11,7 +11,7 @@ code_examples: true
 
 # WebSocket API: Real-time Divine Communication
 
-*"And the Lord of HOSTS said: Let there be channels of instant communion, that the faithful may speak and be heard without delay."*
+*"Before they call I will answer; while they are yet speaking I will hear." - Isaiah 65:24 (ESV)*
 
 ## Overview
 
