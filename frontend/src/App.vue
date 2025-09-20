@@ -1,30 +1,33 @@
 <script setup lang="ts">
-import { onMounted, ref, watchEffect } from 'vue'
-import { RouterView, RouterLink } from 'vue-router'
-import { useChatStore } from '@/stores/chat'
-import { storeToRefs } from 'pinia'
-import LoginModal from '@/components/LoginModal.vue'
+import { onMounted, ref, watchEffect } from "vue";
+import { RouterView, RouterLink } from "vue-router";
+import { useChatStore } from "@/stores/chat";
+import { useSettingsStore } from "@/stores/settings";
+import { storeToRefs } from "pinia";
+import LoginModal from "@/components/LoginModal.vue";
 
-const isCollapsed = ref(false)
-const chatStore = useChatStore()
-const { currentUser, theme, language, totalXp, level } = storeToRefs(chatStore)
+const isCollapsed = ref(false);
+const chatStore = useChatStore();
+const settingsStore = useSettingsStore();
+const { currentUser, totalXp, level } = storeToRefs(chatStore);
+const { theme, language } = storeToRefs(settingsStore);
 
 // On startup, check for saved username and theme
 onMounted(() => {
-  chatStore.init()
-})
+  chatStore.init();
+});
 
 // Watch for theme changes and apply them to the document
 watchEffect(() => {
-  document.documentElement.className = theme.value === 'dark' ? 'dark-theme' : ''
-})
+  document.documentElement.className = settingsStore.theme.value === "dark" ? "dark-theme" : "";
+});
 
 function toggleSidebar() {
-  isCollapsed.value = !isCollapsed.value
+  isCollapsed.value = !isCollapsed.value;
 }
 
 function handleLogin(username: string) {
-  chatStore.login(username)
+  chatStore.login(username);
 }
 </script>
 
@@ -38,7 +41,7 @@ function handleLogin(username: string) {
       </div>
       <div class="user-profile-summary">
         <span class="username">{{ currentUser?.username }}</span>
-        <span class="xp-level">XP: {{ totalXp }} | Level: {{ level }}</span>
+        <span class="consciousness-level">XP: {{ totalXp }} | Level: {{ level }}</span>
       </div>
       <nav class="user-list">
         <h3>Users ({{ chatStore.users.length }})</h3>
@@ -58,11 +61,15 @@ function handleLogin(username: string) {
       </nav>
       <div class="sidebar-footer">
         <div class="lang-switcher">
-          <button @click="chatStore.setLanguage('en')" :class="{ active: language === 'en' }">EN</button>
-          <button @click="chatStore.setLanguage('ru')" :class="{ active: language === 'ru' }">RU</button>
+          <button @click="settingsStore.setLanguage('en')" :class="{ active: settingsStore.language.value === 'en' }">
+            EN
+          </button>
+          <button @click="settingsStore.setLanguage('ru')" :class="{ active: settingsStore.language.value === 'ru' }">
+            RU
+          </button>
         </div>
-        <button @click="chatStore.toggleTheme" class="theme-toggle-btn">
-          {{ theme === 'light' ? 'Dark' : 'Light' }} Mode
+        <button @click="settingsStore.toggleTheme" class="theme-toggle-btn">
+          {{ settingsStore.theme.value === "light" ? "Dark" : "Light" }} Mode
         </button>
       </div>
     </aside>

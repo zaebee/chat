@@ -1,296 +1,269 @@
-import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { defineStore } from "pinia";
+import { ref, computed } from "vue";
+import { useSettingsStore } from "./settings";
+import { useUserStore, type User } from "./user";
+import { useMessagesStore } from "./messages";
+import { useTeammatesStore } from "./teammates";
+import { useGameStore } from "./game";
+import { useOrganellasStore } from "./organellas";
+import { useTalesStore } from "./tales";
 
-// Helper to generate a UUID
-function generateUUID(): string {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    const r = (Math.random() * 16) | 0,
-      v = c === 'x' ? r : (r & 0x3) | 0x8
-    return v.toString(16)
-  })
-}
-
-// Define the types for our state
-export interface User {
-  id: string
-  username: string
-  color: string
-}
-
-export interface Message {
-  id: string
-  text: string
-  sender_id: string
-  sender_name: string
-  timestamp: string
-  is_bot?: boolean
-}
-
-export const useChatStore = defineStore('chat', () => {
+export const useChatStore = defineStore("chat", () => {
   // --- STATE ---
-  const users = ref<User[]>([])
-  const messages = ref<Message[]>([])
-  const isConnected = ref(false)
-  const currentUser = ref<User | null>(null)
-  const theme = ref('light')
-  const language = ref('en')
-  const solvedChallenges = ref<string[]>([])
-  const inputPrompt = ref<string | null>(null)
-  const inputResolver = ref<((value: string) => void) | null>(null)
+  const users = ref<User[]>([]);
+  const isConnected = ref(false);
+  const solvedChallenges = ref<string[]>([]);
+
+  // Store references for delegation
+  const userStore = useUserStore();
+  const messagesStore = useMessagesStore();
+  const teammatesStore = useTeammatesStore();
+  const gameStore = useGameStore();
+  const organellasStore = useOrganellasStore();
+  const talesStore = useTalesStore();
 
   // Gamification constants
-  const XP_PER_CHALLENGE = 100
-  const XP_FOR_LEVEL_UP = 500 // Example: 500 XP to level up
+  const XP_PER_CHALLENGE = 100;
+  const XP_FOR_LEVEL_UP = 500; // Example: 500 XP to level up
 
   // Computed properties for gamification
   const totalXp = computed(() => {
-    return solvedChallenges.value.length * XP_PER_CHALLENGE
-  })
+    return solvedChallenges.value.length * XP_PER_CHALLENGE;
+  });
 
   const level = computed(() => {
-    return Math.floor(totalXp.value / XP_FOR_LEVEL_UP) + 1
-  })
+    return Math.floor(totalXp.value / XP_FOR_LEVEL_UP) + 1;
+  });
 
-  let socket: WebSocket | null = null
+  let socket: WebSocket | null = null;
 
   // --- ACTIONS ---
-
-  /**
-   * Sends input to a waiting Python script.
-   */
-  const sendPythonInput = (text: string) => {
-    if (inputResolver.value) {
-      inputResolver.value(text)
-      inputPrompt.value = null
-      inputResolver.value = null
-    } else {
-      console.warn('No Python input requested.')
-    }
-  }
-
-  /**
-   * Adds a Python output message to the chat.
-   */
-  const addPythonOutputMessage = (text: string) => {
-    const message: Message = {
-      id: generateUUID(),
-      text: text,
-      sender_id: 'python_runtime',
-      sender_name: 'Python',
-      timestamp: new Date().toISOString(),
-      is_bot: true
-    }
-    messages.value.push(message)
-  }
-
-  /**
-   * Requests Python input from the user.
-   */
-  const requestPythonInput = (prompt: string, resolve: (value: string) => void) => {
-    inputPrompt.value = prompt
-    inputResolver.value = resolve
-  }
-
-  /**
-   * Sets the application language.
-   */
-  const setLanguage = (lang: string) => {
-    language.value = lang
-    localStorage.setItem('hive-chat-language', lang)
-  }
-
-  /**
-   * Toggles the color theme between light and dark.
-   */
-  const toggleTheme = () => {
-    theme.value = theme.value === 'light' ? 'dark' : 'light'
-    localStorage.setItem('hive-chat-theme', theme.value)
-  }
 
   /**
    * Fetches solved challenges for the current user.
    */
   const fetchSolvedChallenges = async (userId: string) => {
     try {
-      const response = await fetch(`/api/user_progress/${userId}`)
+      const response = await fetch(`/api/user_progress/${userId}`);
       if (response.ok) {
-        const data = await response.json()
-        solvedChallenges.value = data.solved_challenge_ids
+        const data = await response.json();
+        solvedChallenges.value = data.solved_challenge_ids || [];
+        gameStore.fetchSolvedChallenges(userId);
       } else {
-        console.error('Failed to fetch solved challenges', response.statusText)
+        console.error("Failed to fetch solved challenges", response.statusText);
       }
     } catch (error) {
-      console.error('Error fetching solved challenges:', error)
+      console.error("Error fetching solved challenges:", error);
     }
-  }
+  };
 
   /**
-   * Records a solved challenge for the current user.
+   * Creates a new organella for the current user.
+   * Delegates to organellasStore.
    */
-  const recordChallengeSolved = async (challengeId: string) => {
-    if (!currentUser.value) {
-      console.error('Cannot record solved challenge: user not logged in.')
-      return
-    }
-    if (solvedChallenges.value.includes(challengeId)) {
-      console.log(`Challenge ${challengeId} already solved by ${currentUser.value.username}`)
-      return
+  const createOrganella = async (
+    type: "worker" | "scout" | "guard" | "queen",
+    userName: string,
+  ) => {
+    if (!userStore.currentUser) {
+      console.error("Cannot create organella: user not logged in.");
+      return;
     }
 
     try {
-      const response = await fetch('/solve_challenge', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const newOrganella = await organellasStore.createOrganella(userStore.currentUser.id, {
+        type,
+        name: userName,
+      });
+
+      // Refresh tales after organella creation
+      await talesStore.fetchTales(userStore.currentUser.id);
+      return newOrganella;
+    } catch (error) {
+      console.error("Error creating organella:", error);
+    }
+  };
+
+  /**
+   * Records a solved challenge for the current user.
+   * Delegates to gameStore.
+   */
+  const recordChallengeSolved = async (challengeId: string) => {
+    if (!userStore.currentUser) {
+      console.error("Cannot record solved challenge: user not logged in.");
+      return;
+    }
+    if (solvedChallenges.value.includes(challengeId)) {
+      console.log(`Challenge ${challengeId} already solved by ${userStore.currentUser.username}`);
+      return;
+    }
+
+    try {
+      const response = await fetch("/solve_challenge", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          user_id: currentUser.value.id,
+          user_id: userStore.currentUser.id,
           challenge_id: challengeId,
         }),
-      })
+      });
 
       if (response.ok) {
-        const data = await response.json()
-        console.log(data.message)
-        solvedChallenges.value.push(challengeId) // Optimistically update UI
+        const data = await response.json();
+        console.log(data.message);
+        solvedChallenges.value.push(challengeId);
+        gameStore.recordChallengeSolved(challengeId);
+
+        // Refresh organellas and tales after challenge completion
+        if (userStore.currentUser) {
+          await organellasStore.fetchOrganellas(userStore.currentUser.id);
+          await talesStore.fetchTales(userStore.currentUser.id);
+        }
       } else {
-        console.error('Failed to record challenge solution', response.statusText)
+        console.error("Failed to record challenge solution", response.statusText);
       }
     } catch (error) {
-      console.error('Error recording challenge solution:', error)
+      console.error("Error recording challenge solution:", error);
     }
-  }
+  };
 
   /**
    * Connects to the WebSocket server.
    */
   const connect = (username: string, userId: string) => {
-    if (socket || isConnected.value) return
+    if (socket || isConnected.value) return;
 
     // Clear old data
-    messages.value = []
-    users.value = []
-    currentUser.value = null
+    messagesStore.setMessages([]);
+    users.value = [];
+    userStore.setCurrentUser(null);
 
-    const url = `wss://${window.location.host}/ws?username=${encodeURIComponent(username)}&user_id=${encodeURIComponent(userId)}`
-    socket = new WebSocket(url)
+    const url = `wss://${window.location.host}/ws?username=${encodeURIComponent(username)}&user_id=${encodeURIComponent(userId)}`;
+    socket = new WebSocket(url);
 
     socket.onopen = () => {
-      isConnected.value = true
-      console.log('WebSocket connected')
-    }
+      isConnected.value = true;
+      console.log("WebSocket connected");
+    };
 
     socket.onmessage = (event) => {
-      const response = JSON.parse(event.data)
-      const { type, data } = response
+      const response = JSON.parse(event.data);
+      const { type, data } = response;
 
       switch (type) {
-        case 'message':
-          messages.value.push(data)
-          break
-        case 'user_list':
-          users.value = data
+        case "message":
+          messagesStore.addMessage(data);
+          break;
+        case "user_list":
+          users.value = data;
           // Now that we have the user list, find the current user
-          currentUser.value = data.find((user: User) => user.id === userId) || null
-          // Fetch solved challenges for the current user
-          if (currentUser.value) {
-            fetchSolvedChallenges(currentUser.value.id)
+          const foundUser = data.find((user: User) => user.id === userId) || null;
+          userStore.setCurrentUser(foundUser);
+          // Fetch solved challenges, organellas, and tales for the current user
+          if (userStore.currentUser) {
+            fetchSolvedChallenges(userStore.currentUser.id);
+            organellasStore.fetchOrganellas(userStore.currentUser.id);
+            talesStore.fetchTales(userStore.currentUser.id);
           }
-          break
-        case 'user_joined':
-          users.value.push(data)
-          break
-        case 'user_left':
-          users.value = users.value.filter((user) => user.id !== data.id)
-          break
+          break;
+        case "user_joined":
+          users.value.push(data);
+          break;
+        case "user_departed":
+          users.value = users.value.filter((user) => user.id !== data.id);
+          break;
+        case "teammate_list":
+          teammatesStore.setTeammates(data);
+          break;
+        case "rooms":
+          gameStore.rooms = data;
+          break;
+        case "room_switched":
+          gameStore.setCurrentRoom(data.room_id);
+          messagesStore.setMessages(data.messages || []);
+          break;
       }
-    }
+    };
 
     socket.onclose = () => {
-      isConnected.value = false
-      socket = null
-      console.log('WebSocket disconnected')
-    }
+      isConnected.value = false;
+      socket = null;
+      console.log("WebSocket disconnected");
+    };
 
     socket.onerror = (error) => {
-      console.error('WebSocket error:', error)
-      isConnected.value = false
-      socket = null
-    }
-  }
-
-  /**
-   * Saves username and connects.
-   */
-  const login = (username: string) => {
-    let userId = localStorage.getItem('hive-chat-user-id')
-    if (!userId) {
-      userId = generateUUID()
-      localStorage.setItem('hive-chat-user-id', userId)
-    }
-    localStorage.setItem('hive-chat-username', username)
-    connect(username, userId)
-  }
+      console.error("WebSocket error:", error);
+      isConnected.value = false;
+      socket = null;
+    };
+  };
 
   /**
    * Checks localStorage for a username and connects if found.
    */
   const init = () => {
-    // Check for saved language
-    const savedLang = localStorage.getItem('hive-chat-language')
-    if (savedLang) {
-      language.value = savedLang
-    }
-
-    // Check for saved theme
-    const savedTheme = localStorage.getItem('hive-chat-theme')
-    if (savedTheme) {
-      theme.value = savedTheme
-    }
+    // Initialize settings from settings store
+    useSettingsStore().initSettings();
 
     // Check for saved username and user ID
-    const savedUsername = localStorage.getItem('hive-chat-username')
-    const savedUserId = localStorage.getItem('hive-chat-user-id')
+    const { savedUsername, savedUserId } = useUserStore().initUser();
 
     if (savedUsername && savedUserId) {
-      connect(savedUsername, savedUserId)
+      connect(savedUsername, savedUserId);
     }
-  }
+  };
 
-  /**
-   * Sends a message over the WebSocket.
-   */
-  const sendMessage = (text: string) => {
+  const fetchTeammates = async () => {
+    await teammatesStore.fetchTeammates();
+  };
+
+  const fetchRooms = async () => {
+    await gameStore.fetchRooms();
+  };
+
+  const switchRoom = (roomId: string) => {
+    if (socket && isConnected.value) {
+      gameStore.setCurrentRoom(roomId);
+      messagesStore.setMessages([]); // Clear current messages
+
+      // Send room switch message to server
+      socket.send(
+        JSON.stringify({
+          type: "switch_room",
+          data: { room_id: roomId },
+        }),
+      );
+    }
+  };
+
+  const sendMessage = (text: string, parentId: string | null = null) => {
     if (socket && isConnected.value) {
       const message = {
-        type: 'message',
-        data: { text },
-      }
-      socket.send(JSON.stringify(message))
-    } else {
-      console.error('Cannot send message, WebSocket is not connected.')
+        type: "message",
+        data: {
+          text: text,
+          room_id: gameStore.currentRoom,
+          parent_id: parentId,
+        },
+      };
+      socket.send(JSON.stringify(message));
     }
-  }
+  };
 
   return {
     users,
-    messages,
     isConnected,
-    currentUser,
-    theme,
-    language,
     solvedChallenges,
     connect,
-    sendMessage,
-    login,
     init,
-    toggleTheme,
-    setLanguage,
     recordChallengeSolved,
     fetchSolvedChallenges,
+    createOrganella,
+    fetchTeammates,
+    fetchRooms,
+    switchRoom,
     totalXp,
     level,
-    inputPrompt,
-    sendPythonInput,
-    addPythonOutputMessage,
-    requestPythonInput,
-  }
-})
+    sendMessage,
+  };
+});
