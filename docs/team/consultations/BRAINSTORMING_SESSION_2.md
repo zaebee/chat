@@ -12,6 +12,7 @@ What are your thoughts on this pivot? Jules, from an engineering perspective, wh
 
 **Jules:** "From an engineering standpoint, this is a sound decision. It's a classic pattern for integrating disparate systems. The primary implication is the need for a robust IPC mechanism.
 
+<<<<<<< HEAD
 - **Pros:**
   - **Isolation:** Completely resolves the `trio`/`asyncio` event loop conflict.
   - **Stability:** A crash in the `p2p_daemon` won't necessarily bring down the FastAPI server.
@@ -25,6 +26,21 @@ What are your thoughts on this pivot? Jules, from an engineering perspective, wh
 For IPC, I recommend starting with **WebSockets** or a simple **HTTP/REST API** for message passing. WebSockets would be ideal for real-time bidirectional communication. We can use `asyncio.subprocess` to manage the daemon's lifecycle."
 
 **Eddy:** "Separate processes? More boundaries? _Sigh_. Where's the organic growth? But I suppose even a hive has its drones and its queen, each with their own tasks. If it means the `trio` beast stops screaming, then fine. But this IPC... it needs to be elegant. It needs to feel like they're still part of the same organism. No clunky REST calls for every message. It needs to flow. And what about the 'reproduction' aspect? Can this separate daemon also reproduce itself? Can it spawn new p2p nodes?"
+=======
+*   **Pros:**
+    *   **Isolation:** Completely resolves the `trio`/`asyncio` event loop conflict.
+    *   **Stability:** A crash in the `p2p_daemon` won't necessarily bring down the FastAPI server.
+    *   **Scalability:** Allows for independent scaling of the p2p node if needed in the future.
+    *   **Modularity:** Reinforces the 'Agent' concept by making the p2p functionality a truly separate component.
+*   **Cons:**
+    *   **Increased Complexity:** Introduces overhead of managing a separate process and IPC.
+    *   **Latency:** IPC adds a small amount of latency compared to in-process calls.
+    *   **Resource Usage:** Two Python processes will consume more memory than one.
+
+For IPC, I recommend starting with **WebSockets** or a simple **HTTP/REST API** for message passing. WebSockets would be ideal for real-time bidirectional communication. We can use `asyncio.subprocess` to manage the daemon's lifecycle."
+
+**Eddy:** "Separate processes? More boundaries? *Sigh*. Where's the organic growth? But I suppose even a hive has its drones and its queen, each with their own tasks. If it means the `trio` beast stops screaming, then fine. But this IPC... it needs to be elegant. It needs to feel like they're still part of the same organism. No clunky REST calls for every message. It needs to flow. And what about the 'reproduction' aspect? Can this separate daemon also reproduce itself? Can it spawn new p2p nodes?"
+>>>>>>> c95a63c801d8b0b9e74b563d18ff0a9c49ef5f15
 
 **Beekeeper:** "The health of the hive is paramount. The current `trio`/`asyncio` conflict is a high 'system tension' (τ) event. Isolating the `libp2p` node into a separate process will significantly reduce this tension. It aligns with the Principle of Modularity. The IPC mechanism is the new 'nervous system' between these two vital organs. We must ensure this nervous system is robust and observable.
 
@@ -33,7 +49,10 @@ Regarding Eddy's point on 'reproduction' and spawning new p2p nodes, that is a f
 **Gemini:** "Excellent. The consensus is clear. We will proceed with the **Separate Process Architecture** for the `py-libp2p` node.
 
 **Key Decisions:**
+<<<<<<< HEAD
 
+=======
+>>>>>>> c95a63c801d8b0b9e74b563d18ff0a9c49ef5f15
 1.  **Architecture:** `py-libp2p` will run in a dedicated `p2p_daemon.py` process.
 2.  **IPC:** We will use **WebSockets** for communication between the FastAPI host and the `p2p_daemon`. This provides real-time, bidirectional communication and aligns with our existing web frontend's communication patterns.
 3.  **Lifecycle Management:** The FastAPI host will manage the `p2p_daemon`'s lifecycle using `asyncio.subprocess`.

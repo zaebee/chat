@@ -70,7 +70,9 @@ Built-in Python learning environment with:
 - **Gamification** - XP, badges, and progression tracking
 - **Collaborative Learning** - Human-AI pair programming
 
-## 📚 Documentation
+## Documentation
+
+All detailed documentation, including our vision, architectural principles, roadmap, and technical requirements, can be found in the `docs/` directory.
 
 Comprehensive documentation organized by audience:
 
@@ -153,3 +155,13 @@ Ready to explore the future of software?
 ---
 
 *"In the Hive, we don't just write code—we cultivate life."* 🐝✨
+=======
+*   [**Start Here: The Hive Vision**](docs/00_VISION.md)
+*   [**Project Roadmap**](docs/02_ROADMAP.md)
+*   [**Technical Requirements**](docs/03_REQUIREMENTS.md)
+*   [**Our Team & Consultations**](docs/team/index.md)
+
+## Getting Started
+
+Instructions on how to set up the development environment and run the application will be provided in the documentation.
+>>>>>>> c95a63c801d8b0b9e74b563d18ff0a9c49ef5f15
