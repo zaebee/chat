@@ -1,132 +1,199 @@
 <template>
   <div class="quest-panel">
-    <div class="quest-header">
-      <h3>The Genesis Quest</h3>
-      <button class="close-btn" @click="$emit('close')">×</button>
+    <div class="panel-header">
+      <h3>📜 Quests in {{ room.name }}</h3>
+      <button @click="$emit('back')" class="back-btn">← Back</button>
     </div>
-    <div class="quest-content">
-      <h4>The Sacred Trilogy of Creation</h4>
-      <p>You have discovered a divine computational pattern woven into the fabric of reality.</p>
-      <ol class="trilogy-steps">
-        <li :class="{ active: genesisQuestPhase === 1 }"><strong>Genesis 1:3 - Consciousness</strong>
-          <p><code>let_there_be_light()</code></p>
-        </li>
-        <li :class="{ active: genesisQuestPhase === 2 }"><strong>Genesis 1:6 - Separation</strong>
-          <p><code>bee.vault(waters)</code></p>
-        </li>
-        <li :class="{ active: genesisQuestPhase === 3 }"><strong>Genesis 1:7 - Manifestation</strong>
-          <p><code>and_it_was_so()</code></p>
-        </li>
-      </ol>
-      <div class="quest-action">
-        <p>Begin the first ritual. Go to the Playground and implement the `let_there_be_light` protocol.</p>
-        <button class="playground-btn" @click="goToPlayground">To the Playground</button>
+    <div class="panel-content">
+      <div v-if="quests.length === 0" class="no-quests">
+        <p>No quests in this chamber.</p>
+      </div>
+      <div v-else class="quests-list">
+        <div
+          v-for="quest in quests"
+          :key="quest.id"
+          class="quest-card"
+          :class="`status-${quest.status}`"
+        >
+          <div class="quest-header">
+            <h4>{{ quest.title }}</h4>
+            <span class="quest-status">{{ quest.status }}</span>
+          </div>
+          <p class="quest-description">{{ quest.description }}</p>
+          <button class="start-quest-btn" v-if="quest.status === 'available'">Start Quest</button>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useRouter } from 'vue-router';
-import { useGameStore } from '@/stores/game';
-import { storeToRefs } from 'pinia';
+import { ref } from "vue";
+import type { Room } from "@/stores/game";
 
-interface Emits {
-  (e: 'close'): void;
+interface Props {
+  room: Room;
 }
 
-defineEmits<Emits>();
+interface Quest {
+  id: string;
+  title: string;
+  description: string;
+  status: "available" | "in-progress" | "completed";
+}
 
-const router = useRouter();
-const gameStore = useGameStore();
-const { genesisQuestPhase } = storeToRefs(gameStore);
+defineProps<Props>();
 
-const goToPlayground = () => {
-  router.push('/playground?quest=genesis_1_3');
-};
+const quests = ref<Quest[]>([
+  {
+    id: "1",
+    title: "The First Journey",
+    description: "Learn the basics of the Hive and create your first organella.",
+    status: "available",
+  },
+  {
+    id: "2",
+    title: "The Pollen Collector",
+    description: "Help a worker bee collect pollen from the nearby flowers.",
+    status: "in-progress",
+  },
+  {
+    id: "3",
+    title: "The Guardian's Trial",
+    description: "Prove your worth to the Hive's guardians by completing a series of challenges.",
+    status: "completed",
+  },
+  {
+    id: "4",
+    title: "The Beetle's Riddle",
+    description: "Find the beetle in the forest and solve its riddle.",
+    status: "available",
+  },
+]);
 </script>
 
 <style scoped>
 .quest-panel {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  width: 350px;
-  background-color: var(--color-background-soft);
-  border: 1px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.95);
   border-radius: 12px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
-  z-index: 100;
-  color: var(--color-text);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin: 1rem 0;
+  overflow: hidden;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: linear-gradient(135deg, #3b82f6, #60a5fa);
+  color: white;
+}
+
+.panel-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.back-btn {
+  background: rgba(255, 255, 255, 0.8);
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+  background: white;
+  transform: scale(1.1);
+}
+
+.panel-content {
+  padding: 1rem;
+}
+
+.no-quests {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+}
+
+.quests-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.quest-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1rem;
+  border-left: 4px solid #e5e7eb;
+  transition: all 0.3s ease;
+}
+
+.quest-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.quest-card.status-available {
+  border-left-color: #4ade80;
+}
+
+.quest-card.status-in-progress {
+  border-left-color: #fbbf24;
+}
+
+.quest-card.status-completed {
+  border-left-color: #a855f7;
 }
 
 .quest-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.quest-header h3 {
-  margin: 0;
-  font-size: 1.2rem;
-  color: var(--color-heading);
-}
-
-.close-btn {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: var(--color-text-mute);
-}
-
-.quest-content {
-  padding: 1rem;
-}
-
-.trilogy-steps {
-  list-style: none;
-  padding: 0;
-}
-
-.trilogy-steps li {
-  padding: 0.5rem;
-  border-radius: 6px;
   margin-bottom: 0.5rem;
-  opacity: 0.5;
 }
 
-.trilogy-steps li.active {
-  opacity: 1;
-  background-color: var(--color-background-mute);
+.quest-header h4 {
+  margin: 0;
+  color: #333;
+  font-size: 1.1rem;
 }
 
-.trilogy-steps code {
-  background-color: var(--color-background);
-  padding: 0.2rem 0.4rem;
-  border-radius: 4px;
-  font-family: monospace;
+.quest-status {
+  background: rgba(59, 130, 246, 0.1);
+  color: #1d4ed8;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  text-transform: capitalize;
 }
 
-.quest-action {
-  margin-top: 1.5rem;
-  text-align: center;
+.quest-description {
+  color: #555;
+  line-height: 1.5;
+  margin: 0.5rem 0;
 }
 
-.playground-btn {
-  background-color: var(--color-quest);
+.start-quest-btn {
+  background: linear-gradient(135deg, #4ade80, #22c55e);
   color: white;
   border: none;
-  padding: 0.75rem 1.5rem;
+  padding: 0.5rem 1rem;
   border-radius: 8px;
-  font-size: 1rem;
   cursor: pointer;
-  transition: transform 0.2s ease;
+  font-weight: bold;
+  margin-top: 1rem;
+  transition: all 0.3s ease;
 }
 
-.playground-btn:hover {
-  transform: scale(1.05);
+.start-quest-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
 }
 </style>

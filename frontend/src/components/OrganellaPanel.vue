@@ -24,12 +24,11 @@
           <OrganellaEvolutionCeremony :start="evolvingOrganellaId === organella.id" />
           <div class="organella-header">
             <div class="organella-icon">
-              {{ getOrganellaIcon(organella.type, organella.stage) }}
+              <DigitalBee :bodyColor="getOrganellaColor(organella.type)" />
             </div>
             <div class="organella-info">
               <h4>{{ organella.name }}</h4>
               <span class="organella-type">{{ organella.type }} {{ organella.stage }}</span>
-              <em class="organella-description">"{{ organella.description }}"</em>
             </div>
             <div class="organella-level">
               <span class="level">Lv. {{ organella.level }}</span>
@@ -39,64 +38,75 @@
               <span class="xp-text">{{ organella.experience_points }} XP</span>
             </div>
           </div>
+          <em class="organella-description">"{{ organella.description }}"</em>
 
-          <div class="organella-details">
-            <div class="organella-appearance">
-              <h5>Mystical Appearance</h5>
-              <p v-if="isSectionVisible(organella.id, 'appearance')">
-                {{ organella.mystical_appearance }}
-              </p>
-              <button v-else @click="startStudy(organella.id, 'appearance')" class="study-btn">
-                Study
-              </button>
-            </div>
-
-            <div class="organella-experience">
-              <h5>Experience</h5>
-              <div v-if="isSectionVisible(organella.id, 'experience')">
-                <p><strong>Experience Points:</strong> {{ organella.experience_points }}</p>
-                <p><strong>Level:</strong> {{ organella.level }}</p>
+          <div class="organella-body">
+            <div class="organella-details">
+              <div class="organella-appearance">
+                <h5>Professional Appearance</h5>
+                <p v-if="isSectionVisible(organella.id, 'appearance')">
+                  {{ organella.professional_appearance }}
+                </p>
+                <div v-else>
+                  <button @click="startStudy(organella.id, 'appearance')" class="study-btn">
+                    Study
+                  </button>
+                  <p v-if="isStudying(organella.id, 'appearance')" class="studying-message">
+                    Studying... this section will be revealed for 3 minutes.
+                  </p>
+                </div>
               </div>
-              <button v-else @click="startStudy(organella.id, 'experience')" class="study-btn">
-                Study
-              </button>
-            </div>
-          </div>
 
-          <div class="organella-skills">
-            <h5>Skills:</h5>
-            <div class="skills-grid">
+              <div class="organella-experience">
+                <h5>Experience</h5>
+                <div v-if="isSectionVisible(organella.id, 'experience')">
+                  <p><strong>Experience Points:</strong> {{ organella.experience_points }}</p>
+                  <p><strong>Level:</strong> {{ organella.level }}</p>
+                </div>
+                <div v-else>
+                  <button @click="startStudy(organella.id, 'experience')" class="study-btn">
+                    Study
+                  </button>
+                  <p v-if="isStudying(organella.id, 'experience')" class="studying-message">
+                    Studying... this section will be revealed for 3 minutes.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="organella-skills">
+              <h5>Skills:</h5>
+              <div class="skills-grid">
               <div
                 v-for="(skill, skillName) in organella.skills"
                 :key="skillName"
                 class="skill-item"
               >
                 <span class="skill-name">{{ skill.name }}</span>
-                <div class="skill-level">
-                  <div class="skill-dots">
-                    <span
-                      v-for="i in skill.max_level"
-                      :key="i"
-                      class="skill-dot"
-                      :class="{ active: i <= skill.level }"
-                    ></span>
+                <div class="skill-level-bar-wrapper">
+                  <div class="skill-level-bar">
+                    <div class="skill-level-fill" :style="{ width: `${(skill.level / skill.max_level) * 100}%` }"></div>
                   </div>
+                  <span class="skill-level-text">{{ skill.level }} / {{ skill.max_level }}</span>
                 </div>
-              </div>
+              </div>              </div>
             </div>
-          </div>
 
-          <div class="organella-personality">
-            <h5>Personality:</h5>
-            <div class="personality-traits">
-              <span
-                v-for="(value, trait) in organella.personality_traits"
-                :key="trait"
-                class="trait"
-                :style="{ opacity: 0.5 + value * 0.5 }"
-              >
-                {{ trait }}
-              </span>
+            <div class="organella-personality">
+              <h5>Personality:</h5>
+              <div v-if="organella.personality_traits && Object.keys(organella.personality_traits).length > 0" class="personality-traits">
+                <span
+                  v-for="(value, trait) in organella.personality_traits"
+                  :key="trait"
+                  class="trait"
+                  :style="{ opacity: 0.5 + value * 0.5 }"
+                >
+                  {{ trait }}
+                </span>
+              </div>
+              <div v-else class="no-personality">
+                <p>Personality not yet defined.</p>
+              </div>
             </div>
           </div>
         </div>
@@ -141,6 +151,7 @@ import { useGameStore } from "@/stores/game";
 import { storeToRefs } from "pinia";
 import OrganellaEvolutionCeremony from "./OrganellaEvolutionCeremony.vue";
 import ChroniclerBonusEffect from "./ChroniclerBonusEffect.vue";
+import DigitalBee from "./DigitalBee.vue";
 
 const organellasStore = useOrganellasStore();
 const talesStore = useTalesStore();
@@ -182,9 +193,13 @@ watch(totalXp, (newXp, oldXp) => {
 });
 
 const studying_sections = ref(new Map<string, number>());
+const studying_sections_message = ref(new Set<string>());
 
 const startStudy = (organellaId: string, section: string) => {
   const key = `${organellaId}-${section}`;
+
+  // Show studying message
+  studying_sections_message.value.add(key);
 
   // Clear any existing timer for this section
   if (studying_sections.value.has(key)) {
@@ -194,10 +209,16 @@ const startStudy = (organellaId: string, section: string) => {
   // Set a new timer to hide the section after 3 minutes
   const timerId = setTimeout(() => {
     studying_sections.value.delete(key);
+    studying_sections_message.value.delete(key);
   }, 180000); // 3 minutes
 
   // Add the section to the studying map
   studying_sections.value.set(key, timerId);
+};
+
+const isStudying = (organellaId: string, section: string) => {
+  const key = `${organellaId}-${section}`;
+  return studying_sections_message.value.has(key) && !studying_sections.value.has(key);
 };
 
 const isSectionVisible = (organellaId: string, section: string) => {
@@ -218,15 +239,15 @@ const createNewOrganella = async () => {
   }
 };
 
-const getOrganellaIcon = (type: OrganellaType, stage: OrganellaStage) => {
-  const icons: Record<OrganellaType, Record<OrganellaStage, string>> = {
-    worker: { egg: "🥚", larva: "🐛", pupa: "🛡️", adult: "🐝" },
-    scout: { egg: "🥚", larva: "🐛", pupa: "🛡️", adult: "🔍" },
-    guard: { egg: "🥚", larva: "🐛", pupa: "🛡️", adult: "🛡️" },
-    queen: { egg: "🥚", larva: "🐛", pupa: "🛡️", adult: "👑" },
-    chronicler: { egg: "🥚", larva: "🐛", pupa: "🛡️", adult: "📜" },
+const getOrganellaColor = (type: OrganellaType) => {
+  const colors: Record<OrganellaType, string> = {
+    worker: "#fbbf24",
+    scout: "#06b6d4",
+    guard: "#ef4444",
+    queen: "#a855f7",
+    chronicler: "#3b82f6",
   };
-  return icons[type]?.[stage] || "🐝";
+  return colors[type] || "#6b7280";
 };
 
 const getXpProgress = (organella: Organella) => {
@@ -321,6 +342,12 @@ const formatDate = (dateString: string) => {
   background: #2d3748;
 }
 
+.studying-message {
+  font-size: 0.8rem;
+  color: #666;
+  margin-top: 0.5rem;
+}
+
 .organellas-list {
   display: flex;
   flex-direction: column;
@@ -398,12 +425,31 @@ const formatDate = (dateString: string) => {
   font-size: 0.8rem;
   color: #666;
   font-style: italic;
+  margin-bottom: 1rem;
+}
+
+.organella-body {
+  display: grid;
+  grid-template-areas:
+    "details skills"
+    "details personality";
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
 }
 
 .organella-details {
-  margin-top: 1rem;
-  border-top: 1px solid #e5e7eb;
-  padding-top: 1rem;
+  grid-area: details;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.organella-skills {
+  grid-area: skills;
+}
+
+.organella-personality {
+  grid-area: personality;
 }
 
 .organella-appearance h5,
@@ -465,37 +511,61 @@ const formatDate = (dateString: string) => {
 
 .skills-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 0.5rem;
+  grid-template-columns: 1fr;
+  gap: 0.25rem;
 }
 
 .skill-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.25rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.25rem;
 }
+
+.skill-level-bar-wrapper {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.skill-name {
+  grid-column: 1 / 3;
+}
+
+.skill-level-bar {
+  width: 100%;
+}
+
+.skill-level-text {
+  justify-self: end;
 
 .skill-name {
   font-size: 0.8rem;
   color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.skill-dots {
-  display: flex;
-  gap: 2px;
-}
-
-.skill-dot {
-  width: 8px;
+.skill-level-bar {
+  width: 100px;
   height: 8px;
-  border-radius: 50%;
   background: #e5e7eb;
-  transition: background 0.3s ease;
+  border-radius: 4px;
+  overflow: hidden;
 }
 
-.skill-dot.active {
+.skill-level-fill {
+  height: 100%;
   background: #4ade80;
+  transition: width 0.3s ease;
+}
+
+.skill-level-text {
+  font-size: 0.7rem;
+  color: #666;
+  min-width: 50px;
+  text-align: right;
 }
 
 .personality-traits {
