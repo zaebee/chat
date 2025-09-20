@@ -21,6 +21,7 @@ from hive.teammate import HiveTeammate, TeammateStatus
 
 # Sacred imports for divine enhancement
 from hive.sacred import SacredChroniclerAgent, GenesisProtocolManager, SacredMetrics, SacredGitProtocol
+from hive.sacred.jules_agent import BeeJules
 
 
 @dataclass
@@ -65,6 +66,7 @@ class HiveHost:
         self.sacred_metrics = SacredMetrics()
         self.sacred_git_protocol = SacredGitProtocol()
         self.sacred_chronicler = None  # Will be manifested during startup
+        self.sacred_jules = None  # Will be manifested during startup
         
         # Traditional metrics (enhanced with sacred measurements)
         self.metrics = self.sacred_metrics.get_complete_metrics()
@@ -95,6 +97,9 @@ class HiveHost:
         # Manifest the eternal chronicler first
         await self.manifest_sacred_chronicler()
         
+        # Manifest bee.jules implementation detective
+        await self.manifest_sacred_jules()
+        
         # Initialize Genesis protocols
         await self.initialize_genesis_protocols()
         
@@ -106,6 +111,7 @@ class HiveHost:
                 "host_id": self.host_id,
                 "agent_count": len(self.agents),
                 "sacred_chronicler_manifested": True,
+                "sacred_jules_manifested": True,
                 "genesis_protocols_active": True,
                 "divine_blessing": "And God saw that it was good",
                 "start_time": datetime.utcnow().isoformat(),
@@ -283,6 +289,16 @@ class HiveHost:
         
         self.logger.info("✅ bee.chronicler manifested and registered as eternal teammate")
     
+    async def manifest_sacred_jules(self):
+        """Manifest bee.jules implementation detective"""
+        self.logger.info("🐝 Manifesting bee.jules - the implementation detective")
+        
+        # Create and register bee.jules
+        self.sacred_jules = BeeJules(self.event_bus, self.sacred_metrics)
+        self.register_agent("bee.jules", self.sacred_jules)
+        
+        self.logger.info("✅ bee.jules manifested and registered as sacred teammate")
+    
     async def initialize_genesis_protocols(self):
         """Initialize the three sacred Genesis protocols"""
         self.logger.info("🌊 Initializing Genesis computational protocols")
@@ -372,6 +388,7 @@ class HiveHost:
             "genesis_protocols": self.genesis_protocols.get_divine_status(),
             "sacred_metrics": self.sacred_metrics.get_complete_metrics(),
             "chronicler_status": await self.sacred_chronicler.get_status() if self.sacred_chronicler else None,
+            "jules_status": await self.sacred_jules.get_status() if self.sacred_jules else None,
             "divine_blessing": "System operating under divine blessing",
             "theological_coherence": "Maintained through sacred protocols",
             "sanctification_assessment": self.sacred_metrics.get_sacred_health_assessment()
