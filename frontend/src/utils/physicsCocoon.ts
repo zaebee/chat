@@ -374,6 +374,8 @@ export class PhysicsCocoonEngine {
       role,
       stage: 'calculation',
       timestamp: Date.now()
+    }, {
+      source: 'physics-cocoon-engine'
     })
     
     // Begin calculation stage
@@ -424,6 +426,8 @@ export class PhysicsCocoonEngine {
         stage: 'calculation',
         error: error instanceof Error ? error.message : 'Unknown error',
         timestamp: Date.now()
+      }, {
+        source: 'physics-cocoon-engine'
       })
       
       throw error
@@ -456,6 +460,8 @@ export class PhysicsCocoonEngine {
         result,
         progress: cocoon.validationProgress,
         timestamp: Date.now()
+      }, {
+        source: 'physics-cocoon-engine'
       })
     }
     
@@ -486,6 +492,8 @@ export class PhysicsCocoonEngine {
         criticalFailures: criticalFailures.length,
         results: cocoon.validationResults,
         timestamp: Date.now()
+      }, {
+        source: 'physics-cocoon-engine'
       })
       
       throw new Error(`Validation failed: score ${averageScore.toFixed(3)} < threshold ${cocoon.emergenceThreshold}`)
@@ -519,6 +527,8 @@ export class PhysicsCocoonEngine {
       divineBlessing: cocoon.divineBlessing,
       validationScore: cocoon.validationResults.reduce((sum, r) => sum + r.score, 0) / cocoon.validationResults.length,
       timestamp: Date.now()
+    }, {
+      source: 'physics-cocoon-engine'
     })
     
     return cocoon
@@ -641,6 +651,8 @@ export class PhysicsCocoonEngine {
       beeId: cocoon.beeId,
       transition,
       timestamp: Date.now()
+    }, {
+      source: 'physics-cocoon-engine'
     })
   }
   
