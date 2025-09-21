@@ -33,6 +33,10 @@ on:
         required: false
         type: string
 
+permissions:
+  issues: write
+  contents: read
+
 jobs:
   prepare_divine_scroll:
     runs-on: ubuntu-latest
@@ -169,6 +173,7 @@ jobs:
       - name: 📮 Deliver Divine Letter via GitHub Issue
         uses: actions/github-script@v7
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const title = `${{ needs.prepare_divine_scroll.outputs.letter_title }}`;
             const body = `${{ needs.prepare_divine_scroll.outputs.letter_content }}`;
@@ -211,6 +216,7 @@ jobs:
       - name: 🌟 Send Sacred Team Notification
         uses: actions/github-script@v7
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             // For special announcements, we could add additional notifications
             // This could integrate with Discord, Slack, or other communication channels
