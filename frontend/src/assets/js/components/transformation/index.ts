@@ -5,6 +5,8 @@
  * These components embody the "T" principle of ATCG architecture.
  */
 
+import type { ATCGComponent } from '../index'
+
 // Transformation component implementations
 export * from './RectValidator'
 export * from './HexaProcessor'
@@ -12,11 +14,15 @@ export * from './TransformHub'
 export * from './DataPipeline'
 
 // Type definitions for transformation components
-export interface TransformationComponent {
+export interface TransformationComponent extends ATCGComponent {
   readonly type: 'transformation'
   readonly purpose: string
+  readonly id: string
   transform(input: any): any
   process(data: any): any
+  initialize(): Promise<void>
+  destroy(): Promise<void>
+  getStatus(): Record<string, any>
 }
 
 // Transformation component factory

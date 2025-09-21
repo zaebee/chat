@@ -7,6 +7,7 @@
 
 import { atcgRegistry } from './components'
 import { createTransformationComponent } from './components/transformation'
+import type { TransformationComponent } from './components/transformation'
 import type { RectConstraint } from './components/transformation/RectValidator'
 import type { HexaNode } from './components/transformation/HexaProcessor'
 
@@ -15,21 +16,21 @@ import type { HexaNode } from './components/transformation/HexaProcessor'
  */
 export async function testTransformationIntegration(): Promise<void> {
   console.log('🧪 Testing T (Transformation) Integration with A (Aggregate) Foundation')
-  console.log('=' * 70)
+  console.log('='.repeat(70))
 
   try {
     // Test 1: Component Creation and Registration
     console.log('\n📝 Test 1: Component Creation and Registration')
     
-    const rectValidator = await createTransformationComponent('rect_validator', { 
+    const rectValidator: TransformationComponent = await createTransformationComponent('rect_validator', { 
       id: 'test_rect_validator' 
     })
     
-    const hexaProcessor = await createTransformationComponent('hexa_processor', { 
+    const hexaProcessor: TransformationComponent = await createTransformationComponent('hexa_processor', { 
       id: 'test_hexa_processor' 
     })
     
-    const transformHub = await createTransformationComponent('transform_hub', { 
+    const transformHub: TransformationComponent = await createTransformationComponent('transform_hub', { 
       id: 'test_transform_hub' 
     })
 
