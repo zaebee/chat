@@ -1,0 +1,168 @@
+name: "🍯 Honeypot Validation"
+
+on:
+  pull_request:
+    paths:
+      - 'docs/**'
+  push:
+    branches: [ main ]
+    paths:
+      - 'docs/**'
+
+jobs:
+  validate-purity:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Validate pure markdown in docs/
+      run: |
+        echo "🍯 Validating Honeypot Purity..."
+        
+        # Check for forbidden content in docs/
+        VIOLATIONS=0
+        
+        # Check for Jekyll Liquid includes
+        if grep -r "{% include" docs/; then
+          echo "❌ Found Jekyll Liquid includes in docs/"
+          VIOLATIONS=$((VIOLATIONS + 1))
+        fi
+        
+        # Check for HTML div tags with classes
+        if grep -r "<div class=" docs/; then
+          echo "❌ Found HTML div tags with classes in docs/"
+          VIOLATIONS=$((VIOLATIONS + 1))
+        fi
+        
+        # Check for script tags
+        if grep -r "<script" docs/; then
+          echo "❌ Found script tags in docs/"
+          VIOLATIONS=$((VIOLATIONS + 1))
+        fi
+        
+        # Check for style tags
+        if grep -r "<style" docs/; then
+          echo "❌ Found style tags in docs/"
+          VIOLATIONS=$((VIOLATIONS + 1))
+        fi
+        
+        # Check for JavaScript/TypeScript files
+        if find docs/ -name "*.js" -o -name "*.ts" -o -name "*.vue" | grep -q .; then
+          echo "❌ Found JavaScript/TypeScript files in docs/"
+          VIOLATIONS=$((VIOLATIONS + 1))
+        fi
+        
+        # Check for complex frontmatter
+        echo "🔍 Checking frontmatter complexity..."
+        python3 << 'EOF'
+        import os
+        import glob
+        import re
+        
+        violations = 0
+        allowed_fields = {'title', 'description', 'category'}
+        
+        for file_path in glob.glob('docs/**/*.md', recursive=True):
+            try:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                
+                if content.startswith('---'):
+                    parts = content.split('---', 2)
+                    if len(parts) >= 2:
+                        frontmatter = parts[1].strip()
+                        fields = set()
+                        
+                        for line in frontmatter.split('\n'):
+                            if ':' in line:
+                                field = line.split(':', 1)[0].strip()
+                                fields.add(field)
+                        
+                        # Check for non-essential fields
+                        extra_fields = fields - allowed_fields
+                        if extra_fields:
+                            print(f"⚠️ Complex frontmatter in {file_path}: {extra_fields}")
+                            violations += 1
+            
+            except Exception as e:
+                print(f"Error checking {file_path}: {e}")
+        
+        if violations > 0:
+            print(f"❌ Found {violations} files with complex frontmatter")
+            exit(1)
+        EOF
+        
+        if [ $VIOLATIONS -gt 0 ]; then
+          echo ""
+          echo "💥 HONEYPOT CONTAMINATED!"
+          echo "Found $VIOLATIONS types of violations in docs/"
+          echo ""
+          echo "🧹 To fix:"
+          echo "1. Remove Jekyll Liquid includes ({% include %})"
+          echo "2. Remove HTML tags with classes"
+          echo "3. Remove script and style tags"
+          echo "4. Move JS/TS files out of docs/"
+          echo "5. Simplify frontmatter to: title, description, category only"
+          echo ""
+          echo "🍯 Keep the honeypot pure - let workflows add the sweetness!"
+          exit 1
+        else
+          echo "✅ Honeypot is pure! No contamination detected."
+        fi
+        
+    - name: Validate markdown syntax
+      run: |
+        echo "📝 Validating markdown syntax..."
+        
+        # Install markdownlint
+        npm install -g markdownlint-cli
+        
+        # Create markdownlint config for pure markdown
+        cat > .markdownlint.json << 'EOF'
+        {
+          "MD013": false,
+          "MD033": {
+            "allowed_elements": ["br"]
+          },
+          "MD041": false
+        }
+        EOF
+        
+        # Run markdownlint on docs/
+        markdownlint docs/ || echo "⚠️ Markdown linting warnings (non-blocking)"
+        
+    - name: Generate purity report
+      run: |
+        echo "📊 Generating Honeypot Purity Report..."
+        
+        python3 << 'EOF'
+        import os
+        import glob
+        
+        # Count files and sizes
+        md_files = glob.glob('docs/**/*.md', recursive=True)
+        total_size = sum(os.path.getsize(f) for f in md_files)
+        
+        print(f"📚 Total markdown files: {len(md_files)}")
+        print(f"📏 Total size: {total_size / 1024:.1f} KB")
+        print(f"📄 Average file size: {total_size / len(md_files) / 1024:.1f} KB")
+        
+        # Check for pure content indicators
+        pure_indicators = 0
+        for file_path in md_files:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            # Count pure markdown indicators
+            if '```' in content:  # Code blocks
+                pure_indicators += 1
+            if '|' in content and '---' in content:  # Tables
+                pure_indicators += 1
+            if content.count('#') > 0:  # Headers
+                pure_indicators += 1
+        
+        print(f"🍯 Purity score: {pure_indicators / len(md_files):.1f} indicators per file")
+        print("✅ Honeypot validation complete!")
+        EOF
