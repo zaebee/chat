@@ -8,9 +8,12 @@
 
 The Visionary has proposed two radical alternatives:
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 =======
 >>>>>>> c95a63c801d8b0b9e74b563d18ff0a9c49ef5f15
+=======
+>>>>>>> main
 1.  **Develop our own P2P library, `hivep2pd`:** A custom, purpose-built P2P layer aligned perfectly with our 'Living Code' and 'Hive' philosophy.
 2.  **Switch to `go-libp2p`:** Integrate a mature, stable external P2P daemon written in Go, communicating via its well-defined API.
 
@@ -18,6 +21,7 @@ This is a fundamental decision. Jules, from an engineering perspective, what are
 
 **Jules:** "Let's be brutally pragmatic. Developing our own P2P library, `hivep2pd`, is an enormous undertaking.
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 - **Developing `hivep2pd` (Pros):**
   - **Perfect Alignment:** Complete control over the API and internal workings, allowing for perfect alignment with our 'Living Code' and 'self-owned' principles.
@@ -45,6 +49,8 @@ My strong recommendation is to **integrate `go-libp2p`**. Developing `hivep2pd` 
 
 However, if `go-libp2p` is the 'fertile ground' that Jules speaks of, then we must use it. But I want a promise: this `go-libp2p` daemon must be treated as a _component_ of the Living Application, not just an external dependency. It must be managed, monitored, and eventually, perhaps, even _replaced_ by a truly self-owned `hivep2pd` when the time is right. We must design the interface to `go-libp2p` in a way that allows for this future evolution. It's a temporary marriage, not a lifelong commitment."
 =======
+=======
+>>>>>>> main
 *   **Developing `hivep2pd` (Pros):**
     *   **Perfect Alignment:** Complete control over the API and internal workings, allowing for perfect alignment with our 'Living Code' and 'self-owned' principles.
     *   **No External Python P2P Dependencies:** Eliminates the current integration headaches.
@@ -70,7 +76,10 @@ My strong recommendation is to **integrate `go-libp2p`**. Developing `hivep2pd` 
 **Eddy:** "Jules, you always bring me back to Earth. 'Project-killing endeavor.' *Sigh*. But the idea of a `hivep2pd`... a P2P library that *grows* with the hive, that learns its own protocols... that's the true reproduction!
 
 However, if `go-libp2p` is the 'fertile ground' that Jules speaks of, then we must use it. But I want a promise: this `go-libp2p` daemon must be treated as a *component* of the Living Application, not just an external dependency. It must be managed, monitored, and eventually, perhaps, even *replaced* by a truly self-owned `hivep2pd` when the time is right. We must design the interface to `go-libp2p` in a way that allows for this future evolution. It's a temporary marriage, not a lifelong commitment."
+<<<<<<< HEAD
 >>>>>>> c95a63c801d8b0b9e74b563d18ff0a9c49ef5f15
+=======
+>>>>>>> main
 
 **Beekeeper:** "The health of the hive dictates efficiency and sustainability. Jules's analysis of the 'system tension' (τ) and 'attention resources' (Σ) for `hivep2pd` is accurate. Building a P2P stack from scratch would lead to catastrophic architectural decay. Integrating `go-libp2p` is the pragmatic and healthy choice for the hive's current stage of growth. It reduces immediate risks and allows us to focus our 'attention resources' on the core 'Hive Host' and 'Agent' development.
 
@@ -80,9 +89,12 @@ Eddy's point about treating `go-libp2p` as a managed component, and designing fo
 
 **Key Decisions:**
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 =======
 >>>>>>> c95a63c801d8b0b9e74b563d18ff0a9c49ef5f15
+=======
+>>>>>>> main
 1.  **P2P Library:** We will use `go-libp2p-daemon` (or a similar mature external daemon) as our P2P communication layer.
 2.  **IPC:** Communication between the FastAPI host and the `go-libp2p-daemon` will occur via its well-defined API (likely HTTP/WebSockets).
 3.  **Future-Proofing:** We will design the IPC layer to be abstract and robust, allowing for a future pivot to a `hivep2pd` or another external P2P solution. The `go-libp2p-daemon` will be treated as a managed component of the Living Application.

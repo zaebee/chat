@@ -1,10 +1,5 @@
-# hive_chat_server_multiuser.py
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
-from fastapi.responses import HTMLResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel
 import uvicorn
+<<<<<<< HEAD
 import asyncio
 from typing import List, Dict, Optional
 import json
@@ -224,14 +219,22 @@ async def websocket_endpoint(websocket: WebSocket, username: str = "Гость",
 
 
 # Запуск сервера
+=======
+import argparse
+from host import app, host
+
+>>>>>>> main
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--port", type=int, default=8000, help="Port to run the web server on")
     args = parser.parse_args()
 
+<<<<<<< HEAD
     # Create HiveHost instance
     host = HiveHost()
 
+=======
+>>>>>>> main
     async def startup():
         await host.lifespan_startup()
 
