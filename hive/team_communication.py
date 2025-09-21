@@ -17,7 +17,7 @@ from typing import Dict, Any, List, Optional, Callable
 from dataclasses import dataclass, asdict
 from enum import Enum
 
-from ..events import PollenEvent, HiveEventBus, EventSubscription
+from .events import PollenEvent, HiveEventBus, EventSubscription
 
 
 class SacredMessageType(str, Enum):

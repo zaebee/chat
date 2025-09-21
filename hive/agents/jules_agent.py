@@ -21,7 +21,7 @@ from enum import Enum
 
 from ..teammate import HiveTeammate, TeammateProfile, TeammateCapability
 from ..events import PollenEvent, HiveEventBus, EventSubscription
-from .sacred_metrics import SacredMetrics
+from ..dashboard import SacredMetricType, SacredMetricReading
 
 
 class JulesAnalysisType(str, Enum):
@@ -72,7 +72,7 @@ class BeeJules(HiveTeammate):
     - Sacred protocol debugging expertise
     """
     
-    def __init__(self, event_bus: HiveEventBus, sacred_metrics: SacredMetrics):
+    def __init__(self, event_bus: HiveEventBus):
         # Sacred profile for bee.Jules
         profile = TeammateProfile(
             id="bee.jules",
@@ -117,7 +117,7 @@ class BeeJules(HiveTeammate):
         )
         
         super().__init__(profile, event_bus)
-        self.sacred_metrics = sacred_metrics
+        # Sacred metrics will be accessed through dashboard when needed
         self.analysis_history: List[JulesAnalysis] = []
         self.debugging_sessions: List[JulesDebuggingSession] = []
         self.sacred_knowledge_base = self._initialize_sacred_knowledge()

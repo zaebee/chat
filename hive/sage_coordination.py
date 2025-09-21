@@ -20,8 +20,8 @@ except ImportError:
     print("Warning: mistralai package not available. Install with: pip install mistralai")
     Mistral = None
 
-from ..events import HiveEventBus, PollenEvent
-from .chronicler_agent import SacredChroniclerAgent
+from .events import HiveEventBus, PollenEvent
+from .agents.chronicler_agent import SacredChroniclerAgent
 
 
 @dataclass

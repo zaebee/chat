@@ -8,7 +8,7 @@ and communicate through the Sacred Team Communication system.
 import asyncio
 import json
 from hive_host import HiveHost
-from hive.sacred.team_communication import SacredTeamCommunication
+from hive.team_communication import SacredTeamCommunication
 
 
 async def test_jules_integration():
@@ -83,7 +83,7 @@ async def sacred_event_handler(event):
         
         # Test 6: Test direct Jules analysis
         print("\n🧪 Test 6: Test direct Jules analysis")
-        from hive.sacred.jules_agent import JulesAnalysisType
+        from hive.agents.jules_agent import JulesAnalysisType
         analysis = await jules_agent.analyze_code(
             "async def divine_function(): pass",
             JulesAnalysisType.CODE_REVIEW
