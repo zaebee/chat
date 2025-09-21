@@ -18,7 +18,7 @@ chronicle_type: "completion"
 session_type: "soft_merge_implementation"
 ---
 
-# docs/ Soft Merge Completion Chronicle
+# 🔗 Documentation Transformation: Soft Merge Success Chronicle
 
 {% include language-switcher.html %}
 
