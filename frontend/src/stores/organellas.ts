@@ -4,6 +4,7 @@
 
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { getApiUrl } from '@/config/env'
 
 export interface Organella {
   id: string;
@@ -295,7 +296,7 @@ export const useOrganellasStore = defineStore('organellas', () => {
    */
   const addXpToOrganella = async (userId: string, organellaId: string, xpGain: number): Promise<void> => {
     try {
-      const response = await fetch(`/api/organellas/${userId}/${organellaId}/add_xp`, {
+      const response = await fetch(getApiUrl(`api/organellas/${userId}/${organellaId}/add_xp`), {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

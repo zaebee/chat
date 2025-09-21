@@ -9,6 +9,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request, HTTPExcept
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import uvicorn
 import asyncio
@@ -85,6 +86,28 @@ app = FastAPI(
     description="A collaborative learning platform with AI teammates",
     version="1.0.0",
     lifespan=lifespan
+)
+
+# Configure CORS to allow requests from development environments
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        # Local development
+        "http://localhost:3000",
+        "http://localhost:5173", 
+        "http://localhost:8080",
+        "https://localhost:3000",
+        "https://localhost:5173",
+        "https://localhost:8080",
+        # Production domains
+        "https://chat.zae.life",
+        "https://www.chat.zae.life",
+    ],
+    # Regex to match Gitpod and Codespaces URLs
+    allow_origin_regex=r"https://.*\.gitpod\.(dev|io)$|https://.*\.githubpreview\.dev$|https://.*\.app\.github\.dev$",
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["*"],
 )
 
 # Setup templates and static files

@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
+import { getApiUrl } from "@/config/env";
 
 export interface HiveTeammate {
   id: string;
@@ -24,7 +25,7 @@ export const useTeammatesStore = defineStore("teammates", () => {
   const fetchTeammates = async () => {
     isLoading.value = true;
     try {
-      const response = await fetch("/api/hive/teammates");
+      const response = await fetch(getApiUrl("api/hive/teammates"));
       if (!response.ok) {
         throw new Error(`Failed to fetch teammates: ${response.statusText}`);
       }

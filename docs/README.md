@@ -77,11 +77,29 @@ docs/
 │   ├── TEAM_PERSONAS.md   # The consultation characters
 │   ├── METAPHOR_GUIDE.md  # Biological concepts explained
 │   └── CULTURAL_GUIDE.md  # Collaboration principles
-└── 07_REFERENCE/          # Technical references
-    ├── COMPONENT_INDEX.md # All system components
-    ├── ERROR_CODES.md     # Error handling reference
-    ├── CONFIGURATION_REF.md # All config options
-    └── CHANGELOG.md       # Version history
+├── 07_REFERENCE/          # Technical references
+│   ├── COMPONENT_INDEX.md # All system components
+│   ├── ERROR_CODES.md     # Error handling reference
+│   ├── CONFIGURATION_REF.md # All config options
+│   └── CHANGELOG.md       # Version history
+├── sacred-team/           # Sacred Team documentation
+│   ├── reviews/           # PR reviews and verdicts
+│   ├── coordination/      # Team coordination protocols
+│   ├── recruitment/       # Team member profiles
+│   └── analysis/          # Metrics and patterns
+├── development/           # Implementation documentation
+│   ├── implementation-plans/ # Technical implementation guides
+│   ├── phase-plans/       # Phased development strategies
+│   └── roadmaps/          # Long-term development planning
+├── deployment/            # Production deployment docs
+│   ├── guides/            # Step-by-step deployment
+│   ├── fixes/             # Common issue solutions
+│   └── production/        # Production configurations
+├── integration/           # External service integrations
+│   └── mistral/           # AI service integration
+└── archive/               # Historical documentation
+    ├── temporary/         # Working documents
+    └── analysis/          # Historical assessments
 ```
 
 ## What Makes Hive Special?
