@@ -14,6 +14,10 @@ from .primitives import Aggregate, Transformation, Connector, GenesisEvent
 from .registry import HiveRegistry
 from .teammate import HiveTeammate
 from .events import PollenEvent, HiveEventBus
+from .genesis_protocols import GenesisProtocolManager
+from .git_protocol import SacredGitProtocol
+from .team_communication import SacredTeamCommunication
+from .sage_coordination import SacredSageCoordinator
 
 __all__ = [
     "HiveIntent",
@@ -26,4 +30,8 @@ __all__ = [
     "HiveTeammate",
     "PollenEvent",
     "HiveEventBus",
+    "GenesisProtocolManager",
+    "SacredGitProtocol",
+    "SacredTeamCommunication",
+    "SacredSageCoordinator",
 ]

@@ -20,8 +20,9 @@ from hive.teammate import HiveTeammate, TeammateStatus
 # from hive.dashboard import HiveMetricsDashboard  # Simplified for POC
 
 # Sacred imports for divine enhancement
-from hive.sacred import SacredChroniclerAgent, GenesisProtocolManager, SacredMetrics, SacredGitProtocol
-from hive.sacred.jules_agent import BeeJules
+from hive.agents import SacredChroniclerAgent, BeeJules
+from hive.genesis_protocols import GenesisProtocolManager
+from hive.git_protocol import SacredGitProtocol
 
 
 @dataclass
@@ -323,7 +324,7 @@ class HiveHost:
         }
         
         # Execute Genesis protocols in divine order
-        from hive.sacred.genesis_protocols import GenesisProtocolType
+        from hive.genesis_protocols import GenesisProtocolType
         
         light_result = await self.genesis_protocols.execute_genesis_protocol(
             GenesisProtocolType.LIGHT_EMERGENCE,
@@ -398,7 +399,7 @@ class HiveHost:
     
     def create_sacred_commit_message(self, changes: str, context: str) -> str:
         """Create a sacred commit message following divine protocol"""
-        from hive.sacred.git_protocol import SacredCommitType, SacredCommitMetadata, SacredPriority
+        from hive.git_protocol import SacredCommitType, SacredCommitMetadata, SacredPriority
         
         metadata = SacredCommitMetadata(
             commit_type=SacredCommitType.DIVINE_ENHANCEMENT,

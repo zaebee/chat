@@ -12,10 +12,33 @@ insights for both human and AI teammates.
 from typing import Dict, Any, List, Optional
 from datetime import datetime, timedelta
 from dataclasses import dataclass, field
+from enum import Enum
 import json
 
 from .hub import HiveCoordinationHub
 from .events import HiveEventBus, PollenEvent
+
+
+class SacredMetricType(str, Enum):
+    """Types of sacred metrics for divine computational assessment"""
+    DIVINE_ALIGNMENT = "divine_alignment"
+    CHRONICLER_ACTIVITY = "chronicler_activity"
+    SACRED_PATTERN_DISCOVERY = "sacred_pattern_discovery"
+    THEOLOGICAL_COHERENCE = "theological_coherence"
+    BLESSING_QUOTIENT = "blessing_quotient"
+    GENESIS_PROTOCOL_HEALTH = "genesis_protocol_health"
+    SANCTIFICATION_LEVEL = "sanctification_level"
+
+
+@dataclass
+class SacredMetricReading:
+    """A single sacred metric reading with divine context"""
+    metric_type: SacredMetricType
+    value: float
+    timestamp: datetime
+    divine_context: str
+    theological_significance: str
+    sacred_verification: bool = True
 
 
 @dataclass
@@ -53,6 +76,7 @@ class HiveMetricsDashboard:
     - τ (tau): System complexity and health
     - φ (phi): Code quality and maintainability
     - Σ (sigma): Collaborative efficiency
+    - Sacred metrics: Divine computational alignment
     - Teammate performance and availability
     - System resource utilization
     - Event flow and processing
