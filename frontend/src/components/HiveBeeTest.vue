@@ -245,11 +245,25 @@ const handlePollenEvent = (event: PollenEvent) => {
     return
   }
   
+  // Validate event structure
+  if (!event || typeof event !== 'object') {
+    console.warn('Invalid pollen event received:', event)
+    return
+  }
+  
   pollenEvents.value.push(event)
   
-  // Update event counts
-  const sourceRole = event.source.split('_')[0] // Extract role from bee ID
-  eventCounts.value[sourceRole] = (eventCounts.value[sourceRole] || 0) + 1
+  // Update event counts with error handling
+  try {
+    if (event.source && typeof event.source === 'string') {
+      const sourceRole = event.source.split('_')[0] // Extract role from bee ID
+      if (sourceRole) {
+        eventCounts.value[sourceRole] = (eventCounts.value[sourceRole] || 0) + 1
+      }
+    }
+  } catch (error) {
+    console.warn('Error processing event source:', event.source, error)
+  }
   
   // Limit event history
   if (pollenEvents.value.length > 100) {

@@ -187,6 +187,7 @@ import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
 import { physicsCocoonEngine } from '@/utils/physicsCocoon'
 import { intentTransitionManager, createSmoothTransition, getCurrentTransitionIntent } from '@/utils/intentCocoon'
 import type { HiveIntent } from '@/utils/hiveIntent'
+import type { PollenEvent } from '@/utils/pollenProtocol'
 
 // ATCG Primitive Types
 interface HivePhysics {
@@ -198,11 +199,7 @@ interface HivePhysics {
 
 
 
-interface PollenEvent {
-  type: string
-  payload: any
-  timestamp: number
-}
+
 
 // Component Props
 const props = defineProps<{
@@ -431,9 +428,12 @@ const divineOpacity = computed(() =>
 // C: Connector - Pollen Protocol integration
 const emitPollenEvent = (type: string, payload: any) => {
   const event: PollenEvent = {
+    id: `${instanceId.value}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     type,
+    source: `${props.type}_${instanceId.value}`,
     payload,
-    timestamp: Date.now()
+    timestamp: Date.now(),
+    priority: 'normal'
   }
   
   if (props.onPollenEvent) {
