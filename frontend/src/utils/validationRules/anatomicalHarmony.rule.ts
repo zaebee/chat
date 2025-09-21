@@ -1,4 +1,4 @@
-function validateAnatomicalHarmony(morphology: BeeMorphology, GOLDEN_RATIO: number): ValidationResult {
+export function validateAnatomicalHarmony(morphology: BeeMorphology, GOLDEN_RATIO: number): ValidationResult {
   const { abdomen, thorax, head } = morphology
   
   // Check size progression: head < thorax < abdomen
