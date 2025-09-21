@@ -212,3 +212,6 @@ __marimo__/
 *.buildinfo
 *.changes
 chat.db
+
+.gemini/
+gha-creds-*.json
