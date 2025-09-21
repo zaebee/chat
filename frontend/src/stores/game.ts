@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
+import { getApiUrl } from "@/config/env";
 
 export interface Room {
   id: string;
@@ -57,7 +58,7 @@ export const useGameStore = defineStore("game", () => {
    */
   const fetchSolvedChallenges = async (userId: string) => {
     try {
-      const response = await fetch(`/api/user_progress/${userId}`);
+      const response = await fetch(getApiUrl(`api/user_progress/${userId}`));
       if (!response.ok) {
         throw new Error(`Failed to fetch solved challenges: ${response.statusText}`);
       }
@@ -95,7 +96,7 @@ export const useGameStore = defineStore("game", () => {
    */
   const fetchRooms = async () => {
     try {
-      const response = await fetch("/api/rooms");
+      const response = await fetch(getApiUrl("api/rooms"));
       if (!response.ok) {
         throw new Error(`Failed to fetch rooms: ${response.statusText}`);
       }
@@ -179,7 +180,7 @@ export const useGameStore = defineStore("game", () => {
     };
 
     try {
-      const response = await fetch("/api/rooms/create", {
+      const response = await fetch(getApiUrl("api/rooms/create"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

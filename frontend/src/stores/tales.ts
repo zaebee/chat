@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
+import { getApiUrl } from "@/config/env";
 
 export interface TaleChapter {
   id: string;
@@ -26,7 +27,7 @@ export const useTalesStore = defineStore("tales", () => {
   const fetchTales = async (userId: string) => {
     isLoading.value = true;
     try {
-      const response = await fetch(`/api/tales/${userId}`);
+      const response = await fetch(getApiUrl(`api/tales/${userId}`));
       if (!response.ok) {
         throw new Error(`Failed to fetch tales: ${response.statusText}`);
       }

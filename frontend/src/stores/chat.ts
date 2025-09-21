@@ -7,6 +7,7 @@ import { useTeammatesStore } from "./teammates";
 import { useGameStore } from "./game";
 import { useOrganellasStore } from "./organellas";
 import { useTalesStore } from "./tales";
+import { getApiUrl, getWebSocketUrl } from "@/config/env";
 
 export const useChatStore = defineStore("chat", () => {
   // --- STATE ---
@@ -44,7 +45,7 @@ export const useChatStore = defineStore("chat", () => {
    */
   const fetchSolvedChallenges = async (userId: string) => {
     try {
-      const response = await fetch(`/api/user_progress/${userId}`);
+      const response = await fetch(getApiUrl(`api/user_progress/${userId}`));
       if (response.ok) {
         const data = await response.json();
         solvedChallenges.value = data.solved_challenge_ids || [];
@@ -102,7 +103,7 @@ export const useChatStore = defineStore("chat", () => {
     }
 
     try {
-      const response = await fetch("/solve_challenge", {
+      const response = await fetch(getApiUrl("solve_challenge"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -141,7 +142,7 @@ export const useChatStore = defineStore("chat", () => {
     users.value = [];
     userStore.setCurrentUser(null);
 
-    const url = `wss://${window.location.host}/ws?username=${encodeURIComponent(username)}&user_id=${encodeURIComponent(userId)}`;
+    const url = getWebSocketUrl(`ws?username=${encodeURIComponent(username)}&user_id=${encodeURIComponent(userId)}`);
     socket = new WebSocket(url);
 
     socket.onopen = () => {
