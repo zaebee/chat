@@ -74,6 +74,33 @@
         <span>{{ transitionDuration }}ms</span>
       </div>
       
+      <!-- Emotional Contagion Controls -->
+      <div class="control-group">
+        <label>
+          <input 
+            v-model="emotionalContagion" 
+            type="checkbox"
+            class="smooth-checkbox"
+          />
+          Emotional Contagion
+        </label>
+        <span :class="emotionalContagion ? 'enabled' : 'disabled'">
+          {{ emotionalContagion ? '🧠 Active' : '🚫 Disabled' }}
+        </span>
+      </div>
+      
+      <div class="control-group" v-if="emotionalContagion">
+        <label>Contagion Strength:</label>
+        <input 
+          v-model.number="contagionStrength" 
+          type="range" 
+          min="0.1" 
+          max="2.0" 
+          step="0.1"
+        />
+        <span>{{ contagionStrength }}x</span>
+      </div>
+
       <!-- Test Buttons -->
       <div class="control-group">
         <button @click="testRapidChanges" class="test-button">
@@ -84,6 +111,9 @@
         </button>
         <button @click="testCollaborationModes" class="test-button">
           🤝 Test Collaboration Modes
+        </button>
+        <button @click="triggerEmotionalWave" class="test-button">
+          🌊 Trigger Emotional Wave
         </button>
       </div>
     </div>
@@ -150,6 +180,18 @@
             {{ smoothTransitions ? 'ON' : 'OFF' }}
           </span>
         </div>
+        <div class="metric">
+          <label>Emotional Influences:</label>
+          <span>{{ contagionStatus.activeInfluences }}</span>
+        </div>
+        <div class="metric">
+          <label>Dominant Emotion:</label>
+          <span>{{ contagionStatus.dominantEmotion }}</span>
+        </div>
+        <div class="metric">
+          <label>Clustered Bees:</label>
+          <span>{{ proximityStatus.clusteredBees }}/{{ proximityStatus.totalBees }}</span>
+        </div>
       </div>
       
       <div class="event-log">
@@ -172,17 +214,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import BeeOrganella from './BeeOrganella.vue'
 import BeeOrganellaHive from './BeeOrganellaHive.vue'
 import { hivePhysics } from '../utils/hivePhysics'
 import { hiveIntentEngine, createIntent } from '../utils/hiveIntent'
 import { pollenBus, BeeEventTypes, type PollenEvent } from '../utils/pollenProtocol'
 import { intentTransitionManager } from '../utils/intentCocoon'
+import { emotionalContagionEngine } from '../utils/emotionalContagion'
+import { proximityDetector } from '../utils/proximityDetector'
 
 // Test configuration
 const physicsConfig = ref({
-  baseUnit: 20,
+  baseUnit: 50, // Match original BeeOrganella base size
   scaleFactor: 1,
   aspectRatio: 1.2,
   energyLevel: 0.8
@@ -199,6 +243,10 @@ const intentConfig = ref({
 const smoothTransitions = ref(true)
 const transitionDuration = ref(1000)
 
+// Emotional contagion controls
+const emotionalContagion = ref(true)
+const contagionStrength = ref(0.7)
+
 const beeRoles = ['worker', 'scout', 'queen', 'guard', 'chronicler', 'jules'] as const
 
 // Event tracking
@@ -210,6 +258,8 @@ const physicsStatus = computed(() => hivePhysics.getStatus())
 const intentStatus = computed(() => hiveIntentEngine.getStatus())
 const pollenMetrics = computed(() => pollenBus.getMetrics())
 const transitionStatus = computed(() => intentTransitionManager.getStatus())
+const contagionStatus = computed(() => emotionalContagionEngine.getMetrics())
+const proximityStatus = computed(() => proximityDetector.getMetrics())
 
 const recentEvents = computed(() => 
   pollenEvents.value.slice(-10).reverse()
@@ -320,6 +370,28 @@ const testCollaborationModes = () => {
   })
 }
 
+// Trigger emotional wave from queen bee
+const triggerEmotionalWave = () => {
+  const queenBeeId = 'queen_' + Date.now()
+  emotionalContagionEngine.triggerEmotionalWave(
+    queenBeeId, 
+    'excited', 
+    contagionStrength.value
+  )
+}
+
+// Configure emotional contagion
+const configureContagion = () => {
+  emotionalContagionEngine.configure({
+    enabled: emotionalContagion.value,
+    influenceStrength: contagionStrength.value,
+    propagationSpeed: 0.5
+  })
+}
+
+// Watch for contagion setting changes
+watch([emotionalContagion, contagionStrength], configureContagion)
+
 // Lifecycle
 onMounted(() => {
   // Subscribe to all bee events
@@ -327,6 +399,9 @@ onMounted(() => {
   
   // Update physics when config changes
   updatePhysics()
+  
+  // Configure initial contagion settings
+  configureContagion()
 })
 
 onUnmounted(() => {

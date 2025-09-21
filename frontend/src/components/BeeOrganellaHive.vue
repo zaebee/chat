@@ -186,6 +186,8 @@
 import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
 import { physicsCocoonEngine } from '@/utils/physicsCocoon'
 import { intentTransitionManager, createSmoothTransition, getCurrentTransitionIntent } from '@/utils/intentCocoon'
+import { proximityDetector } from '@/utils/proximityDetector'
+import { emotionalContagionEngine } from '@/utils/emotionalContagion'
 import type { HiveIntent } from '@/utils/hiveIntent'
 import type { PollenEvent } from '@/utils/pollenProtocol'
 
@@ -448,6 +450,15 @@ onMounted(async () => {
     baseHiveIntent.value = hiveIntent.value
   }
   
+  // Initialize position tracking and emotional contagion
+  updateBeePosition()
+  
+  // Start emotional contagion processing
+  contagionProcessingInterval.value = setInterval(() => {
+    emotionalContagionEngine.processContagion()
+    processEmotionalContagion()
+  }, 200) // Process every 200ms
+  
   if (props.useCocoon) {
     await enterPhysicsCocoon()
   } else {
@@ -472,6 +483,12 @@ onUnmounted(() => {
   if (props.smoothTransitions) {
     intentTransitionManager.cancelTransition(instanceId.value)
   }
+  
+  // Clean up emotional contagion
+  if (contagionProcessingInterval.value) {
+    clearInterval(contagionProcessingInterval.value)
+  }
+  proximityDetector.removeBee(instanceId.value)
 })
 
 // Physics Cocoon Integration
@@ -598,6 +615,51 @@ const transitionToIntent = async (newIntent: HiveIntent) => {
   }
 }
 
+// Emotional contagion integration
+const beePosition = ref({ x: 0, y: 0 })
+const contagionProcessingInterval = ref<number | null>(null)
+
+// Update bee position for proximity detection
+const updateBeePosition = () => {
+  // Get the bee's position relative to the viewport
+  // This is a simplified approach - in a real implementation you'd get actual DOM position
+  const baseX = Math.random() * 400 + 100 // Simulate position in test area
+  const baseY = Math.random() * 300 + 100
+  
+  beePosition.value = { x: baseX, y: baseY }
+  
+  proximityDetector.updateBeePosition({
+    beeId: instanceId.value,
+    x: baseX,
+    y: baseY,
+    role: props.type,
+    emotionalState: hiveIntent.value.emotionalState,
+    timestamp: Date.now()
+  })
+}
+
+// Process emotional contagion influences
+const processEmotionalContagion = () => {
+  const influence = emotionalContagionEngine.getInfluenceForBee(instanceId.value)
+  
+  if (influence && !isTransitioning.value && baseHiveIntent.value) {
+    // Apply emotional influence through smooth transition
+    const influencedIntent: HiveIntent = {
+      ...baseHiveIntent.value,
+      emotionalState: influence.targetEmotion as any
+    }
+    
+    // Update emotional history
+    emotionalContagionEngine.updateEmotionalHistory(
+      instanceId.value, 
+      influence.targetEmotion
+    )
+    
+    // Trigger smooth transition to new emotional state
+    transitionToIntent(influencedIntent)
+  }
+}
+
 // Watch for intent prop changes and trigger smooth transitions
 watch(() => props.intent, (newIntent) => {
   if (newIntent && baseHiveIntent.value && !isTransitioning.value) {
@@ -608,6 +670,12 @@ watch(() => props.intent, (newIntent) => {
     transitionToIntent(targetIntent)
   }
 }, { deep: true })
+
+// Watch for emotional state changes to update position tracking
+watch(() => hiveIntent.value.emotionalState, (newEmotion) => {
+  updateBeePosition()
+  emotionalContagionEngine.updateEmotionalHistory(instanceId.value, newEmotion)
+})
 </script>
 
 <style scoped>
