@@ -240,6 +240,11 @@ const getEventCount = (role: string) => {
 
 // Handle Pollen events
 const handlePollenEvent = (event: PollenEvent) => {
+  // Filter out high-frequency transition progress events to prevent loops
+  if (event.type === 'intent_transition_progress') {
+    return
+  }
+  
   pollenEvents.value.push(event)
   
   // Update event counts

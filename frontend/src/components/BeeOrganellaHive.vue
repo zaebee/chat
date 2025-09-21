@@ -265,11 +265,6 @@ const hiveIntent = computed<HiveIntent>(() => {
     ...props.intent
   }
 
-  // Store base intent for transitions
-  if (!baseHiveIntent.value) {
-    baseHiveIntent.value = calculatedIntent
-  }
-
   // If smooth transitions enabled and transitioning, return interpolated intent
   if (props.smoothTransitions && isTransitioning.value) {
     return getCurrentTransitionIntent(instanceId.value, calculatedIntent)
@@ -448,6 +443,11 @@ const emitPollenEvent = (type: string, payload: any) => {
 
 // G: Genesis - Lifecycle events with optional cocoon validation
 onMounted(async () => {
+  // Initialize base intent for transitions
+  if (!baseHiveIntent.value) {
+    baseHiveIntent.value = hiveIntent.value
+  }
+  
   if (props.useCocoon) {
     await enterPhysicsCocoon()
   } else {
@@ -600,7 +600,7 @@ const transitionToIntent = async (newIntent: HiveIntent) => {
 
 // Watch for intent prop changes and trigger smooth transitions
 watch(() => props.intent, (newIntent) => {
-  if (newIntent && baseHiveIntent.value) {
+  if (newIntent && baseHiveIntent.value && !isTransitioning.value) {
     const targetIntent = {
       ...baseHiveIntent.value,
       ...newIntent
