@@ -1,3 +1,6 @@
+import type { BeeMorphology } from "@/utils/hivePhysics";
+import type { ValidationResult } from "@/utils/physicsCocoon";
+
 export function validatePhysicsConstraints(morphology: BeeMorphology): ValidationResult {
   // Check for impossible geometries
   const viewBoxDimensions = morphology.viewBox.split(' ').slice(2).map(Number)

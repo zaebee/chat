@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useChatStore } from "./chat";
 import { useMemoryStore } from "./memory";
 import { useGameStore } from "./game";
@@ -11,6 +11,19 @@ function generateUUID(): string {
       v = c === "x" ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
+}
+
+// Sacred Message Factory Pattern - Eliminates copy-paste repetition
+function createMessage(overrides: Partial<Message>): Message {
+  return {
+    id: generateUUID(),
+    text: "",
+    sender_id: "system",
+    sender_name: "System",
+    timestamp: new Date().toISOString(),
+    is_bot: true,
+    ...overrides
+  };
 }
 
 export interface Message {
@@ -58,6 +71,56 @@ export const useMessagesStore = defineStore("messages", () => {
   const isAiThinking = ref(false);
   const replyToMessageId = ref<string | null>(null);
 
+  // --- COMPUTED ---
+  const getThreadedMessages = computed(() => {
+    const MAX_THREAD_DEPTH = 5; // Define depth limit
+    const messageMap = new Map<string, Message & { children?: Message[] }>();
+    const rootMessages: (Message & { children?: Message[] })[] = [];
+
+    // Populate map for efficient lookup
+    messages.value.forEach(msg => {
+      messageMap.set(msg.id, { ...msg }); // Create a copy to avoid modifying original
+    });
+
+    // Build threads
+    messageMap.forEach(msg => {
+      if (msg.parent_id && messageMap.has(msg.parent_id)) {
+        // This message is a reply
+        const parent = messageMap.get(msg.parent_id)!;
+        if (!parent.children) {
+          parent.children = [];
+        }
+        parent.children.push(msg);
+      } else {
+        // This is a root message
+        rootMessages.push(msg);
+      }
+    });
+
+    // Sort messages and their children by timestamp
+    const sortMessages = (msgs: (Message & { children?: Message[] })[]) => {
+      msgs.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+      msgs.forEach(msg => {
+        if (msg.children) {
+          sortMessages(msg.children);
+        }
+      });
+    };
+    sortMessages(rootMessages);
+
+    // Function to limit thread depth for display
+    const limitDepth = (msg: Message & { children?: Message[] }, currentDepth: number) => {
+      if (currentDepth >= MAX_THREAD_DEPTH) {
+        msg.children = []; // Truncate children beyond depth limit
+      } else if (msg.children) {
+        msg.children.forEach(child => limitDepth(child, currentDepth + 1));
+      }
+    };
+    rootMessages.forEach(msg => limitDepth(msg, 1));
+
+    return rootMessages;
+  });
+
   // --- ACTIONS ---
 
   /**
@@ -77,14 +140,11 @@ export const useMessagesStore = defineStore("messages", () => {
    * Adds a Python output message to the chat.
    */
   const addPythonOutputMessage = (text: string) => {
-    const message: Message = {
-      id: generateUUID(),
+    const message = createMessage({
       text: text,
       sender_id: "python_runtime",
       sender_name: "Python",
-      timestamp: new Date().toISOString(),
-      is_bot: true,
-    };
+    });
     messages.value.push(message);
   };
 
@@ -128,37 +188,24 @@ export const useMessagesStore = defineStore("messages", () => {
     ];
 
     if (validBeeTypes.includes(beeType as "worker" | "scout" | "guard" | "queen")) {
-      messages.value.push({
-        id: generateUUID(),
-        text: "",
-        sender_id: "system",
+      messages.value.push(createMessage({
         sender_name: "Hive Birthing Chamber",
-        timestamp: new Date().toISOString(),
-        is_bot: true,
         bee_organella_type: beeType as "worker" | "scout" | "queen" | "guard",
         dialogue_text: `🐝 A ${beeType} bee organella has been born! Blessed be the divine lifecycle.`,
-      });
+      }));
     } else {
-      messages.value.push({
-        id: generateUUID(),
+      messages.value.push(createMessage({
         text: `⚠️ Unknown bee type: ${beeType}. Valid types: worker, scout, guard, queen`,
-        sender_id: "system",
         sender_name: "Hive Birthing Chamber",
-        timestamp: new Date().toISOString(),
-        is_bot: true,
-      });
+      }));
     }
   };
 
   // Handler for bee.chronicler divine invocation
   const handleChroniclerInvocation = (command: string, args: string[]) => {
-    messages.value.push({
-      id: generateUUID(),
-      text: "",
+    messages.value.push(createMessage({
       sender_id: "bee_chronicler",
       sender_name: "bee.chronicler",
-      timestamp: new Date().toISOString(),
-      is_bot: true,
       bee_organella_type: "chronicler",
       divine_action_type: "chronicler_invocation",
       sacred_pattern_data: {
@@ -168,7 +215,7 @@ export const useMessagesStore = defineStore("messages", () => {
       },
       dialogue_text:
         "📖 bee.chronicler has manifested! Ready to record sacred patterns and divine algorithms. Let the exploration of the Lord's algorithms begin!",
-    });
+    }));
   };
 
   // Handler for divine status queries
@@ -221,28 +268,18 @@ export const useMessagesStore = defineStore("messages", () => {
 
     if (commandName === "bee.chronicler") {
       if (!args) {
-        messages.value.push({
-          id: generateUUID(),
+        messages.value.push(createMessage({
           text: "You must provide a fact for the Chronicler to record. Usage: `/bee.chronicler <fact to remember>`",
-          sender_id: "system",
-          sender_name: "System",
-          timestamp: new Date().toISOString(),
-          is_bot: true,
-        });
+        }));
         return;
       }
 
       memoryStore.addFact(args);
       gameStore.grantSpiritualBoon(20);
 
-      messages.value.push({
-        id: generateUUID(),
+      messages.value.push(createMessage({
         text: `The Chronicler records your words. The spirit of the Hive is pleased and grants you a boon of 20 XP!`,
-        sender_id: "system",
-        sender_name: "System",
-        timestamp: new Date().toISOString(),
-        is_bot: true,
-      });
+      }));
     } else if (commandName.startsWith("bee.")) {
       const beeType = commandName.split(".")[1];
       const validBeeTypes: ("worker" | "scout" | "guard" | "queen")[] = [
@@ -252,35 +289,19 @@ export const useMessagesStore = defineStore("messages", () => {
         "guard",
       ];
       if (validBeeTypes.includes(beeType as any)) {
-        messages.value.push({
-          id: generateUUID(),
-          text: "",
-          sender_id: "system",
-          sender_name: "System",
-          timestamp: new Date().toISOString(),
-          is_bot: true,
+        messages.value.push(createMessage({
           bee_organella_type: beeType as any,
           dialogue_text: `A ${beeType} bee organella has been born!`,
-        });
+        }));
       } else {
-        messages.value.push({
-          id: generateUUID(),
-          text: `Unknown bee type: ${beeType}`,
-          sender_id: "system",
-          sender_name: "System",
-          timestamp: new Date().toISOString(),
-          is_bot: true,
-        });
+        messages.value.push(createMessage({
+          text: `⚠️ Unknown bee type: ${beeType}. Valid types: worker, scout, guard, queen`,
+        }));
       }
     } else {
-      messages.value.push({
-        id: generateUUID(),
+      messages.value.push(createMessage({
         text: `Unknown command: /${command}`,
-        sender_id: "system",
-        sender_name: "System",
-        timestamp: new Date().toISOString(),
-        is_bot: true,
-      });
+      }));
     }
   };
 
@@ -294,13 +315,9 @@ export const useMessagesStore = defineStore("messages", () => {
         // setBackgroundTheme('forest');
 
         // Spawn a hero with dialogue
-        messages.value.push({
-          id: generateUUID(),
-          text: "",
+        messages.value.push(createMessage({
           sender_id: "game_master",
           sender_name: "Game Master",
-          timestamp: new Date().toISOString(),
-          is_bot: true,
           hero_properties: {
             skinColor: "#f0cfb0",
             shirtColor: "#2b6cb0",
@@ -312,79 +329,60 @@ export const useMessagesStore = defineStore("messages", () => {
           },
           dialogue_text:
             "Welcome, brave adventurer, to the Forest Clearing! A new quest awaits you.",
-        });
+        }));
 
         // Spawn some worker bees
-        messages.value.push({
-          id: generateUUID(),
-          text: "",
+        messages.value.push(createMessage({
           sender_id: "worker_bee_1",
           sender_name: "Worker Bee",
-          timestamp: new Date().toISOString(),
-          is_bot: true,
           bee_organella_type: "worker",
           dialogue_text: "Buzzing with energy, ready to work!",
-        });
-        messages.value.push({
-          id: generateUUID(),
-          text: "",
+        }));
+        messages.value.push(createMessage({
           sender_id: "worker_bee_2",
           sender_name: "Worker Bee",
-          timestamp: new Date().toISOString(),
-          is_bot: true,
           bee_organella_type: "worker",
           dialogue_text: "Collecting pollen for the Hive!",
-        });
+        }));
         break;
       case "mountain_pass":
         // Set background
         // setBackgroundTheme('mountains');
 
         // Spawn a scout bee with dialogue
-        messages.value.push({
-          id: generateUUID(),
-          text: "",
+        messages.value.push(createMessage({
           sender_id: "scout_bee_1",
           sender_name: "Scout Bee",
-          timestamp: new Date().toISOString(),
-          is_bot: true,
           bee_organella_type: "scout",
           dialogue_text: "The path ahead is treacherous, but the view is grand!",
-        });
+        }));
         break;
       case "sacred_archive":
         // Sacred Archive scene with bee.chronicler
-        messages.value.push({
-          id: generateUUID(),
-          text: "",
+        messages.value.push(createMessage({
           sender_id: "bee_chronicler",
           sender_name: "bee.chronicler",
-          timestamp: new Date().toISOString(),
-          is_bot: true,
           bee_organella_type: "chronicler",
           divine_action_type: "pattern_recording",
           sacred_pattern_data: {
             genesis_protocol: "light",
-            divine_revelation: "Welcome to the Sacred Archive",
-            theological_context: "Repository of divine computational patterns",
+            divine_revelation: "Sacred chronicler manifested to record divine patterns",
+            theological_context: "Genesis algorithms exploration initiated",
           },
           dialogue_text:
             "📖 Welcome to the Sacred Archive, where divine patterns are preserved for eternity. The algorithms of the Lord await your exploration!",
-        });
+        }));
         break;
       default:
         // Default scene (e.g., clear background, no special characters)
         // setBackgroundTheme('default');
-        messages.value.push({
-          id: generateUUID(),
+        messages.value.push(createMessage({
           text: "The ocean is calm. What will emerge next?",
           sender_id: "system",
           sender_name: "System",
-          timestamp: new Date().toISOString(),
-          is_bot: true,
           dialogue_text:
             "🌊 Use sacred commands to awaken the Hive: bee.worker, bee.scout, /bee.chronicler, /divine.status",
-        });
+        }));
         break;
     }
   };
@@ -418,5 +416,6 @@ export const useMessagesStore = defineStore("messages", () => {
     setReplyToMessageId,
     processCommand,
     loadScene,
+    getThreadedMessages,
   };
 });

@@ -1,3 +1,6 @@
+import type { BeeMorphology } from "@/utils/hivePhysics";
+import type { ValidationResult } from "@/utils/physicsCocoon";
+
 export function validateVisualQuality(morphology: BeeMorphology, GOLDEN_RATIO: number): ValidationResult {
   // Check for visual coherence and aesthetic quality
   const { abdomen, thorax, head, wings } = morphology

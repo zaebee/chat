@@ -8,7 +8,7 @@ import ChroniclerOrganella from "@/components/ChroniclerOrganella.vue";
 import HeroMessage from "@/components/HeroMessage.vue";
 
 const props = defineProps<{ 
-  message: Message & { replies: Message[] } 
+  message: Message & { children?: Message[] } 
 }>();
 
 const emit = defineEmits<{ 
@@ -88,12 +88,12 @@ function handleReply(senderName: string, messageId: string) {
       <span>Reply</span>
     </button>
   </div>
-  <!-- Render Replies -->
-  <div v-if="message.replies && message.replies.length > 0" class="replies-container">
+  <!-- Render Children (replies) -->
+  <div v-if="message.children && message.children.length > 0" class="replies-container">
     <MessageItem
-      v-for="reply in message.replies"
-      :key="reply.id"
-      :message="reply"
+      v-for="child in message.children"
+      :key="child.id"
+      :message="child"
       @reply="handleReply"
       class="reply-message"
     />
