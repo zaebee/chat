@@ -48,9 +48,14 @@ jobs:
         id: generate
         run: |
           # Set default values for scheduled runs
-          LETTER_TYPE="${{ github.event.inputs.letter_type || 'wisdom' }}"
-          RECIPIENT="${{ github.event.inputs.recipient || 'all' }}"
-          OCCASION="${{ github.event.inputs.occasion || 'Weekly Wisdom Sharing' }}"
+          LETTER_TYPE="${{ github.event.inputs.letter_type }}"
+          RECIPIENT="${{ github.event.inputs.recipient }}"
+          OCCASION="${{ github.event.inputs.occasion }}"
+
+          # Apply defaults if empty
+          LETTER_TYPE="${LETTER_TYPE:-wisdom}"
+          RECIPIENT="${RECIPIENT:-all}"
+          OCCASION="${OCCASION:-Weekly Wisdom Sharing}"
 
           # Generate sacred date
           SACRED_DATE=$(date '+%B %d, %Y')
@@ -167,6 +172,7 @@ jobs:
           script: |
             const title = `${{ needs.prepare_divine_scroll.outputs.letter_title }}`;
             const body = `${{ needs.prepare_divine_scroll.outputs.letter_content }}`;
+            const letterType = '${{ github.event.inputs.letter_type }}' || 'wisdom';
 
             // Create the divine letter as a GitHub issue
             const issue = await github.rest.issues.create({
@@ -178,14 +184,14 @@ jobs:
                 '🧚‍♀️ fairy-tale',
                 'bee.chronicler',
                 'divine-letter',
-                '${{ github.event.inputs.letter_type || ''wisdom'' }}'
+                letterType
               ]
             });
 
             console.log(`Divine letter delivered! Issue #${issue.data.number}`);
 
             // Pin important announcements
-            if ('${{ github.event.inputs.letter_type }}' === 'special_announcement') {
+            if (letterType === 'special_announcement') {
               await github.rest.issues.update({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
