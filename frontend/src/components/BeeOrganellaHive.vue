@@ -183,7 +183,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
+import { physicsCocoonEngine } from '@/utils/physicsCocoon'
 
 // ATCG Primitive Types
 interface HivePhysics {
@@ -213,10 +214,17 @@ const props = defineProps<{
   physics?: Partial<HivePhysics>
   intent?: Partial<HiveIntent>
   onPollenEvent?: (event: any) => void
+  useCocoon?: boolean  // Enable physics cocoon validation
 }>()
 
 // Instance ID for unique SVG elements
 const instanceId = ref(`bee_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`)
+
+// Cocoon state
+const cocoonState = ref<'none' | 'calculating' | 'validating' | 'manifesting' | 'emerged'>('none')
+const cocoonProgress = ref(0)
+const validationResults = ref<any[]>([])
+const emergenceReady = ref(false)
 
 // A: Aggregate - Physics-based calculations
 const hivePhysics = computed<HivePhysics>(() => ({
@@ -421,15 +429,116 @@ const emitPollenEvent = (type: string, payload: any) => {
   }
 }
 
-// G: Genesis - Lifecycle events
-onMounted(() => {
-  emitPollenEvent('bee_manifested', {
-    type: props.type,
-    instanceId: instanceId.value,
-    morphology: morphology.value,
-    intent: hiveIntent.value
-  })
+// G: Genesis - Lifecycle events with optional cocoon validation
+onMounted(async () => {
+  if (props.useCocoon) {
+    await enterPhysicsCocoon()
+  } else {
+    // Direct manifestation without cocoon validation
+    emitPollenEvent('bee_manifested', {
+      type: props.type,
+      instanceId: instanceId.value,
+      morphology: morphology.value,
+      intent: hiveIntent.value
+    })
+    emergenceReady.value = true
+  }
 })
+
+onUnmounted(() => {
+  // Clean up cocoon if still active
+  if (cocoonState.value !== 'none' && cocoonState.value !== 'emerged') {
+    physicsCocoonEngine.releaseCocoon(instanceId.value)
+  }
+})
+
+// Physics Cocoon Integration
+const enterPhysicsCocoon = async () => {
+  try {
+    cocoonState.value = 'calculating'
+    
+    // Enter cocoon with current constraints
+    const constraints = {
+      minSize: hivePhysics.value.baseUnit * 0.5,
+      maxSize: hivePhysics.value.baseUnit * 3,
+      aspectRatioRange: [1.0, 2.0] as [number, number],
+      energyEfficiency: hivePhysics.value.energyLevel
+    }
+    
+    const cocoon = await physicsCocoonEngine.enterCocoon(
+      instanceId.value,
+      props.type,
+      constraints
+    )
+    
+    // Monitor cocoon progress
+    monitorCocoonProgress()
+    
+  } catch (error) {
+    console.error('Cocoon entry failed:', error)
+    cocoonState.value = 'none'
+    // Fallback to direct manifestation
+    emitPollenEvent('bee_manifested', {
+      type: props.type,
+      instanceId: instanceId.value,
+      morphology: morphology.value,
+      intent: hiveIntent.value,
+      cocoonFailed: true
+    })
+    emergenceReady.value = true
+  }
+}
+
+const monitorCocoonProgress = () => {
+  const checkProgress = () => {
+    const cocoon = physicsCocoonEngine.getCocoonStatus(instanceId.value)
+    if (!cocoon) return
+    
+    // Update state based on cocoon stage
+    switch (cocoon.stage) {
+      case 'calculation':
+        cocoonState.value = 'calculating'
+        cocoonProgress.value = cocoon.calculationProgress * 0.33
+        break
+      case 'validation':
+        cocoonState.value = 'validating'
+        cocoonProgress.value = 0.33 + (cocoon.validationProgress * 0.33)
+        validationResults.value = cocoon.validationResults
+        break
+      case 'manifestation':
+        cocoonState.value = 'manifesting'
+        cocoonProgress.value = 0.66 + (cocoon.manifestationProgress * 0.34)
+        break
+    }
+    
+    // Check if emergence is complete
+    if (cocoon.stage === 'manifestation' && cocoon.manifestationProgress >= 1.0) {
+      cocoonState.value = 'emerged'
+      cocoonProgress.value = 1.0
+      emergenceReady.value = true
+      
+      // Emit successful emergence
+      emitPollenEvent('bee_manifested', {
+        type: props.type,
+        instanceId: instanceId.value,
+        morphology: cocoon.validatedMorphology,
+        intent: hiveIntent.value,
+        cocoonValidated: true,
+        divineBlessing: cocoon.divineBlessing,
+        validationScore: cocoon.validationResults.reduce((sum, r) => sum + r.score, 0) / cocoon.validationResults.length
+      })
+      
+      // Clean up cocoon
+      physicsCocoonEngine.releaseCocoon(instanceId.value)
+      return
+    }
+    
+    // Continue monitoring
+    setTimeout(checkProgress, 100)
+  }
+  
+  checkProgress()
+}
 </script>
 
 <style scoped>
