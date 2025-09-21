@@ -7,6 +7,11 @@
 
 import { hivePhysics, type BeeMorphology, type MorphologyConstraints } from './hivePhysics'
 import { pollenBus, BeeEventTypes } from './pollenProtocol'
+import { validateGoldenRatioCompliance } from './validationRules/goldenRatio.rule.ts'
+import { validateDivineTranscendence } from './validationRules/divineTranscendence.rule.ts'
+import { validateAnatomicalHarmony } from './validationRules/anatomicalHarmony.rule.ts'
+import { validatePhysicsConstraints } from './validationRules/physicsConstraints.rule.ts'
+import { validateVisualQuality } from './validationRules/visualQuality.rule.ts'
 
 // Sacred constants for validation
 const GOLDEN_RATIO = 1.618033988749
@@ -100,7 +105,7 @@ const DIVINE_CONSTRAINTS: PhysicsConstraint[] = [
   {
     name: 'golden_ratio_compliance',
     description: 'All proportions must follow golden ratio mathematics',
-    validator: (morphology: BeeMorphology) => validateGoldenRatioCompliance(morphology),
+    validator: (morphology: BeeMorphology) => validateGoldenRatioCompliance(morphology, GOLDEN_RATIO, DIVINE_TOLERANCE),
     severity: 'critical',
     divineRequirement: true
   },
@@ -114,7 +119,7 @@ const DIVINE_CONSTRAINTS: PhysicsConstraint[] = [
   {
     name: 'morphology_coherence',
     description: 'All body parts must maintain anatomical harmony',
-    validator: (morphology: BeeMorphology) => validateAnatomicalHarmony(morphology),
+    validator: (morphology: BeeMorphology) => validateAnatomicalHarmony(morphology, GOLDEN_RATIO),
     severity: 'warning',
     divineRequirement: false
   },
@@ -128,211 +133,11 @@ const DIVINE_CONSTRAINTS: PhysicsConstraint[] = [
   {
     name: 'visual_quality',
     description: 'Rendered output must meet aesthetic standards',
-    validator: (morphology: BeeMorphology) => validateVisualQuality(morphology),
+    validator: (morphology: BeeMorphology) => validateVisualQuality(morphology, GOLDEN_RATIO),
     severity: 'warning',
     divineRequirement: false
   }
 ]
-
-// Validation functions
-function validateGoldenRatioCompliance(morphology: BeeMorphology): ValidationResult {
-  const { abdomen, thorax, head, wings } = morphology
-  
-  // Check abdomen proportions
-  const abdomenRatio = abdomen.radius.x / abdomen.radius.y
-  const abdomenDeviation = Math.abs(abdomenRatio - (1 / GOLDEN_RATIO))
-  
-  // Check thorax proportions
-  const thoraxRatio = thorax.radius.x / thorax.radius.y
-  const thoraxDeviation = Math.abs(thoraxRatio - (1 / GOLDEN_RATIO))
-  
-  // Check wing proportions
-  const wingRatio = wings.left.radius.x / wings.left.radius.y
-  const wingDeviation = Math.abs(wingRatio - GOLDEN_RATIO)
-  
-  const totalDeviation = (abdomenDeviation + thoraxDeviation + wingDeviation) / 3
-  const passed = totalDeviation < DIVINE_TOLERANCE
-  const score = Math.max(0, 1 - (totalDeviation / DIVINE_TOLERANCE))
-  
-  return {
-    passed,
-    score,
-    message: passed 
-      ? '✨ Divine golden ratio proportions achieved'
-      : `⚠️ Golden ratio deviation: ${(totalDeviation * 100).toFixed(2)}%`,
-    details: {
-      abdomenDeviation,
-      thoraxDeviation,
-      wingDeviation,
-      totalDeviation
-    }
-  }
-}
-
-function validateDivineTranscendence(morphology: BeeMorphology): ValidationResult {
-  // Check if this is a divine bee based on special features
-  const hasDivineFeatures = Object.keys(morphology.specialFeatures).length > 0
-  
-  if (!hasDivineFeatures) {
-    return {
-      passed: true,
-      score: 1,
-      message: '✅ Non-divine bee - transcendence not required'
-    }
-  }
-  
-  // For divine bees, check transcendent properties
-  const hasAura = 'divineAura' in morphology.specialFeatures
-  const hasScroll = 'scroll' in morphology.specialFeatures
-  const hasAntenna = 'antenna' in morphology.specialFeatures
-  const hasCrown = 'crown' in morphology.specialFeatures
-  
-  const transcendentFeatures = [hasAura, hasScroll, hasAntenna, hasCrown].filter(Boolean).length
-  const passed = transcendentFeatures > 0
-  const score = transcendentFeatures / 4 // Max 4 possible features
-  
-  return {
-    passed,
-    score,
-    message: passed
-      ? `✨ Divine transcendence manifested (${transcendentFeatures} features)`
-      : '❌ Divine bee lacks transcendent features',
-    details: {
-      hasAura,
-      hasScroll,
-      hasAntenna,
-      hasCrown,
-      transcendentFeatures
-    }
-  }
-}
-
-function validateAnatomicalHarmony(morphology: BeeMorphology): ValidationResult {
-  const { abdomen, thorax, head } = morphology
-  
-  // Check size progression: head < thorax < abdomen
-  const headSize = head.radius
-  const thoraxSize = Math.sqrt(thorax.radius.x * thorax.radius.y)
-  const abdomenSize = Math.sqrt(abdomen.radius.x * abdomen.radius.y)
-  
-  const properProgression = headSize < thoraxSize && thoraxSize < abdomenSize
-  const sizeRatio = abdomenSize / headSize
-  const idealRatio = GOLDEN_RATIO * GOLDEN_RATIO // φ²
-  const ratioDeviation = Math.abs(sizeRatio - idealRatio) / idealRatio
-  
-  const passed = properProgression && ratioDeviation < 0.2
-  const score = properProgression ? Math.max(0, 1 - ratioDeviation) : 0
-  
-  return {
-    passed,
-    score,
-    message: passed
-      ? '✅ Anatomical harmony achieved'
-      : '⚠️ Body part proportions lack harmony',
-    details: {
-      headSize,
-      thoraxSize,
-      abdomenSize,
-      sizeRatio,
-      idealRatio,
-      ratioDeviation,
-      properProgression
-    }
-  }
-}
-
-function validatePhysicsConstraints(morphology: BeeMorphology): ValidationResult {
-  // Check for impossible geometries
-  const viewBoxDimensions = morphology.viewBox.split(' ').slice(2).map(Number)
-  const [width, height] = viewBoxDimensions
-  
-  // Ensure all elements fit within viewBox
-  const { abdomen, thorax, head, wings } = morphology
-  
-  const maxX = Math.max(
-    abdomen.center.x + abdomen.radius.x,
-    thorax.center.x + thorax.radius.x,
-    head.center.x + head.radius,
-    wings.left.center.x + wings.left.radius.x,
-    wings.right.center.x + wings.right.radius.x
-  )
-  
-  const maxY = Math.max(
-    abdomen.center.y + abdomen.radius.y,
-    thorax.center.y + thorax.radius.y,
-    head.center.y + head.radius,
-    wings.left.center.y + wings.left.radius.y,
-    wings.right.center.y + wings.right.radius.y
-  )
-  
-  const fitsInViewBox = maxX <= width && maxY <= height
-  const utilizationRatio = (maxX * maxY) / (width * height)
-  
-  const passed = fitsInViewBox && utilizationRatio > 0.3 && utilizationRatio < 0.9
-  const score = fitsInViewBox ? Math.max(0, 1 - Math.abs(utilizationRatio - 0.6) / 0.3) : 0
-  
-  return {
-    passed,
-    score,
-    message: passed
-      ? '✅ Physics constraints satisfied'
-      : fitsInViewBox 
-        ? '⚠️ Suboptimal space utilization'
-        : '❌ Elements exceed viewBox boundaries',
-    details: {
-      viewBoxWidth: width,
-      viewBoxHeight: height,
-      maxX,
-      maxY,
-      fitsInViewBox,
-      utilizationRatio
-    }
-  }
-}
-
-function validateVisualQuality(morphology: BeeMorphology): ValidationResult {
-  // Check for visual coherence and aesthetic quality
-  const { abdomen, thorax, head, wings } = morphology
-  
-  // Symmetry check
-  const leftWing = wings.left
-  const rightWing = wings.right
-  const wingSymmetry = Math.abs(leftWing.radius.x - rightWing.radius.x) < 0.1 &&
-                      Math.abs(leftWing.radius.y - rightWing.radius.y) < 0.1
-  
-  // Alignment check
-  const centerAlignment = Math.abs(abdomen.center.x - thorax.center.x) < 1 &&
-                         Math.abs(thorax.center.x - head.center.x) < 1
-  
-  // Proportion balance
-  const totalArea = (abdomen.radius.x * abdomen.radius.y * Math.PI) +
-                   (thorax.radius.x * thorax.radius.y * Math.PI) +
-                   (head.radius * head.radius * Math.PI)
-  const wingArea = (leftWing.radius.x * leftWing.radius.y * Math.PI * 2)
-  const wingToBodyRatio = wingArea / totalArea
-  const idealWingRatio = 1 / GOLDEN_RATIO // Wings should be φ⁻¹ of body
-  const wingRatioDeviation = Math.abs(wingToBodyRatio - idealWingRatio) / idealWingRatio
-  
-  const qualityFactors = [wingSymmetry, centerAlignment, wingRatioDeviation < 0.2]
-  const passed = qualityFactors.filter(Boolean).length >= 2
-  const score = qualityFactors.filter(Boolean).length / qualityFactors.length
-  
-  return {
-    passed,
-    score,
-    message: passed
-      ? '✅ Visual quality standards met'
-      : '⚠️ Visual quality could be improved',
-    details: {
-      wingSymmetry,
-      centerAlignment,
-      wingToBodyRatio,
-      idealWingRatio,
-      wingRatioDeviation,
-      qualityScore: score
-    }
-  }
-}
 
 export class PhysicsCocoonEngine {
   private cocoons: Map<string, PhysicsCocoon> = new Map()
