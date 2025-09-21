@@ -49,13 +49,20 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Add CORS middleware
+# Add CORS middleware - Secure configuration for Sacred Hive
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Allow all for simplicity, can be restricted later
+    allow_origins=[
+        "http://localhost:3000",    # React development server
+        "http://localhost:5173",    # Vite development server
+        "http://localhost:8080",    # Alternative dev server
+        "https://chat.zae.life",    # Production domain
+        "https://zae.life",         # Root domain
+        # Add specific domains only - never use wildcard "*" in production
+    ],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE"],  # Removed OPTIONS for security
+    allow_headers=["Content-Type", "Authorization", "Accept"],  # Specific headers only
 )
 
 # Mount static files and templates
