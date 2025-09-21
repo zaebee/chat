@@ -7,8 +7,8 @@ import BeeOrganella from "@/components/BeeOrganella.vue";
 import ChroniclerOrganella from "@/components/ChroniclerOrganella.vue";
 import HeroMessage from "@/components/HeroMessage.vue";
 
-const props = defineProps<{ 
-  message: Message & { children?: Message[] } 
+const props = defineProps<{
+  message: Message & { children?: Message[] }
 }>();
 
 const emit = defineEmits<{ 
