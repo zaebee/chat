@@ -2,35 +2,42 @@
 import { onMounted, ref, watchEffect } from "vue";
 import { RouterView, RouterLink } from "vue-router";
 import { useChatStore } from "@/stores/chat";
+import { useUserStore } from "@/stores/user";
+import { useGameStore } from "@/stores/game";
 import { useSettingsStore } from "@/stores/settings";
 import { storeToRefs } from "pinia";
 import LoginModal from "@/components/LoginModal.vue";
 
 const isCollapsed = ref(false);
 const chatStore = useChatStore();
+const userStore = useUserStore();
+const gameStore = useGameStore();
 const settingsStore = useSettingsStore();
-const { currentUser, totalXp, level } = storeToRefs(chatStore);
+const { currentUser } = storeToRefs(userStore);
+const { totalXp, level } = storeToRefs(gameStore);
 const { theme, language } = storeToRefs(settingsStore);
 
 // On startup, check for saved username and theme
 onMounted(() => {
-  chatStore.init();
+  chatStore.init(); // This will call settingsStore.initSettings() internally
 });
 
 // Watch for theme changes and apply them to the document
 watchEffect(() => {
-  document.documentElement.className = settingsStore.theme.value === "dark" ? "dark-theme" : "";
+  document.documentElement.className = theme.value === "dark" ? "dark-theme" : "";
 });
 
 function toggleSidebar() {
   isCollapsed.value = !isCollapsed.value;
 }
 
-function handleLogin(username: string) {
-  chatStore.login(username);
+async function handleLogin(username: string) {
+  const user = await userStore.login(username);
+  if (user) {
+    chatStore.connect(user.username, user.id);
+  }
 }
 </script>
-
 <template>
   <LoginModal v-if="!currentUser" @login="handleLogin" />
   <div v-else class="app-container">
@@ -58,18 +65,19 @@ function handleLogin(username: string) {
         <RouterLink to="/">Chat</RouterLink>
         <RouterLink to="/playground">Playground</RouterLink>
         <RouterLink to="/journey">Journey</RouterLink>
+        <RouterLink to="/bee-test">🐝 Bee Test</RouterLink>
       </nav>
       <div class="sidebar-footer">
         <div class="lang-switcher">
-          <button @click="settingsStore.setLanguage('en')" :class="{ active: settingsStore.language.value === 'en' }">
+          <button @click="settingsStore.setLanguage('en')" :class="{ active: language === 'en' }">
             EN
           </button>
-          <button @click="settingsStore.setLanguage('ru')" :class="{ active: settingsStore.language.value === 'ru' }">
+          <button @click="settingsStore.setLanguage('ru')" :class="{ active: language === 'ru' }">
             RU
           </button>
         </div>
         <button @click="settingsStore.toggleTheme" class="theme-toggle-btn">
-          {{ settingsStore.theme.value === "light" ? "Dark" : "Light" }} Mode
+          {{ theme === "light" ? "Dark" : "Light" }} Mode
         </button>
       </div>
     </aside>
@@ -116,7 +124,6 @@ function handleLogin(username: string) {
   margin-bottom: 1rem;
   transition: all 0.3s ease;
 }
-
 .sidebar h2 {
   color: var(--color-heading);
   margin: 0;
@@ -159,7 +166,6 @@ function handleLogin(username: string) {
   flex-direction: column;
   gap: 0.5rem;
 }
-
 .user-item {
   display: flex;
   align-items: center;
@@ -234,7 +240,6 @@ function handleLogin(username: string) {
   background-color: #007bff;
   color: white;
 }
-
 .theme-toggle-btn {
   width: 100%;
   padding: 0.75rem;
@@ -275,7 +280,6 @@ function handleLogin(username: string) {
   line-height: 1;
   flex-shrink: 0;
 }
-
 .toggle-btn:hover {
   background: var(--color-background-soft);
   border-color: var(--color-border-hover);

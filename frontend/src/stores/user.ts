@@ -160,6 +160,34 @@ export const useUserStore = defineStore('user', () => {
     error.value = null
   }
 
+  function setCurrentUser(user: User | null) {
+    currentUser.value = user
+    isAuthenticated.value = !!user
+    if (user) {
+      localStorage.setItem('hive_user', JSON.stringify(user))
+    }
+  }
+
+  function initUser() {
+    const stored = localStorage.getItem('hive_user')
+    if (stored) {
+      try {
+        const user = JSON.parse(stored)
+        return {
+          savedUsername: user.username,
+          savedUserId: user.id
+        }
+      } catch (err) {
+        console.error('Error parsing stored user:', err)
+        localStorage.removeItem('hive_user')
+      }
+    }
+    return {
+      savedUsername: null,
+      savedUserId: null
+    }
+  }
+
   // Initialize user from storage on store creation
   loadUserFromStorage()
 
@@ -169,12 +197,12 @@ export const useUserStore = defineStore('user', () => {
     isAuthenticated,
     loading,
     error,
-    
+
     // Getters
     userLevel,
     userExperience,
     userStats,
-    
+
     // Actions
     login,
     logout,
@@ -182,6 +210,8 @@ export const useUserStore = defineStore('user', () => {
     updateUser,
     addExperience,
     completeChallenge,
-    clearError
+    clearError,
+    setCurrentUser,
+    initUser
   }
 })

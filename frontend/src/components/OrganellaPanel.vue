@@ -246,6 +246,7 @@ const getOrganellaColor = (type: OrganellaType) => {
     guard: "#ef4444",
     queen: "#a855f7",
     chronicler: "#3b82f6",
+    jules: "#8b5cf6",
   };
   return colors[type] || "#6b7280";
 };
@@ -538,6 +539,7 @@ const formatDate = (dateString: string) => {
 
 .skill-level-text {
   justify-self: end;
+}
 
 .skill-name {
   font-size: 0.8rem;

@@ -22,6 +22,11 @@ const router = createRouter({
       name: 'journey',
       component: () => import('../views/JourneyView.vue'),
     },
+    {
+      path: '/bee-test',
+      name: 'bee-test',
+      component: () => import('../components/HiveBeeTest.vue'),
+    },
   ],
 })
 

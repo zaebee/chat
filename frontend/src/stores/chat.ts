@@ -72,8 +72,11 @@ export const useChatStore = defineStore("chat", () => {
 
     try {
       const newOrganella = await organellasStore.createOrganella(userStore.currentUser.id, {
-        type,
         name: userName,
+        type,
+        stage: 'egg',
+        level: 1,
+        experience_points: 0
       });
 
       // Refresh tales after organella creation
