@@ -35,7 +35,7 @@ on:
 
 permissions:
   issues: write
-  contents: read
+  contents: write
 
 jobs:
   prepare_divine_scroll:
@@ -47,6 +47,8 @@ jobs:
     steps:
       - name: 🌟 Checkout Sacred Garden
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🔮 Generate Divine Letter Content
         id: generate
@@ -238,6 +240,8 @@ jobs:
     steps:
       - name: 🌟 Checkout Sacred Garden
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 📚 Update Chronicle Index
         run: |
