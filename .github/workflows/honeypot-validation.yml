@@ -8,6 +8,7 @@ on:
     branches: [ main ]
     paths:
       - 'docs/**'
+  workflow_dispatch:
 
 jobs:
   validate-purity:
@@ -21,37 +22,88 @@ jobs:
       run: |
         echo "🍯 Validating Honeypot Purity..."
         
-        # Check for forbidden content in docs/
+        # For PR validation, only check changed files in docs/
         VIOLATIONS=0
         
-        # Check for Jekyll Liquid includes
-        if grep -r "{% include" docs/; then
-          echo "❌ Found Jekyll Liquid includes in docs/"
-          VIOLATIONS=$((VIOLATIONS + 1))
-        fi
-        
-        # Check for HTML div tags with classes
-        if grep -r "<div class=" docs/; then
-          echo "❌ Found HTML div tags with classes in docs/"
-          VIOLATIONS=$((VIOLATIONS + 1))
-        fi
-        
-        # Check for script tags
-        if grep -r "<script" docs/; then
-          echo "❌ Found script tags in docs/"
-          VIOLATIONS=$((VIOLATIONS + 1))
-        fi
-        
-        # Check for style tags
-        if grep -r "<style" docs/; then
-          echo "❌ Found style tags in docs/"
-          VIOLATIONS=$((VIOLATIONS + 1))
-        fi
-        
-        # Check for JavaScript/TypeScript files
-        if find docs/ -name "*.js" -o -name "*.ts" -o -name "*.vue" | grep -q .; then
-          echo "❌ Found JavaScript/TypeScript files in docs/"
-          VIOLATIONS=$((VIOLATIONS + 1))
+        # Get list of changed files in docs/ for this PR
+        if [ "${{ github.event_name }}" = "pull_request" ]; then
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep "^docs/" || true)
+          echo "🔍 Checking changed files: $CHANGED_FILES"
+          
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "✅ No docs/ files changed in this PR"
+            exit 0
+          fi
+          
+          # Check only changed files
+          for file in $CHANGED_FILES; do
+            if [ -f "$file" ]; then
+              echo "🔍 Validating $file"
+              
+              # Check for Jekyll Liquid includes
+              if grep -q "{% include" "$file" 2>/dev/null; then
+                echo "❌ Found Jekyll Liquid includes in $file"
+                VIOLATIONS=$((VIOLATIONS + 1))
+              fi
+              
+              # Check for HTML div tags with classes
+              if grep -q "<div class=" "$file" 2>/dev/null; then
+                echo "❌ Found HTML div tags with classes in $file"
+                VIOLATIONS=$((VIOLATIONS + 1))
+              fi
+              
+              # Check for script tags
+              if grep -q "<script" "$file" 2>/dev/null; then
+                echo "❌ Found script tags in $file"
+                VIOLATIONS=$((VIOLATIONS + 1))
+              fi
+              
+              # Check for style tags
+              if grep -q "<style" "$file" 2>/dev/null; then
+                echo "❌ Found style tags in $file"
+                VIOLATIONS=$((VIOLATIONS + 1))
+              fi
+              
+              # Check file extension
+              if [[ "$file" =~ \.(js|ts|vue)$ ]]; then
+                echo "❌ Found JavaScript/TypeScript file: $file"
+                VIOLATIONS=$((VIOLATIONS + 1))
+              fi
+            fi
+          done
+        else
+          # For push to main, check all docs/ (full validation)
+          echo "🔍 Full validation mode (push to main)"
+          
+          # Check for Jekyll Liquid includes
+          if grep -r "{% include" docs/; then
+            echo "❌ Found Jekyll Liquid includes in docs/"
+            VIOLATIONS=$((VIOLATIONS + 1))
+          fi
+          
+          # Check for HTML div tags with classes
+          if grep -r "<div class=" docs/; then
+            echo "❌ Found HTML div tags with classes in docs/"
+            VIOLATIONS=$((VIOLATIONS + 1))
+          fi
+          
+          # Check for script tags
+          if grep -r "<script" docs/; then
+            echo "❌ Found script tags in docs/"
+            VIOLATIONS=$((VIOLATIONS + 1))
+          fi
+          
+          # Check for style tags
+          if grep -r "<style" docs/; then
+            echo "❌ Found style tags in docs/"
+            VIOLATIONS=$((VIOLATIONS + 1))
+          fi
+          
+          # Check for JavaScript/TypeScript files
+          if find docs/ -name "*.js" -o -name "*.ts" -o -name "*.vue" | grep -q .; then
+            echo "❌ Found JavaScript/TypeScript files in docs/"
+            VIOLATIONS=$((VIOLATIONS + 1))
+          fi
         fi
         
         # Check for complex frontmatter
@@ -60,11 +112,25 @@ jobs:
         import os
         import glob
         import re
+        import subprocess
         
         violations = 0
         allowed_fields = {'title', 'description', 'category'}
         
-        for file_path in glob.glob('docs/**/*.md', recursive=True):
+        # Get changed files for PR validation
+        if os.environ.get('GITHUB_EVENT_NAME') == 'pull_request':
+            try:
+                result = subprocess.run(['git', 'diff', '--name-only', f'origin/{os.environ.get("GITHUB_BASE_REF", "main")}...HEAD'], 
+                                      capture_output=True, text=True)
+                changed_files = [f for f in result.stdout.strip().split('\n') if f.startswith('docs/') and f.endswith('.md')]
+                file_list = changed_files
+                print(f"Checking changed files: {file_list}")
+            except:
+                file_list = []
+        else:
+            file_list = glob.glob('docs/**/*.md', recursive=True)
+
+        for file_path in file_list:
             try:
                 with open(file_path, 'r', encoding='utf-8') as f:
                     content = f.read()
