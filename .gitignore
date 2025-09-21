@@ -211,3 +211,4 @@ __marimo__/
 *.deb
 *.buildinfo
 *.changes
+chat.db

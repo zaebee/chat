@@ -2,10 +2,12 @@ import sqlite3
 
 DATABASE_URL = "chat.db"
 
+
 def get_db_connection():
     conn = sqlite3.connect(DATABASE_URL)
     conn.row_factory = sqlite3.Row
     return conn
+
 
 def init_db():
     conn = get_db_connection()
@@ -16,6 +18,14 @@ def init_db():
             sender_id TEXT NOT NULL,
             sender_name TEXT NOT NULL,
             timestamp TEXT NOT NULL
+        );
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS user_progress (
+            user_id TEXT NOT NULL,
+            challenge_id TEXT NOT NULL,
+            solved_at TEXT NOT NULL,
+            PRIMARY KEY (user_id, challenge_id)
         );
     """)
     conn.commit()
