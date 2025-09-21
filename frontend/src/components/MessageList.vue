@@ -1,10 +1,8 @@
 <script setup lang="ts">
-import type { Message } from "@/stores/messages";
+import { useMessagesStore } from "@/stores/messages";
 import MessageItem from "./MessageItem.vue";
 
-const props = defineProps<{ 
-  messages: (Message & { replies: Message[] })[] 
-}>();
+const messagesStore = useMessagesStore();
 
 const emit = defineEmits<{ 
   (e: 'reply', senderName: string, messageId: string): void 
@@ -17,7 +15,7 @@ function handleReply(senderName: string, messageId: string) {
 
 <template>
   <div class="chat-messages">
-    <template v-for="message in messages" :key="message.id">
+    <template v-for="message in messagesStore.getThreadedMessages" :key="message.id">
       <MessageItem :message="message" @reply="handleReply" />
     </template>
   </div>
