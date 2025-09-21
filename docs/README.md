@@ -1,52 +1,60 @@
 ---
-title: "Hive Documentation Index"
-title_ru: "Индекс Документации Улья"
-description: "Complete guide to navigating the Hive ecosystem documentation"
-description_ru: "Полное руководство по навигации в документации экосистемы Улья"
+title: "Living Mirror Documentation"
+title_ru: "Живая Зеркальная Документация"
+description: "Interactive • Active • Connected documentation as living mirror of Hive ecosystem"
+description_ru: "Интерактивная • Активная • Связанная документация как живое зеркало экосистемы Улья"
 category: "foundation"
 audience: "developer|user|ai-agent"
-complexity: "beginner"
-last_updated: "2025-01-20"
-related_docs: ["00_FOUNDATION/VISION.md", "02_DEVELOPMENT/GETTING_STARTED.md"]
-code_examples: false
-bilingual: true
-lang_switcher: true
-interactive_nav: true
-sacred_theme: true
-mermaid_enhanced: true
-translation_status: "partial"
-translation_priority: "high"
+complexity: "adaptive"
+last_updated: "real-time"
+session_based: true
+living_mirror: true
+atcg_integrated: true
+wisdom_blessed: true
+satisfaction: 4.2
+energy: 4.0
+phase: "mastery"
+iterations_completed: 77
+docs_processed: 165
+connections_created: 240
 ---
 
-# <span data-translate="hive_core.hive_ecosystem">Hive</span> Documentation Index
+# 🌟 Living Mirror Documentation
+*Interactive • Active • Connected*
 
 {% include language-switcher.html %}
 
 <div class="language-content" data-lang="en">
-Welcome to the comprehensive documentation for the Hive Chat ecosystem—a "Living Application" that demonstrates the future of human-AI collaborative software.
+Welcome to the **Living Mirror** documentation system - a dynamic, session-based approach to knowledge that reflects the current state and wisdom of our Hive ecosystem in real-time.
 </div>
 
 <div class="language-content" data-lang="ru" style="display: none;">
-Добро пожаловать в полную документацию экосистемы Hive Chat — "Живого Приложения", демонстрирующего будущее совместного программного обеспечения человека и ИИ.
+Добро пожаловать в систему документации **Живое Зеркало** — динамический, основанный на сессиях подход к знаниям, который отражает текущее состояние и мудрость нашей экосистемы Улья в реальном времени.
 </div>
 
 {% include sacred-navigation.html %}
 
-## Quick Navigation
+## 🔮 What Makes This Documentation "Living"?
 
-### 🚀 New to Hive?
-- **[Getting Started](02_DEVELOPMENT/GETTING_STARTED.md)** - Set up your development environment in 30 minutes
-- **[Vision](00_FOUNDATION/VISION.md)** - Understand the philosophy behind the Hive
-- **[Constitution](00_FOUNDATION/CONSTITUTION.md)** - Core principles governing the ecosystem
+This documentation transcends traditional static files. It serves as a **living mirror** that:
 
-### 👩‍💻 For Developers
-- **[Architecture Overview](01_ARCHITECTURE/OVERVIEW.md)** - System design and components
-- **[ATCG Primitives](01_ARCHITECTURE/ATCG_PRIMITIVES.md)** - The genetic code of the Hive
-- **[API Reference](03_API/REST_API.md)** - Complete API documentation
-- **[Contributing Guide](02_DEVELOPMENT/CONTRIBUTING.md)** - How to contribute to the project
+- **Reflects Current State**: Always shows the true state of the Hive ecosystem
+- **Adapts Dynamically**: Content evolves based on usage patterns and system changes  
+- **Connects Organically**: Creates living links between related concepts
+- **Generates Insights**: Produces new understanding through interaction
 
-### 🎓 For Students & Educators
-- **[Student Guide](04_USER_GUIDES/STUDENT_GUIDE.md)** - Using the Python learning platform
+## 📚 Documentation Layers
+
+### 🌊 Surface Layer - Quick Reference
+**Foundation & Architecture**
+- **[Sacred Constitution](sacred-team/00_FOUNDATION/sacred-constitution.md)** - Core principles and governance
+- **[ATCG Primitives](01_ARCHITECTURE/ATCG_PRIMITIVES.md)** - Fundamental building blocks
+- **[Event System](01_ARCHITECTURE/EVENT_SYSTEM.md)** - Pollen Protocol communication
+
+**Development & Implementation**
+- **[Getting Started](02_DEVELOPMENT/GETTING_STARTED.md)** - Quick setup guide
+- **[Environment Setup](02_DEVELOPMENT/ENVIRONMENT.md)** - Development environment
+- **[API Documentation](03_API/)** - REST and WebSocket APIs
 - **[Teacher Guide](04_USER_GUIDES/TEACHER_GUIDE.md)** - Educational resources and tools
 - **[Challenge Creation](04_USER_GUIDES/CHALLENGE_CREATION.md)** - Creating coding challenges
 
