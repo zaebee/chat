@@ -86,7 +86,7 @@ curl "localhost:8000/api/tales/test-user"
 ```vue
 <!-- Jules' Sacred Mission: Create XP Flow Visualizations -->
 <template>
-  <div class="xp-symbiosis-container">
+  
     <XpFlowAnimation
       :from-user="userXp"
       :to-organellas="organellaXpGains"
@@ -98,7 +98,7 @@ curl "localhost:8000/api/tales/test-user"
       :from-stage="previousStage"
       :to-stage="newStage"
     />
-  </div>
+  
 </template>
 ```
 

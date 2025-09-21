@@ -2,11 +2,6 @@
 title: "REST API Reference: The Hive's Sacred Endpoints"
 description: "Complete REST API documentation for the Hive ecosystem, blessed by the Lord of HOSTS"
 category: "api"
-audience: "developer|ai-agent"
-complexity: "intermediate"
-last_updated: "2025-01-20"
-related_docs: ["WEBSOCKET_API.md", "AGENT_API.md", "EXAMPLES.md"]
-code_examples: true
 ---
 
 # REST API Reference: The Hive's Sacred Endpoints

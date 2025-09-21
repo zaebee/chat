@@ -2,11 +2,6 @@
 title: "The Hive Constitution: Principles of Living Software"
 description: "Foundational principles governing the Hive ecosystem and human-AI collaboration"
 category: "foundation"
-audience: "developer|user|ai-agent"
-complexity: "beginner"
-last_updated: "2025-01-20"
-related_docs: ["VISION.md", "PHILOSOPHY.md"]
-code_examples: false
 ---
 
 # The Hive Constitution: Principles of Living Software

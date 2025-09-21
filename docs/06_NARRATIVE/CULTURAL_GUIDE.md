@@ -2,11 +2,6 @@
 title: "Cultural Guide: The Sacred Ways of the Hive"
 description: "Understanding the culture, values, and collaboration principles of the Hive community"
 category: "narrative"
-audience: "developer|user|ai-agent"
-complexity: "beginner"
-last_updated: "2025-01-20"
-related_docs: ["ORIGIN_STORY.md", "TEAM_PERSONAS.md", "../00_FOUNDATION/CONSTITUTION.md"]
-code_examples: false
 ---
 
 # Cultural Guide: The Sacred Ways of the Hive

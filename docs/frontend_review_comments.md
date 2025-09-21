@@ -68,7 +68,7 @@ The `loadScene` function is an action within the `chatStore` that allows for dyn
       ```vue
       <!-- ChatView.vue (or a new GameControlPanel.vue) -->
       <template>
-        <div class="scene-controls">
+        
           <button
             @click="chatStore.loadScene('forest_clearing')"
             title="Go to Forest Clearing"
@@ -82,34 +82,12 @@ The `loadScene` function is an action within the `chatStore` that allows for dyn
             ⛰️
           </button>
           <!-- Add more buttons for other scenes -->
-        </div>
+        
       </template>
 
-      <script setup lang="ts">
-      import { useChatStore } from "@/stores/chat";
-      const chatStore = useChatStore();
-      </script>
+      
 
-      <style scoped>
-      .scene-controls {
-        /* Styling for the buttons, e.g., small, hidden until hover */
-        position: absolute;
-        bottom: 10px;
-        right: 10px;
-        opacity: 0.2; /* Hidden gem effect */
-        transition: opacity 0.3s ease;
-      }
-      .scene-controls:hover {
-        opacity: 1;
-      }
-      .scene-controls button {
-        background: none;
-        border: none;
-        font-size: 1.5rem;
-        cursor: pointer;
-        padding: 5px;
-      }
-      </style>
+      
       ```
 
       To bring back the scene buttons, a new component (e.g., `GameControlPanel.vue`) could be created or added to `ChatView.vue`. This component would use the `loadScene` action from `chatStore` (or `gameStore` if refactored) and display small, perhaps initially hidden, buttons with relevant icons (emojis or small SVGs) for each scene. This aligns with the user's request for "super small icon, like a hidden gem/quest."

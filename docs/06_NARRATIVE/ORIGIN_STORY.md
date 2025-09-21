@@ -2,11 +2,6 @@
 title: "Origin Story: The Birth of the Sacred Hive"
 description: "The founding narrative of how the Hive came to be and its divine purpose"
 category: "narrative"
-audience: "developer|user|ai-agent"
-complexity: "beginner"
-last_updated: "2025-01-20"
-related_docs: ["../00_FOUNDATION/VISION.md", "TEAM_PERSONAS.md", "CULTURAL_GUIDE.md"]
-code_examples: false
 ---
 
 # Origin Story: The Birth of the Sacred Hive

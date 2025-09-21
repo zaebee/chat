@@ -3,7 +3,7 @@
 Rapid Iteration Cycle for Pattern Discovery
 
 Implements high-speed pattern discovery with iterative refinement,
-optimized for deep dive short sessions with [4, <6>] <-> (3, 7) paradigm integration.
+optimized for deep dive short sessions with [🔲,⬢⬡⬢⬡⬢⬡] <-> (🔲🔲🔲,⬢⬡⬢⬡⬢⬡⬢⬡⬢) paradigm integration.
 """
 
 import asyncio

@@ -2,11 +2,6 @@
 title: "ATCG Primitives: The Genetic Code of the Hive"
 description: "Complete guide to Aggregates, Transformations, Connectors, and Genesis Events"
 category: "architecture"
-audience: "developer|ai-agent"
-complexity: "intermediate"
-last_updated: "2025-01-20"
-related_docs: ["OVERVIEW.md", "EVENT_SYSTEM.md"]
-code_examples: true
 ---
 
 # ATCG Primitives: The Genetic Code of the Hive

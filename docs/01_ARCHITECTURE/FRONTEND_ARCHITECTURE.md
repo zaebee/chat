@@ -2,11 +2,6 @@
 title: "Frontend Architecture: The Sacred Interface"
 description: "Vue.js architecture for the Hive's user interface and learning platform"
 category: "architecture"
-audience: "developer"
-complexity: "intermediate"
-last_updated: "2025-01-20"
-related_docs: ["OVERVIEW.md", "../02_DEVELOPMENT/GETTING_STARTED.md"]
-code_examples: true
 ---
 
 # Frontend Architecture: The Sacred Interface
@@ -58,41 +53,20 @@ Real-time messaging interface with WebSocket integration:
 
 ```vue
 <template>
-  <div class="chat-container">
-    <div class="messages" ref="messagesContainer">
-      <div v-for="message in messages" :key="message.id" class="message">
+  
+    
+      
         <span class="sender">{{ message.sender_name }}:</span>
         <span class="text">{{ message.text }}</span>
-      </div>
-    </div>
-    <div class="input-area">
+      
+    
+    
       <input v-model="newMessage" @keyup.enter="sendMessage" />
       <button @click="sendMessage">Send</button>
-    </div>
-  </div>
+    
+  
 </template>
 
-<script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useChatStore } from '@/stores/chat'
-
-const chatStore = useChatStore()
-const newMessage = ref('')
-const messagesContainer = ref<HTMLElement>()
-
-const messages = computed(() => chatStore.messages)
-
-const sendMessage = () => {
-  if (newMessage.value.trim()) {
-    chatStore.sendMessage(newMessage.value)
-    newMessage.value = ''
-  }
-}
-
-onMounted(() => {
-  chatStore.connect()
-})
-</script>
 ```
 
 ### CodeEditor.vue
@@ -100,58 +74,19 @@ Python code editor with Pyodide integration:
 
 ```vue
 <template>
-  <div class="code-editor">
-    <div ref="editorContainer" class="editor-container"></div>
-    <div class="controls">
+  
+    
+    
       <button @click="runCode" :disabled="isRunning">
         {{ isRunning ? 'Running...' : 'Run Code' }}
       </button>
-    </div>
-    <div class="output" v-if="output">
+    
+    
       <pre>{{ output }}</pre>
-    </div>
-  </div>
+    
+  
 </template>
 
-<script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { EditorView, basicSetup } from 'codemirror'
-import { python } from '@codemirror/lang-python'
-import { oneDark } from '@codemirror/theme-one-dark'
-import { usePythonRunner } from '@/services/pythonRunner'
-
-const editorContainer = ref<HTMLElement>()
-const output = ref('')
-const isRunning = ref(false)
-
-let editor: EditorView
-
-const pythonRunner = usePythonRunner()
-
-const runCode = async () => {
-  isRunning.value = true
-  try {
-    const code = editor.state.doc.toString()
-    output.value = await pythonRunner.runCode(code)
-  } catch (error) {
-    output.value = `Error: ${error.message}`
-  } finally {
-    isRunning.value = false
-  }
-}
-
-onMounted(() => {
-  editor = new EditorView({
-    doc: '# Write your Python code here\nprint("Hello, Hive!")',
-    extensions: [
-      basicSetup,
-      python(),
-      oneDark
-    ],
-    parent: editorContainer.value
-  })
-})
-</script>
 ```
 
 ## State Management

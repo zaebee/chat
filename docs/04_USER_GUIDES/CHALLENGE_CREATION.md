@@ -2,11 +2,6 @@
 title: "Challenge Creation: Crafting Sacred Learning Experiences"
 description: "Complete guide for creating engaging coding challenges in the Hive"
 category: "user"
-audience: "user"
-complexity: "intermediate"
-last_updated: "2025-01-20"
-related_docs: ["TEACHER_GUIDE.md", "STUDENT_GUIDE.md", "GAMIFICATION.md"]
-code_examples: true
 ---
 
 # Challenge Creation: Crafting Sacred Learning Experiences

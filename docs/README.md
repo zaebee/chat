@@ -1,38 +1,13 @@
 ---
 title: "Living Mirror Documentation"
-title_ru: "Живая Зеркальная Документация"
 description: "Interactive • Active • Connected documentation as living mirror of Hive ecosystem"
-description_ru: "Интерактивная • Активная • Связанная документация как живое зеркало экосистемы Улья"
 category: "foundation"
-audience: "developer|user|ai-agent"
-complexity: "adaptive"
-last_updated: "real-time"
-session_based: true
-living_mirror: true
-atcg_integrated: true
-wisdom_blessed: true
-satisfaction: 4.2
-energy: 4.0
-phase: "mastery"
-iterations_completed: 77
-docs_processed: 165
-connections_created: 240
 ---
 
 # 🌟 Living Mirror Documentation
 *Interactive • Active • Connected*
 
-{% include language-switcher.html %}
-
-<div class="language-content" data-lang="en">
 Welcome to the **Living Mirror** documentation system - a dynamic, session-based approach to knowledge that reflects the current state and wisdom of our Hive ecosystem in real-time.
-</div>
-
-<div class="language-content" data-lang="ru" style="display: none;">
-Добро пожаловать в систему документации **Живое Зеркало** — динамический, основанный на сессиях подход к знаниям, который отражает текущее состояние и мудрость нашей экосистемы Улья в реальном времени.
-</div>
-
-{% include sacred-navigation.html %}
 
 ## 🔮 What Makes This Documentation "Living"?
 
@@ -42,6 +17,14 @@ This documentation transcends traditional static files. It serves as a **living 
 - **Adapts Dynamically**: Content evolves based on usage patterns and system changes  
 - **Connects Organically**: Creates living links between related concepts
 - **Generates Insights**: Produces new understanding through interaction
+
+## 📐 Rect-to-Hexa Architecture
+
+### 🔲 RECT (Core) - Pure Documentation
+Clean markdown files in `docs/` with no mixing of content and presentation.
+
+### [⬢⬡⬢⬡] HEXA (Enhancement) - Generated Features  
+Interactive elements, styling, and navigation added via GitHub Actions workflows.
 
 ## 📚 Documentation Layers
 

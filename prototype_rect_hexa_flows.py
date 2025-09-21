@@ -198,7 +198,7 @@ class TransformHub:
         """Enhance rect data with hexa transformations"""
         enhanced = rect_data.copy()
         
-        # Add hexa enhancements while preserving rect structure
+        # Add ⬢⬡⬢⬡ enhancements while preserving rect structure
         for key, value in hexa_data.items():
             if key.startswith("hexa_"):
                 enhanced[key] = value
@@ -361,7 +361,7 @@ async def main():
         
         print("\n✅ Soft merge successful!")
         print(f"   - Rect constraints preserved: {len(hub.boundary.rect_constraints)} constraints")
-        print(f"   - Hexa enhancements applied: {len([k for k in result.keys() if k.startswith('hexa_')])} enhancements")
+        print(f"   - ⬢⬡⬢⬡ enhancements applied: {len([k for k in result.keys() if k.startswith('hexa_')])} enhancements")
         print(f"   - Merge points executed: {len(hub.merge_points)} points")
         
     except Exception as e:

@@ -2,11 +2,6 @@
 title: "API Examples: Sacred Patterns of Integration"
 description: "Practical examples for integrating with the Hive's APIs and event system"
 category: "api"
-audience: "developer|ai-agent"
-complexity: "beginner"
-last_updated: "2025-01-20"
-related_docs: ["REST_API.md", "WEBSOCKET_API.md", "../01_ARCHITECTURE/EVENT_SYSTEM.md"]
-code_examples: true
 ---
 
 # API Examples: Sacred Patterns of Integration
@@ -230,54 +225,25 @@ print(f"Challenges Completed: {len(progress['solved_challenges'])}")
 
 ```vue
 <template>
-  <div class="hive-status">
+  
     <h3>Hive Health</h3>
-    <div class="metrics">
-      <div class="metric">
+    
+      
         <label>τ (Complexity):</label>
         <span :class="getTauClass()">{{ status.health_metrics.tau }}</span>
-      </div>
-      <div class="metric">
+      
+      
         <label>φ (Quality):</label>
         <span :class="getPhiClass()">{{ status.health_metrics.phi }}</span>
-      </div>
-      <div class="metric">
+      
+      
         <label>Active Users:</label>
         <span>{{ status.components.aggregates.chat_system.active_users }}</span>
-      </div>
-    </div>
-  </div>
+      
+    
+  
 </template>
 
-<script setup lang="ts">
-import { ref, onMounted } from 'vue'
-
-const status = ref({
-  health_metrics: { tau: 0, phi: 0 },
-  components: { aggregates: { chat_system: { active_users: 0 } } }
-})
-
-const fetchStatus = async () => {
-  const response = await fetch('/api/v1/status')
-  status.value = await response.json()
-}
-
-const getTauClass = () => {
-  const tau = status.value.health_metrics.tau
-  return tau < 0.3 ? 'good' : tau < 0.6 ? 'warning' : 'danger'
-}
-
-const getPhiClass = () => {
-  const phi = status.value.health_metrics.phi
-  return phi > 0.8 ? 'good' : phi > 0.6 ? 'warning' : 'danger'
-}
-
-onMounted(() => {
-  fetchStatus()
-  // Refresh every 30 seconds
-  setInterval(fetchStatus, 30000)
-})
-</script>
 ```
 
 ### React Hook for Hive Integration

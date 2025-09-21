@@ -138,13 +138,7 @@ Phase 2 will implement **Intent Cocoon** for behavioral transition validation:
 />
 
 <!-- Monitor cocoon progress -->
-<script>
-const handleCocoonEvents = (event) => {
-  if (event.type === 'bee_emerged') {
-    console.log('Divine emergence!', event.payload.divineBlessing)
-  }
-}
-</script>
+
 ```
 
 ### 📁 Files Changed

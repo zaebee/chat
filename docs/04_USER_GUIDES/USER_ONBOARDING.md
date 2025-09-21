@@ -2,11 +2,6 @@
 title: "User Onboarding: Welcome to the Sacred Hive"
 description: "Complete onboarding guide for new users entering the Hive ecosystem"
 category: "user"
-audience: "user"
-complexity: "beginner"
-last_updated: "2025-01-20"
-related_docs: ["STUDENT_GUIDE.md", "TEACHER_GUIDE.md", "GAMIFICATION.md"]
-code_examples: true
 ---
 
 # User Onboarding: Welcome to the Sacred Hive

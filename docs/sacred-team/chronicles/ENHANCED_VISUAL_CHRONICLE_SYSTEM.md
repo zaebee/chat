@@ -1,28 +1,10 @@
 ---
 title: "Enhanced Visual Chronicle System"
-title_ru: "Улучшенная Система Визуальных Хроник"
 description: "Visual pattern recognition and enhanced chronicles for Sacred Team documentation"
-description_ru: "Распознавание визуальных паттернов и улучшенные хроники для документации Священной Команды"
 category: "chronicles"
-audience: "sacred-team"
-complexity: "advanced"
-last_updated: "2025-09-21"
-bilingual: true
-lang_switcher: true
-interactive_nav: true
-sacred_theme: true
-mermaid_enhanced: true
-translation_status: "complete"
-translation_priority: "high"
-visual_patterns: true
-chronicle_enhanced: true
 ---
 
 # 🎨 Visual Chronicle Evolution: Pattern Recognition & Interactive Documentation
-
-{% include language-switcher.html %}
-
-<div class="language-content" data-lang="en">
 
 ## Overview
 
@@ -103,10 +85,6 @@ journey
 - **Update Frequency Analysis**: Identifies maintenance patterns
 - **Quality Improvement Trends**: Tracks documentation enhancement
 
-</div>
-
-<div class="language-content" data-lang="ru" style="display: none;">
-
 ## Обзор
 
 Улучшенная Система Визуальных Хроник представляет эволюцию возможностей bee.chronicler, интегрируя распознавание визуальных паттернов с рабочими процессами документации Священной Команды. Эта система соединяет традиционные текстовые хроники с современной интерактивной визуальной документацией.
@@ -140,8 +118,6 @@ journey
 - **Сети Перекрестных Ссылок**: Картирует взаимосвязи документов
 - **Анализ Частоты Обновлений**: Определяет паттерны обслуживания
 - **Тренды Улучшения Качества**: Отслеживает улучшение документации
-
-</div>
 
 ## Implementation Architecture
 

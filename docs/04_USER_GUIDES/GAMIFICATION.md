@@ -2,11 +2,6 @@
 title: "Gamification Guide: The Sacred Progression System"
 description: "Complete guide to XP, badges, levels, and progression mechanics in the Hive"
 category: "user"
-audience: "user"
-complexity: "beginner"
-last_updated: "2025-01-20"
-related_docs: ["STUDENT_GUIDE.md", "TEACHER_GUIDE.md", "CHALLENGE_CREATION.md"]
-code_examples: false
 ---
 
 # Gamification Guide: The Sacred Progression System

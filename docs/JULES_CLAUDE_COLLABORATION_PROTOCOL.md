@@ -215,7 +215,7 @@ interface EnvironmentalTheme {
 ### **User Experience Goals**
 - [ ] Intuitive room creation workflow
 - [ ] Beautiful environmental theme visualization
-- [ ] Smooth integration with hexagonal navigation
+- [ ] Smooth integration with Hexagonal [⬢⬡⬢⬡] navigation
 - [ ] Enhanced procedural visual elements
 
 ### **Architectural Goals**

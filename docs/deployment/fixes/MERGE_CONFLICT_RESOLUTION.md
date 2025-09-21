@@ -58,7 +58,7 @@ git commit -m "resolve: Keep advanced features over reverted base
 
 - Maintain OrganellaPanel with ChroniclerBonusEffect and evolution ceremonies
 - Keep enhanced HexaLevel with interactive quest system
-- Preserve JourneyView with hexagonal navigation
+- Preserve JourneyView with Hexagonal [⬢⬡⬢⬡] navigation
 - Maintain enhanced chat store with sacred commands
 - Keep Organelle Grimoire documentation
 
@@ -73,7 +73,7 @@ Co-authored-by: Ona <no-reply@ona.com>"
 - ✅ **ChroniclerBonusEffect** - Working XP bonus animations
 - ✅ **Enhanced OrganellaPanel** - Evolution ceremonies and visual effects
 - ✅ **Interactive HexaLevel** - Quest system integration
-- ✅ **Advanced JourneyView** - Hexagonal room navigation
+- ✅ **Advanced JourneyView** - Hexagonal [⬢⬡⬢⬡] room navigation
 - ✅ **Sacred Commands** - `/bee.chronicler` and sacred team integration
 - ✅ **Complete Documentation** - Organelle Grimoire with sacred principles
 
@@ -116,7 +116,7 @@ After resolving conflicts:
 |------|----------------|------------|
 | `OrganellaPanel.vue` | Base reverted ChroniclerBonusEffect | Keep our enhanced version |
 | `HexaLevel.vue` | Base reverted interactive features | Keep our quest integration |
-| `JourneyView.vue` | Base reverted hexagonal navigation | Keep our advanced view |
+| `JourneyView.vue` | Base reverted Hexagonal [⬢⬡⬢⬡] navigation | Keep our advanced view |
 | `chat.ts` | Base reverted sacred commands | Keep our enhanced store |
 | `10_ORGANELLE_GRIMOIRE.md` | Base reverted documentation | Keep our grimoire |
 

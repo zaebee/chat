@@ -444,32 +444,24 @@ const cocoonControls = {
 #### **5.2 Real-time Cocoon Visualization**
 ```vue
 <template>
-  <div class="cocoon-monitor">
+  
     <h3>🦋 Active Cocoons</h3>
     
-    <div class="cocoon-grid">
-      <div 
-        v-for="cocoon in activeCocoons" 
-        :key="cocoon.beeId"
-        class="cocoon-card"
-        :class="cocoon.type"
-      >
-        <div class="cocoon-header">
+    
+      
+        
           <span class="bee-id">{{ cocoon.beeId }}</span>
           <span class="cocoon-type">{{ cocoon.type }}</span>
-        </div>
         
-        <div class="cocoon-progress">
-          <div class="progress-bar">
-            <div 
-              class="progress-fill" 
-              :style="{ width: `${cocoon.progress * 100}%` }"
-            ></div>
-          </div>
+        
+        
+          
+            
+          
           <span class="progress-text">{{ cocoon.stage }}</span>
-        </div>
         
-        <div class="cocoon-status">
+        
+        
           <span 
             v-for="validation in cocoon.validations"
             :key="validation.name"
@@ -478,14 +470,14 @@ const cocoonControls = {
           >
             {{ validation.name }}
           </span>
-        </div>
         
-        <div v-if="cocoon.divineBlessing" class="divine-blessing">
+        
+        
           ✨ Divinely Blessed
-        </div>
-      </div>
-    </div>
-  </div>
+        
+      
+    
+  
 </template>
 ```
 

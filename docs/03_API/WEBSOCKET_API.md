@@ -2,11 +2,6 @@
 title: "WebSocket API: Real-time Divine Communication"
 description: "WebSocket endpoints for real-time chat and event streaming in the Hive"
 category: "api"
-audience: "developer|ai-agent"
-complexity: "intermediate"
-last_updated: "2025-01-20"
-related_docs: ["REST_API.md", "EXAMPLES.md", "../01_ARCHITECTURE/EVENT_SYSTEM.md"]
-code_examples: true
 ---
 
 # WebSocket API: Real-time Divine Communication
@@ -431,33 +426,28 @@ asyncio.run(main())
 
 ```vue
 <template>
-  <div class="hive-chat">
-    <div class="connection-status" :class="connectionClass">
-      {{ connectionStatus }}
-    </div>
+  
     
-    <div class="messages" ref="messagesContainer">
-      <div 
-        v-for="message in messages" 
-        :key="message.id"
-        class="message"
-        :class="{ 'own-message': message.sender_id === currentUserId }"
-      >
+      {{ connectionStatus }}
+    
+    
+    
+      
         <span class="sender">{{ message.sender_name }}:</span>
         <span class="text">{{ message.text }}</span>
         <span class="timestamp">{{ formatTime(message.timestamp) }}</span>
-      </div>
-    </div>
+      
     
-    <div class="user-list">
+    
+    
       <h4>Active Users ({{ users.length }})</h4>
-      <div v-for="user in users" :key="user.id" class="user">
+      
         <span class="user-indicator" :style="{ backgroundColor: user.color }"></span>
         {{ user.username }}
-      </div>
-    </div>
+      
     
-    <div class="input-area">
+    
+    
       <input 
         v-model="newMessage" 
         @keyup.enter="sendMessage"
@@ -467,247 +457,10 @@ asyncio.run(main())
       <button @click="sendMessage" :disabled="!isConnected || !newMessage.trim()">
         Send
       </button>
-    </div>
-  </div>
+    
+  
 </template>
 
-<script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
-
-interface Message {
-  id: string
-  text: string
-  sender_id: string
-  sender_name: string
-  timestamp: string
-}
-
-interface User {
-  id: string
-  username: string
-  color: string
-}
-
-const messages = ref<Message[]>([])
-const users = ref<User[]>([])
-const newMessage = ref('')
-const isConnected = ref(false)
-const currentUserId = ref('dev_001')
-const currentUsername = ref('Developer')
-
-let websocket: WebSocket | null = null
-const messagesContainer = ref<HTMLElement>()
-
-const connectionStatus = computed(() => {
-  return isConnected.value ? 'Connected to Hive' : 'Disconnected'
-})
-
-const connectionClass = computed(() => {
-  return isConnected.value ? 'connected' : 'disconnected'
-})
-
-const connect = () => {
-  const wsUrl = `ws://localhost:8000/ws?username=${currentUsername.value}&user_id=${currentUserId.value}`
-  websocket = new WebSocket(wsUrl)
-  
-  websocket.onopen = () => {
-    isConnected.value = true
-    console.log('🐝 Connected to Hive')
-  }
-  
-  websocket.onmessage = (event) => {
-    try {
-      const data = JSON.parse(event.data)
-      handleMessage(data)
-    } catch (error) {
-      console.error('Failed to parse message:', error)
-    }
-  }
-  
-  websocket.onclose = () => {
-    isConnected.value = false
-    console.log('Disconnected from Hive')
-    // Attempt reconnection after 3 seconds
-    setTimeout(connect, 3000)
-  }
-  
-  websocket.onerror = (error) => {
-    console.error('WebSocket error:', error)
-  }
-}
-
-const handleMessage = (message: any) => {
-  switch (message.type) {
-    case 'message':
-      messages.value.push(message.data)
-      scrollToBottom()
-      break
-      
-    case 'user_joined':
-      console.log(`${message.data.username} joined`)
-      break
-      
-    case 'user_left':
-      console.log(`${message.data.username} left`)
-      break
-      
-    case 'user_list':
-      users.value = message.data
-      break
-      
-    case 'system_status':
-      console.log('System status:', message.data)
-      break
-      
-    case 'error':
-      console.error('Server error:', message.data.message)
-      break
-      
-    default:
-      console.log('Unknown message type:', message.type)
-  }
-}
-
-const sendMessage = () => {
-  if (!websocket || !isConnected.value || !newMessage.value.trim()) {
-    return
-  }
-  
-  const message = {
-    type: 'message',
-    data: {
-      text: newMessage.value.trim(),
-      channel: 'general'
-    }
-  }
-  
-  websocket.send(JSON.stringify(message))
-  newMessage.value = ''
-}
-
-const scrollToBottom = async () => {
-  await nextTick()
-  if (messagesContainer.value) {
-    messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
-  }
-}
-
-const formatTime = (timestamp: string) => {
-  return new Date(timestamp).toLocaleTimeString()
-}
-
-onMounted(() => {
-  connect()
-})
-
-onUnmounted(() => {
-  if (websocket) {
-    websocket.close()
-  }
-})
-</script>
-
-<style scoped>
-.hive-chat {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.connection-status {
-  padding: 0.5rem;
-  text-align: center;
-  font-weight: bold;
-}
-
-.connected {
-  background-color: #2ecc71;
-  color: white;
-}
-
-.disconnected {
-  background-color: #e74c3c;
-  color: white;
-}
-
-.messages {
-  flex: 1;
-  overflow-y: auto;
-  padding: 1rem;
-  border: 1px solid #ddd;
-}
-
-.message {
-  margin-bottom: 0.5rem;
-  padding: 0.5rem;
-  border-radius: 4px;
-  background-color: #f8f9fa;
-}
-
-.own-message {
-  background-color: #e3f2fd;
-  margin-left: 2rem;
-}
-
-.sender {
-  font-weight: bold;
-  margin-right: 0.5rem;
-}
-
-.timestamp {
-  font-size: 0.8rem;
-  color: #666;
-  margin-left: 0.5rem;
-}
-
-.user-list {
-  padding: 1rem;
-  border: 1px solid #ddd;
-  background-color: #f8f9fa;
-}
-
-.user {
-  display: flex;
-  align-items: center;
-  margin-bottom: 0.25rem;
-}
-
-.user-indicator {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  margin-right: 0.5rem;
-}
-
-.input-area {
-  display: flex;
-  padding: 1rem;
-  gap: 0.5rem;
-}
-
-.input-area input {
-  flex: 1;
-  padding: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-
-.input-area button {
-  padding: 0.5rem 1rem;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.input-area button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-</style>
 ```
 
 ## Error Handling

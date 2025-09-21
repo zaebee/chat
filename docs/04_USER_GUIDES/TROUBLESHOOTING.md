@@ -2,11 +2,6 @@
 title: "Troubleshooting Guide: Healing the Sacred Code"
 description: "Complete troubleshooting guide for common issues in the Hive"
 category: "user"
-audience: "user"
-complexity: "beginner"
-last_updated: "2025-01-20"
-related_docs: ["USER_ONBOARDING.md", "STUDENT_GUIDE.md", "../02_DEVELOPMENT/ENVIRONMENT.md"]
-code_examples: true
 ---
 
 # Troubleshooting Guide: Healing the Sacred Code

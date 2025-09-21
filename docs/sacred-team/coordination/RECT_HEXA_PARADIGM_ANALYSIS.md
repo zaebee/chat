@@ -21,7 +21,7 @@ graph LR
 - Clear separation of concerns
 - Compliance-friendly (HIPAA, GDPR)
 
-### <hexa> - Hexagonal/Flexible Paradigm  
+### <hexa> - Hexagonal [⬢⬡⬢⬡]/Flexible Paradigm  
 **Characteristics**: Multi-directional, adaptive, organic data flows
 ```
     <Input>
@@ -79,7 +79,7 @@ graph TB
 
 ## Soft Merge Architecture Design
 
-### Hybrid Flow Pattern: [rect<hexa>]
+### Hybrid Flow Pattern: [🔲⬢⬡⬢⬡]
 
 #### Core Concept
 Maintain [rect] structure for compliance/predictability while enabling <hexa> flexibility for data interconnection.
@@ -119,7 +119,7 @@ class SoftMergeProcessor:
 *.md → Parser → AST → Renderer → HTML
 ```
 
-**Proposed [rect<hexa>] Pattern**:
+**Proposed [🔲⬢⬡⬢⬡] Pattern**:
 ```
 *.md → [Parser] → <Transform Hub> → [Validator] → Output
                       ↕

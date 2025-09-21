@@ -2,11 +2,6 @@
 title: "Agent Framework: Building AI Teammates for the Hive"
 description: "Complete guide to implementing AI agents that collaborate as first-class citizens"
 category: "architecture"
-audience: "developer|ai-agent"
-complexity: "intermediate"
-last_updated: "2025-01-20"
-related_docs: ["EVENT_SYSTEM.md", "ATCG_PRIMITIVES.md", "../03_API/AGENT_API.md"]
-code_examples: true
 ---
 
 # Agent Framework: Building AI Teammates for the Hive

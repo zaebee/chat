@@ -2,11 +2,6 @@
 title: "Pollen Protocol: The Sacred Communication System"
 description: "Complete specification of the Hive's event-driven communication protocol"
 category: "architecture"
-audience: "developer|ai-agent"
-complexity: "intermediate"
-last_updated: "2025-01-20"
-related_docs: ["ATCG_PRIMITIVES.md", "../03_API/WEBSOCKET_API.md"]
-code_examples: true
 ---
 
 # Pollen Protocol: The Sacred Communication System

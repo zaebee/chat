@@ -93,25 +93,7 @@ if (hasActiveChronicler) {
 ### **Phase Alpha: Chronicler Integration**
 ```vue
 <!-- Jules' Sacred Mission: Implement Chronicler Bonus Logic -->
-<script setup>
-import { useOrganellasStore } from '@/stores/organellas'
-import { useGameStore } from '@/stores/game'
 
-const organellasStore = useOrganellasStore()
-const gameStore = useGameStore()
-
-const checkForChroniclerBoon = () => {
-  const chronicler = organellasStore.organellas.find(o => o.type === 'chronicler')
-
-  if (chronicler && chronicler.stage === 'adult') {
-    // Grant divine blessing!
-    gameStore.grantSpiritualBoon(20)
-
-    // Trigger sacred visual effects
-    showChroniclerBoonAnimation.value = true
-  }
-}
-</script>
 ```
 
 ### **Phase Beta: XP Flow Visualization Enhancement**

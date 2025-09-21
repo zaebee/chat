@@ -2,11 +2,6 @@
 title: "Development Environment: Sacred Setup Guide"
 description: "Complete guide to setting up and configuring the Hive development environment"
 category: "development"
-audience: "developer"
-complexity: "beginner"
-last_updated: "2025-01-20"
-related_docs: ["GETTING_STARTED.md", "CONTRIBUTING.md", "../05_OPERATIONS/CONFIGURATION.md"]
-code_examples: true
 ---
 
 # Development Environment: Sacred Setup Guide

@@ -2,11 +2,6 @@
 title: "Student Guide: Your Journey in the Sacred Hive"
 description: "Complete tutorial for students using the Hive learning platform"
 category: "user"
-audience: "user"
-complexity: "beginner"
-last_updated: "2025-01-20"
-related_docs: ["TEACHER_GUIDE.md", "GAMIFICATION.md", "CHALLENGE_CREATION.md"]
-code_examples: true
 ---
 
 # Student Guide: Your Journey in the Sacred Hive

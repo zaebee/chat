@@ -48,48 +48,7 @@ function interpolateIntent(from: HiveIntent, to: HiveIntent, progress: number): 
 **Why**: Backward compatible enhancement
 
 ```vue
-<script setup lang="ts">
-// Add one prop
-const props = defineProps<{
-  // ... existing props
-  smoothTransitions?: boolean  // NEW: Enable smooth intent changes
-}>()
 
-// Add transition state
-const isTransitioning = ref(false)
-const transitionProgress = ref(0)
-
-// Simple transition function
-const transitionToIntent = async (newIntent: HiveIntent) => {
-  if (!props.smoothTransitions) {
-    // Direct change (existing behavior)
-    hiveIntent.value = newIntent
-    return
-  }
-  
-  // Smooth transition
-  isTransitioning.value = true
-  const startIntent = { ...hiveIntent.value }
-  const duration = 1000 // 1 second
-  const startTime = Date.now()
-  
-  const animate = () => {
-    const elapsed = Date.now() - startTime
-    const progress = Math.min(elapsed / duration, 1)
-    
-    hiveIntent.value = interpolateIntent(startIntent, newIntent, progress)
-    transitionProgress.value = progress
-    
-    if (progress < 1) {
-      requestAnimationFrame(animate)
-    } else {
-      isTransitioning.value = false
-    }
-  }
-  
-  animate()
-}
-</script>
 ```
 
 ### **Step 3: Test in HiveBeeTest.vue** 🧪
@@ -98,14 +57,14 @@ const transitionToIntent = async (newIntent: HiveIntent) => {
 
 ```vue
 <template>
-  <div class="transition-controls">
+  
     <label>
       <input v-model="smoothTransitions" type="checkbox" />
       Enable Smooth Transitions
     </label>
     
     <button @click="testRapidChanges">Test Rapid Changes</button>
-  </div>
+  
   
   <!-- Pass to bees -->
   <BeeOrganellaHive 
@@ -116,19 +75,6 @@ const transitionToIntent = async (newIntent: HiveIntent) => {
   />
 </template>
 
-<script setup lang="ts">
-const smoothTransitions = ref(true)
-
-const testRapidChanges = () => {
-  // Rapidly change intent to test smoothing
-  const states = ['calm', 'excited', 'focused', 'protective']
-  states.forEach((state, index) => {
-    setTimeout(() => {
-      intentConfig.value.emotionalState = state
-    }, index * 200)
-  })
-}
-</script>
 ```
 
 ---

@@ -2,11 +2,6 @@
 title: "Teacher Guide: Shepherding the Sacred Learning"
 description: "Complete guide for educators using the Hive learning platform"
 category: "user"
-audience: "user"
-complexity: "intermediate"
-last_updated: "2025-01-20"
-related_docs: ["STUDENT_GUIDE.md", "CHALLENGE_CREATION.md", "GAMIFICATION.md"]
-code_examples: true
 ---
 
 # Teacher Guide: Shepherding the Sacred Learning

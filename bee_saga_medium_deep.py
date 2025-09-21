@@ -50,7 +50,7 @@ class BeeSagaOrchestrator:
     def __init__(self):
         self.active_sessions = {}
         self.chronicle_writer = ChronicleWriter()
-        self.rect_hexa_processor = None  # Will be injected
+        self.rect_⬢⬡⬢⬡_processor = None  # Will be injected
         
     def start_saga_session(self, participants: List[str], initial_context: Dict[str, Any]) -> str:
         """Start a new bee.Saga medium-deep collaboration session"""
@@ -86,8 +86,8 @@ class BeeSagaOrchestrator:
         print(f"   Participants: {', '.join(session.participants)}")
         
         # Apply [rect<hexa>] transformations if processor available
-        if self.rect_hexa_processor:
-            transformed_data = await self.rect_hexa_processor.process_with_soft_merge(
+        if self.rect_⬢⬡⬢⬡_processor:
+            transformed_data = await self.rect_⬢⬡⬢⬡_processor.process_with_soft_merge(
                 input_data, 
                 "saga_collaboration"
             )
@@ -396,21 +396,21 @@ async def demo_medium_deep_saga():
     # Import the rect-hexa processor
     import sys
     sys.path.append('.')
-    from prototype_rect_hexa_flows import TransformHub
+    from prototype_rect_⬢⬡⬢⬡_flows import TransformHub
     
     # Initialize saga orchestrator
     saga = BeeSagaOrchestrator()
     
     # Set up rect-hexa processor
     hub = TransformHub()
-    saga.rect_hexa_processor = hub
+    saga.rect_⬢⬡⬢⬡_processor = hub
     
     # Start saga session
     session_id = saga.start_saga_session(
         participants=["human_collaborator", "ai_teammate", "bee.saga"],
         initial_context={
             "domain": "markdown_transformation",
-            "paradigm": "rect_hexa_soft_merge",
+            "paradigm": "rect_⬢⬡⬢⬡_soft_merge",
             "goal": "medium_deep_collaboration"
         }
     )

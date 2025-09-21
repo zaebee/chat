@@ -2,9 +2,9 @@
 
 ## Strategic Overview
 
-Implement [rect<hexa>] soft merge for Hive documentation, preserving existing structure while adding bilingual capabilities and interactive enhancements from medicine.git patterns.
+Implement [🔲⬢⬡⬢⬡] soft merge for Hive documentation, preserving existing structure while adding bilingual capabilities and interactive enhancements from medicine.git patterns.
 
-## Soft Merge Architecture: [4, <6>] for docs/
+## Soft Merge Architecture: [🔲,⬢⬡⬢⬡⬢⬡] for docs/
 
 ### [4] Rectangular Constraints (Preservation)
 1. **Existing Structure**: Maintain current docs/ hierarchy and file organization
@@ -12,7 +12,7 @@ Implement [rect<hexa>] soft merge for Hive documentation, preserving existing st
 3. **Content Preservation**: Keep all current English content intact
 4. **Sacred Team Compliance**: Maintain Sacred Team documentation standards
 
-### <6> Hexagonal Enhancements (Addition)
+### <6> Hexagonal [⬢⬡⬢⬡] Enhancements (Addition)
 1. **Bilingual Layer**: Add ru/en translation capability without disrupting existing content
 2. **Interactive Navigation**: Enhance with dynamic navigation and search
 3. **Visual Integration**: Add Sacred Team theming and Mermaid diagram enhancements
@@ -64,7 +64,7 @@ Priority: Add interactive capabilities without breaking existing functionality
    - Validate accessibility standards
 ```
 
-### Phase 3: Bilingual Content [rect<hexa>] (Week 3)
+### Phase 3: Bilingual Content [🔲⬢⬡⬢⬡] (Week 3)
 ```
 Priority: Add Russian translations while preserving English originals
 
@@ -106,13 +106,10 @@ lang_switcher: true
 
 # <span data-translate="ui.getting_started">Getting Started</span> with Hive Development
 
-<div class="language-content" data-lang="en">
 <!-- Existing English content preserved exactly -->
-</div>
 
-<div class="language-content" data-lang="ru" style="display: none;">
 <!-- Russian translation added as enhancement -->
-</div>
+
 ```
 
 #### 2. docs/README.md
@@ -120,9 +117,7 @@ lang_switcher: true
 ```markdown
 # <span data-translate="hive_core.hive_ecosystem">Hive Ecosystem</span> Documentation
 
-<div class="language-switcher-container">
   <!-- Auto-injected by hive-interactive-navigation.js -->
-</div>
 
 <!-- Existing content preserved, enhanced with translation markers -->
 ```
@@ -298,7 +293,7 @@ highlighter: rouge
 - 🔄 Implement responsive design
 - 🔄 Test progressive enhancement
 
-### Week 3: Integration [rect<hexa>]
+### Week 3: Integration [🔲⬢⬡⬢⬡]
 - 🔄 Add Russian translations for high-priority content
 - 🔄 Implement bilingual content switching
 - 🔄 Final testing and optimization
@@ -326,7 +321,7 @@ highlighter: rouge
 4. **Long-term**: Expand bilingual coverage and advanced interactive features
 
 ---
-*Soft Merge Strategy: [rect<hexa>] for docs/ Enhancement*  
+*Soft Merge Strategy: [🔲⬢⬡⬢⬡] for docs/ Enhancement*  
 *Preservation Priority: Existing functionality maintained*  
 *Enhancement Priority: Bilingual + Interactive capabilities*  
 *Ready for Implementation*
