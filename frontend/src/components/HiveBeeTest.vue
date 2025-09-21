@@ -46,6 +46,46 @@
           <option value="divine">Divine</option>
         </select>
       </div>
+      
+      <!-- Smooth Transitions Controls -->
+      <div class="control-group">
+        <label>
+          <input 
+            v-model="smoothTransitions" 
+            type="checkbox"
+            class="smooth-checkbox"
+          />
+          Smooth Transitions
+        </label>
+        <span :class="smoothTransitions ? 'enabled' : 'disabled'">
+          {{ smoothTransitions ? '✅ Enabled' : '❌ Disabled' }}
+        </span>
+      </div>
+      
+      <div class="control-group" v-if="smoothTransitions">
+        <label>Transition Duration:</label>
+        <input 
+          v-model.number="transitionDuration" 
+          type="range" 
+          min="100" 
+          max="2000" 
+          step="100"
+        />
+        <span>{{ transitionDuration }}ms</span>
+      </div>
+      
+      <!-- Test Buttons -->
+      <div class="control-group">
+        <button @click="testRapidChanges" class="test-button">
+          🎯 Test Rapid Changes
+        </button>
+        <button @click="testExtremeTransitions" class="test-button">
+          ⚡ Test Extreme Transitions
+        </button>
+        <button @click="testCollaborationModes" class="test-button">
+          🤝 Test Collaboration Modes
+        </button>
+      </div>
     </div>
 
     <div class="bee-showcase">
@@ -73,6 +113,7 @@
               :type="role"
               :physics="physicsConfig"
               :intent="getIntentForRole(role)"
+              :smoothTransitions="smoothTransitions"
               @pollen-event="handlePollenEvent"
             />
           </div>
@@ -98,6 +139,16 @@
         <div class="metric">
           <label>Active Bees:</label>
           <span>{{ intentStatus.trackedBees }}</span>
+        </div>
+        <div class="metric">
+          <label>Active Transitions:</label>
+          <span>{{ transitionStatus.activeTransitions }}</span>
+        </div>
+        <div class="metric">
+          <label>Smooth Transitions:</label>
+          <span :class="smoothTransitions ? 'enabled' : 'disabled'">
+            {{ smoothTransitions ? 'ON' : 'OFF' }}
+          </span>
         </div>
       </div>
       
@@ -127,6 +178,7 @@ import BeeOrganellaHive from './BeeOrganellaHive.vue'
 import { hivePhysics } from '../utils/hivePhysics'
 import { hiveIntentEngine, createIntent } from '../utils/hiveIntent'
 import { pollenBus, BeeEventTypes, type PollenEvent } from '../utils/pollenProtocol'
+import { intentTransitionManager } from '../utils/intentCocoon'
 
 // Test configuration
 const physicsConfig = ref({
@@ -143,6 +195,10 @@ const intentConfig = ref({
   emotionalState: 'calm' as const
 })
 
+// Transition controls
+const smoothTransitions = ref(true)
+const transitionDuration = ref(1000)
+
 const beeRoles = ['worker', 'scout', 'queen', 'guard', 'chronicler', 'jules'] as const
 
 // Event tracking
@@ -153,6 +209,7 @@ const eventCounts = ref<Record<string, number>>({})
 const physicsStatus = computed(() => hivePhysics.getStatus())
 const intentStatus = computed(() => hiveIntentEngine.getStatus())
 const pollenMetrics = computed(() => pollenBus.getMetrics())
+const transitionStatus = computed(() => intentTransitionManager.getStatus())
 
 const recentEvents = computed(() => 
   pollenEvents.value.slice(-10).reverse()
@@ -208,6 +265,40 @@ const formatTime = (timestamp: number) => {
 // Update physics configuration
 const updatePhysics = () => {
   hivePhysics.updateConfig(physicsConfig.value)
+}
+
+// Test rapid intent changes
+const testRapidChanges = () => {
+  const states = ['calm', 'excited', 'focused', 'protective', 'divine']
+  states.forEach((state, index) => {
+    setTimeout(() => {
+      intentConfig.value.emotionalState = state as any
+    }, index * 300) // 300ms between changes
+  })
+}
+
+// Test extreme transitions
+const testExtremeTransitions = () => {
+  // Test extreme activity level changes
+  setTimeout(() => {
+    intentConfig.value.activityLevel = 0.1
+  }, 100)
+  setTimeout(() => {
+    intentConfig.value.activityLevel = 0.9
+  }, 600)
+  setTimeout(() => {
+    intentConfig.value.activityLevel = 0.5
+  }, 1100)
+}
+
+// Test collaboration mode changes
+const testCollaborationModes = () => {
+  const modes = ['individual', 'swarm', 'sacred']
+  modes.forEach((mode, index) => {
+    setTimeout(() => {
+      intentConfig.value.collaborationMode = mode as any
+    }, index * 800)
+  })
 }
 
 // Lifecycle
@@ -381,5 +472,39 @@ onUnmounted(() => {
 .event-time {
   color: #999;
   font-size: 0.7rem;
+}
+
+/* Transition Controls */
+.smooth-checkbox {
+  margin-right: 0.5rem;
+}
+
+.enabled {
+  color: #10b981;
+  font-weight: 600;
+}
+
+.disabled {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.test-button {
+  padding: 0.5rem 1rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s;
+}
+
+.test-button:hover {
+  background: #2563eb;
+}
+
+.test-button:active {
+  background: #1d4ed8;
 }
 </style>

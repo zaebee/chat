@@ -183,8 +183,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted } from 'vue'
+import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
 import { physicsCocoonEngine } from '@/utils/physicsCocoon'
+import { intentTransitionManager, createSmoothTransition, getCurrentTransitionIntent } from '@/utils/intentCocoon'
+import type { HiveIntent } from '@/utils/hiveIntent'
 
 // ATCG Primitive Types
 interface HivePhysics {
@@ -194,12 +196,7 @@ interface HivePhysics {
   energyLevel: number
 }
 
-interface HiveIntent {
-  activityLevel: number
-  focusIntensity: number
-  collaborationMode: 'individual' | 'swarm' | 'sacred'
-  purpose: string
-}
+
 
 interface PollenEvent {
   type: string
@@ -215,6 +212,7 @@ const props = defineProps<{
   intent?: Partial<HiveIntent>
   onPollenEvent?: (event: any) => void
   useCocoon?: boolean  // Enable physics cocoon validation
+  smoothTransitions?: boolean  // Enable smooth intent transitions
 }>()
 
 // Instance ID for unique SVG elements
@@ -225,6 +223,11 @@ const cocoonState = ref<'none' | 'calculating' | 'validating' | 'manifesting' | 
 const cocoonProgress = ref(0)
 const validationResults = ref<any[]>([])
 const emergenceReady = ref(false)
+
+// Intent transition state
+const isTransitioning = ref(false)
+const transitionProgress = ref(0)
+const baseHiveIntent = ref<HiveIntent | null>(null)
 
 // A: Aggregate - Physics-based calculations
 const hivePhysics = computed<HivePhysics>(() => ({
@@ -241,24 +244,38 @@ const hiveIntent = computed<HiveIntent>(() => {
     activityLevel: 0.5,
     focusIntensity: 0.7,
     collaborationMode: 'individual',
-    purpose: 'general'
+    purpose: 'general',
+    emotionalState: 'calm',
+    socialAlignment: 0.7
   }
 
-  // Role-specific intent modifiers
-  const roleModifiers = {
+  // Role-specific intent modifiers (partial overrides)
+  const roleModifiers: Record<string, Partial<HiveIntent>> = {
     worker: { activityLevel: 0.6, purpose: 'construction' },
     scout: { activityLevel: 0.9, focusIntensity: 0.9, purpose: 'exploration' },
-    queen: { activityLevel: 0.3, focusIntensity: 0.8, collaborationMode: 'swarm' as const, purpose: 'governance' },
+    queen: { activityLevel: 0.3, focusIntensity: 0.8, collaborationMode: 'swarm', purpose: 'governance' },
     guard: { activityLevel: 0.7, focusIntensity: 0.95, purpose: 'protection' },
-    chronicler: { activityLevel: 0.4, focusIntensity: 0.95, collaborationMode: 'sacred' as const, purpose: 'documentation' },
-    jules: { activityLevel: 0.8, focusIntensity: 0.9, collaborationMode: 'sacred' as const, purpose: 'debugging' }
+    chronicler: { activityLevel: 0.4, focusIntensity: 0.95, collaborationMode: 'sacred', purpose: 'documentation' },
+    jules: { activityLevel: 0.8, focusIntensity: 0.9, collaborationMode: 'sacred', purpose: 'debugging' }
   }
 
-  return {
+  const calculatedIntent: HiveIntent = {
     ...baseIntent,
-    ...roleModifiers[props.type],
+    ...(roleModifiers[props.type] || {}),
     ...props.intent
   }
+
+  // Store base intent for transitions
+  if (!baseHiveIntent.value) {
+    baseHiveIntent.value = calculatedIntent
+  }
+
+  // If smooth transitions enabled and transitioning, return interpolated intent
+  if (props.smoothTransitions && isTransitioning.value) {
+    return getCurrentTransitionIntent(instanceId.value, calculatedIntent)
+  }
+
+  return calculatedIntent
 })
 
 // Bee metadata derived from type
@@ -450,6 +467,11 @@ onUnmounted(() => {
   if (cocoonState.value !== 'none' && cocoonState.value !== 'emerged') {
     physicsCocoonEngine.releaseCocoon(instanceId.value)
   }
+  
+  // Clean up intent transitions
+  if (props.smoothTransitions) {
+    intentTransitionManager.cancelTransition(instanceId.value)
+  }
 })
 
 // Physics Cocoon Integration
@@ -539,6 +561,53 @@ const monitorCocoonProgress = () => {
   
   checkProgress()
 }
+
+// Intent Transition Management
+const transitionToIntent = async (newIntent: HiveIntent) => {
+  if (!props.smoothTransitions || !baseHiveIntent.value) {
+    // Direct change (existing behavior)
+    baseHiveIntent.value = newIntent
+    return
+  }
+
+  try {
+    isTransitioning.value = true
+    transitionProgress.value = 0
+
+    await createSmoothTransition(
+      instanceId.value,
+      baseHiveIntent.value,
+      newIntent,
+      {
+        duration: 1000, // 1 second
+        easing: 'divine',
+        validateTransition: true
+      }
+    )
+
+    // Update base intent after successful transition
+    baseHiveIntent.value = newIntent
+    
+  } catch (error) {
+    console.warn('Intent transition failed:', error)
+    // Fallback to direct change
+    baseHiveIntent.value = newIntent
+  } finally {
+    isTransitioning.value = false
+    transitionProgress.value = 0
+  }
+}
+
+// Watch for intent prop changes and trigger smooth transitions
+watch(() => props.intent, (newIntent) => {
+  if (newIntent && baseHiveIntent.value) {
+    const targetIntent = {
+      ...baseHiveIntent.value,
+      ...newIntent
+    }
+    transitionToIntent(targetIntent)
+  }
+}, { deep: true })
 </script>
 
 <style scoped>
