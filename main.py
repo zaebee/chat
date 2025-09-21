@@ -90,13 +90,9 @@ async def websocket_endpoint(websocket: WebSocket, username: str, user_id: str):
 
             if message_data.get("type") == "message":
                 conn = get_db_connection()
-                message_id = str(uuid.uuid4())
-                timestamp = datetime.now().isoformat()
-
-                conn.execute("""
-                    INSERT INTO messages (id, user_id, username, content, timestamp, room_id)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                """, (message_id, user_id, username, message_data.get("content", ""), timestamp, "general"))
+                message_id, timestamp = str(uuid.uuid4()), datetime.now().isoformat()
+                conn.execute("INSERT INTO messages (id, user_id, username, content, timestamp, room_id) VALUES (?, ?, ?, ?, ?, ?)",
+                           (message_id, user_id, username, message_data.get("content", ""), timestamp, "general"))
                 conn.commit()
                 conn.close()
 

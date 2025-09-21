@@ -96,13 +96,10 @@ def init_db():
     """)
 
     # Insert default room if none exists
-    cursor = conn.execute("SELECT COUNT(*) FROM rooms")
-    if cursor.fetchone()[0] == 0:
+    if conn.execute("SELECT COUNT(*) FROM rooms").fetchone()[0] == 0:
         from datetime import datetime
-        conn.execute("""
-            INSERT INTO rooms (id, name, description, type, created_at)
-            VALUES ('general', 'General Chat', 'Main chat room for Sacred Team collaboration', 'chat', ?)
-        """, (datetime.now().isoformat(),))
+        conn.execute("INSERT INTO rooms (id, name, description, type, created_at) VALUES (?, ?, ?, ?, ?)",
+                    ('general', 'General Chat', 'Main chat room for Sacred Team collaboration', 'chat', datetime.now().isoformat()))
 
     conn.commit()
     conn.close()
