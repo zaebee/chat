@@ -276,7 +276,15 @@ export const BeeEventTypes = {
   // Swarm events
   SWARM_FORMATION_STARTED: 'swarm_formation_started',
   SWARM_COORDINATION_UPDATED: 'swarm_coordination_updated',
-  HIVE_CONSENSUS_REACHED: 'hive_consensus_reached'
+  HIVE_CONSENSUS_REACHED: 'hive_consensus_reached',
+  
+  // Cocoon events
+  COCOON_ENTERED: 'cocoon_entered',
+  COCOON_FAILED: 'cocoon_failed',
+  VALIDATION_PROGRESS: 'validation_progress',
+  VALIDATION_FAILED: 'validation_failed',
+  STAGE_TRANSITION: 'stage_transition',
+  BEE_EMERGED: 'bee_emerged'
 } as const
 
 // Event payload interfaces
