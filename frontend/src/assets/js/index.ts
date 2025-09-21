@@ -8,9 +8,9 @@
 // Export ATCG component library
 export * from './components'
 
-// Export individual assets
-export { default as HiveNavigationEnhancer } from './hive-interactive-navigation.js'
-export * from './tales_v2_implementation'
+// Export individual assets (to be properly typed in future PRs)
+// export { default as HiveNavigationEnhancer } from './hive-interactive-navigation.js'
+// export * from './tales_v2_implementation'
 
 // Asset metadata and configuration
 export const ASSET_METADATA = {

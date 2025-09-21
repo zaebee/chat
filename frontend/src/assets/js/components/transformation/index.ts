@@ -5,10 +5,10 @@
  * These components embody the "T" principle of ATCG architecture.
  */
 
-// Re-export all transformation components
-export * from './DataTransformer'
-export * from './StateProcessor'
-export * from './ContentFormatter'
+// Transformation component implementations (to be created)
+// export * from './DataTransformer'
+// export * from './StateProcessor'
+// export * from './ContentFormatter'
 
 // Type definitions for transformation components
 export interface TransformationComponent {
@@ -18,16 +18,13 @@ export interface TransformationComponent {
   process(data: any): any
 }
 
-// Transformation component factory
+// Transformation component factory (stub implementation)
 export function createTransformationComponent(type: string, config: any): TransformationComponent {
-  switch (type) {
-    case 'data':
-      return new DataTransformer(config)
-    case 'state':
-      return new StateProcessor(config)
-    case 'content':
-      return new ContentFormatter(config)
-    default:
-      throw new Error(`Unknown transformation component type: ${type}`)
+  // Stub implementation - components to be created in future PRs
+  return {
+    type: 'transformation',
+    purpose: `${type} transformation component`,
+    transform: (input: any) => input,
+    process: (data: any) => data
   }
 }

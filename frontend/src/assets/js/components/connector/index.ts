@@ -5,10 +5,10 @@
  * These components embody the "C" principle of ATCG architecture.
  */
 
-// Re-export all connector components
-export * from './APIConnector'
-export * from './WebSocketHandler'
-export * from './ProtocolManager'
+// Connector component implementations (to be created)
+// export * from './APIConnector'
+// export * from './WebSocketHandler'
+// export * from './ProtocolManager'
 
 // Type definitions for connector components
 export interface ConnectorComponent {
@@ -20,16 +20,15 @@ export interface ConnectorComponent {
   receive(): Promise<any>
 }
 
-// Connector component factory
+// Connector component factory (stub implementation)
 export function createConnectorComponent(type: string, config: any): ConnectorComponent {
-  switch (type) {
-    case 'api':
-      return new APIConnector(config)
-    case 'websocket':
-      return new WebSocketHandler(config)
-    case 'protocol':
-      return new ProtocolManager(config)
-    default:
-      throw new Error(`Unknown connector component type: ${type}`)
+  // Stub implementation - components to be created in future PRs
+  return {
+    type: 'connector',
+    purpose: `${type} connector component`,
+    connect: async () => console.log(`Connecting ${type}`),
+    disconnect: async () => console.log(`Disconnecting ${type}`),
+    send: async (data: any) => data,
+    receive: async () => ({})
   }
 }

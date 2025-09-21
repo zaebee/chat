@@ -5,10 +5,10 @@
  * These components embody the "G" principle of ATCG architecture.
  */
 
-// Re-export all genesis components
-export * from './ContentGenerator'
-export * from './ComponentBuilder'
-export * from './WorkflowCreator'
+// Genesis component implementations (to be created)
+// export * from './ContentGenerator'
+// export * from './ComponentBuilder'
+// export * from './WorkflowCreator'
 
 // Type definitions for genesis components
 export interface GenesisComponent {
@@ -19,16 +19,14 @@ export interface GenesisComponent {
   build(config: any): any
 }
 
-// Genesis component factory
+// Genesis component factory (stub implementation)
 export function createGenesisComponent(type: string, config: any): GenesisComponent {
-  switch (type) {
-    case 'content':
-      return new ContentGenerator(config)
-    case 'component':
-      return new ComponentBuilder(config)
-    case 'workflow':
-      return new WorkflowCreator(config)
-    default:
-      throw new Error(`Unknown genesis component type: ${type}`)
+  // Stub implementation - components to be created in future PRs
+  return {
+    type: 'genesis',
+    purpose: `${type} genesis component`,
+    generate: (template: any) => template,
+    create: (specification: any) => specification,
+    build: (config: any) => config
   }
 }
