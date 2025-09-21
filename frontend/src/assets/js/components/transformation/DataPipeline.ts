@@ -41,8 +41,8 @@ export interface PipelineMetrics {
 export interface PipelineExecution {
   readonly id: string
   readonly startTime: Date
-  readonly endTime?: Date
-  readonly status: 'running' | 'completed' | 'failed' | 'cancelled'
+  endTime?: Date
+  status: 'running' | 'completed' | 'failed' | 'cancelled'
   readonly stages: Array<{
     stage: PipelineStage
     status: 'pending' | 'running' | 'completed' | 'failed' | 'skipped'
@@ -51,8 +51,8 @@ export interface PipelineExecution {
     result?: any
     error?: string
   }>
-  readonly metrics?: PipelineMetrics
-  readonly result?: any
+  metrics?: PipelineMetrics
+  result?: any
 }
 
 export interface DataQualityReport {
