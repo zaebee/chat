@@ -284,7 +284,16 @@ export const BeeEventTypes = {
   VALIDATION_PROGRESS: 'validation_progress',
   VALIDATION_FAILED: 'validation_failed',
   STAGE_TRANSITION: 'stage_transition',
-  BEE_EMERGED: 'bee_emerged'
+  BEE_EMERGED: 'bee_emerged',
+  
+  // Intent transition events
+  INTENT_TRANSITION_STARTED: 'intent_transition_started',
+  INTENT_TRANSITION_PROGRESS: 'intent_transition_progress',
+  INTENT_EMERGENCE_READY: 'intent_emergence_ready',
+  
+  // Emotional contagion events
+  EMOTIONAL_CONTAGION: 'emotional_contagion',
+  EMOTIONAL_WAVE_TRIGGERED: 'emotional_wave_triggered'
 } as const
 
 // Event payload interfaces

@@ -46,6 +46,76 @@
           <option value="divine">Divine</option>
         </select>
       </div>
+      
+      <!-- Smooth Transitions Controls -->
+      <div class="control-group">
+        <label>
+          <input 
+            v-model="smoothTransitions" 
+            type="checkbox"
+            class="smooth-checkbox"
+          />
+          Smooth Transitions
+        </label>
+        <span :class="smoothTransitions ? 'enabled' : 'disabled'">
+          {{ smoothTransitions ? '✅ Enabled' : '❌ Disabled' }}
+        </span>
+      </div>
+      
+      <div class="control-group" v-if="smoothTransitions">
+        <label>Transition Duration:</label>
+        <input 
+          v-model.number="transitionDuration" 
+          type="range" 
+          min="100" 
+          max="2000" 
+          step="100"
+        />
+        <span>{{ transitionDuration }}ms</span>
+      </div>
+      
+      <!-- Emotional Contagion Controls -->
+      <div class="control-group">
+        <label>
+          <input 
+            v-model="emotionalContagion" 
+            type="checkbox"
+            class="smooth-checkbox"
+          />
+          Emotional Contagion
+        </label>
+        <span :class="emotionalContagion ? 'enabled' : 'disabled'">
+          {{ emotionalContagion ? '🧠 Active' : '🚫 Disabled' }}
+        </span>
+      </div>
+      
+      <div class="control-group" v-if="emotionalContagion">
+        <label>Contagion Strength:</label>
+        <input 
+          v-model.number="contagionStrength" 
+          type="range" 
+          min="0.1" 
+          max="2.0" 
+          step="0.1"
+        />
+        <span>{{ contagionStrength }}x</span>
+      </div>
+
+      <!-- Test Buttons -->
+      <div class="control-group">
+        <button @click="testRapidChanges" class="test-button">
+          🎯 Test Rapid Changes
+        </button>
+        <button @click="testExtremeTransitions" class="test-button">
+          ⚡ Test Extreme Transitions
+        </button>
+        <button @click="testCollaborationModes" class="test-button">
+          🤝 Test Collaboration Modes
+        </button>
+        <button @click="triggerEmotionalWave" class="test-button">
+          🌊 Trigger Emotional Wave
+        </button>
+      </div>
     </div>
 
     <div class="bee-showcase">
@@ -73,6 +143,7 @@
               :type="role"
               :physics="physicsConfig"
               :intent="getIntentForRole(role)"
+              :smoothTransitions="smoothTransitions"
               @pollen-event="handlePollenEvent"
             />
           </div>
@@ -99,6 +170,28 @@
           <label>Active Bees:</label>
           <span>{{ intentStatus.trackedBees }}</span>
         </div>
+        <div class="metric">
+          <label>Active Transitions:</label>
+          <span>{{ transitionStatus.activeTransitions }}</span>
+        </div>
+        <div class="metric">
+          <label>Smooth Transitions:</label>
+          <span :class="smoothTransitions ? 'enabled' : 'disabled'">
+            {{ smoothTransitions ? 'ON' : 'OFF' }}
+          </span>
+        </div>
+        <div class="metric">
+          <label>Emotional Influences:</label>
+          <span>{{ contagionStatus.activeInfluences }}</span>
+        </div>
+        <div class="metric">
+          <label>Dominant Emotion:</label>
+          <span>{{ contagionStatus.dominantEmotion }}</span>
+        </div>
+        <div class="metric">
+          <label>Clustered Bees:</label>
+          <span>{{ proximityStatus.clusteredBees }}/{{ proximityStatus.totalBees }}</span>
+        </div>
       </div>
       
       <div class="event-log">
@@ -121,16 +214,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import BeeOrganella from './BeeOrganella.vue'
 import BeeOrganellaHive from './BeeOrganellaHive.vue'
 import { hivePhysics } from '../utils/hivePhysics'
 import { hiveIntentEngine, createIntent } from '../utils/hiveIntent'
 import { pollenBus, BeeEventTypes, type PollenEvent } from '../utils/pollenProtocol'
+import { intentTransitionManager } from '../utils/intentCocoon'
+import { emotionalContagionEngine } from '../utils/emotionalContagion'
+import { proximityDetector } from '../utils/proximityDetector'
 
 // Test configuration
 const physicsConfig = ref({
-  baseUnit: 20,
+  baseUnit: 50, // Match original BeeOrganella base size
   scaleFactor: 1,
   aspectRatio: 1.2,
   energyLevel: 0.8
@@ -143,6 +239,14 @@ const intentConfig = ref({
   emotionalState: 'calm' as const
 })
 
+// Transition controls
+const smoothTransitions = ref(true)
+const transitionDuration = ref(1000)
+
+// Emotional contagion controls
+const emotionalContagion = ref(true)
+const contagionStrength = ref(0.7)
+
 const beeRoles = ['worker', 'scout', 'queen', 'guard', 'chronicler', 'jules'] as const
 
 // Event tracking
@@ -153,6 +257,9 @@ const eventCounts = ref<Record<string, number>>({})
 const physicsStatus = computed(() => hivePhysics.getStatus())
 const intentStatus = computed(() => hiveIntentEngine.getStatus())
 const pollenMetrics = computed(() => pollenBus.getMetrics())
+const transitionStatus = computed(() => intentTransitionManager.getStatus())
+const contagionStatus = computed(() => emotionalContagionEngine.getMetrics())
+const proximityStatus = computed(() => proximityDetector.getMetrics())
 
 const recentEvents = computed(() => 
   pollenEvents.value.slice(-10).reverse()
@@ -183,11 +290,30 @@ const getEventCount = (role: string) => {
 
 // Handle Pollen events
 const handlePollenEvent = (event: PollenEvent) => {
+  // Filter out high-frequency transition progress events to prevent loops
+  if (event.type === 'intent_transition_progress') {
+    return
+  }
+  
+  // Validate event structure
+  if (!event || typeof event !== 'object') {
+    console.warn('Invalid pollen event received:', event)
+    return
+  }
+  
   pollenEvents.value.push(event)
   
-  // Update event counts
-  const sourceRole = event.source.split('_')[0] // Extract role from bee ID
-  eventCounts.value[sourceRole] = (eventCounts.value[sourceRole] || 0) + 1
+  // Update event counts with error handling
+  try {
+    if (event.source && typeof event.source === 'string') {
+      const sourceRole = event.source.split('_')[0] // Extract role from bee ID
+      if (sourceRole) {
+        eventCounts.value[sourceRole] = (eventCounts.value[sourceRole] || 0) + 1
+      }
+    }
+  } catch (error) {
+    console.warn('Error processing event source:', event.source, error)
+  }
   
   // Limit event history
   if (pollenEvents.value.length > 100) {
@@ -210,6 +336,62 @@ const updatePhysics = () => {
   hivePhysics.updateConfig(physicsConfig.value)
 }
 
+// Test rapid intent changes
+const testRapidChanges = () => {
+  const states = ['calm', 'excited', 'focused', 'protective', 'divine']
+  states.forEach((state, index) => {
+    setTimeout(() => {
+      intentConfig.value.emotionalState = state as any
+    }, index * 300) // 300ms between changes
+  })
+}
+
+// Test extreme transitions
+const testExtremeTransitions = () => {
+  // Test extreme activity level changes
+  setTimeout(() => {
+    intentConfig.value.activityLevel = 0.1
+  }, 100)
+  setTimeout(() => {
+    intentConfig.value.activityLevel = 0.9
+  }, 600)
+  setTimeout(() => {
+    intentConfig.value.activityLevel = 0.5
+  }, 1100)
+}
+
+// Test collaboration mode changes
+const testCollaborationModes = () => {
+  const modes = ['individual', 'swarm', 'sacred']
+  modes.forEach((mode, index) => {
+    setTimeout(() => {
+      intentConfig.value.collaborationMode = mode as any
+    }, index * 800)
+  })
+}
+
+// Trigger emotional wave from queen bee
+const triggerEmotionalWave = () => {
+  const queenBeeId = 'queen_' + Date.now()
+  emotionalContagionEngine.triggerEmotionalWave(
+    queenBeeId, 
+    'excited', 
+    contagionStrength.value
+  )
+}
+
+// Configure emotional contagion
+const configureContagion = () => {
+  emotionalContagionEngine.configure({
+    enabled: emotionalContagion.value,
+    influenceStrength: contagionStrength.value,
+    propagationSpeed: 0.5
+  })
+}
+
+// Watch for contagion setting changes
+watch([emotionalContagion, contagionStrength], configureContagion)
+
 // Lifecycle
 onMounted(() => {
   // Subscribe to all bee events
@@ -217,6 +399,9 @@ onMounted(() => {
   
   // Update physics when config changes
   updatePhysics()
+  
+  // Configure initial contagion settings
+  configureContagion()
 })
 
 onUnmounted(() => {
@@ -381,5 +566,39 @@ onUnmounted(() => {
 .event-time {
   color: #999;
   font-size: 0.7rem;
+}
+
+/* Transition Controls */
+.smooth-checkbox {
+  margin-right: 0.5rem;
+}
+
+.enabled {
+  color: #10b981;
+  font-weight: 600;
+}
+
+.disabled {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.test-button {
+  padding: 0.5rem 1rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s;
+}
+
+.test-button:hover {
+  background: #2563eb;
+}
+
+.test-button:active {
+  background: #1d4ed8;
 }
 </style>

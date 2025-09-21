@@ -183,8 +183,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted } from 'vue'
+import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
 import { physicsCocoonEngine } from '@/utils/physicsCocoon'
+import { intentTransitionManager, createSmoothTransition, getCurrentTransitionIntent } from '@/utils/intentCocoon'
+import { proximityDetector } from '@/utils/proximityDetector'
+import { emotionalContagionEngine } from '@/utils/emotionalContagion'
+import type { HiveIntent } from '@/utils/hiveIntent'
+import type { PollenEvent } from '@/utils/pollenProtocol'
 
 // ATCG Primitive Types
 interface HivePhysics {
@@ -194,18 +199,9 @@ interface HivePhysics {
   energyLevel: number
 }
 
-interface HiveIntent {
-  activityLevel: number
-  focusIntensity: number
-  collaborationMode: 'individual' | 'swarm' | 'sacred'
-  purpose: string
-}
 
-interface PollenEvent {
-  type: string
-  payload: any
-  timestamp: number
-}
+
+
 
 // Component Props
 const props = defineProps<{
@@ -215,6 +211,7 @@ const props = defineProps<{
   intent?: Partial<HiveIntent>
   onPollenEvent?: (event: any) => void
   useCocoon?: boolean  // Enable physics cocoon validation
+  smoothTransitions?: boolean  // Enable smooth intent transitions
 }>()
 
 // Instance ID for unique SVG elements
@@ -225,6 +222,11 @@ const cocoonState = ref<'none' | 'calculating' | 'validating' | 'manifesting' | 
 const cocoonProgress = ref(0)
 const validationResults = ref<any[]>([])
 const emergenceReady = ref(false)
+
+// Intent transition state
+const isTransitioning = ref(false)
+const transitionProgress = ref(0)
+const baseHiveIntent = ref<HiveIntent | null>(null)
 
 // A: Aggregate - Physics-based calculations
 const hivePhysics = computed<HivePhysics>(() => ({
@@ -241,24 +243,33 @@ const hiveIntent = computed<HiveIntent>(() => {
     activityLevel: 0.5,
     focusIntensity: 0.7,
     collaborationMode: 'individual',
-    purpose: 'general'
+    purpose: 'general',
+    emotionalState: 'calm',
+    socialAlignment: 0.7
   }
 
-  // Role-specific intent modifiers
-  const roleModifiers = {
+  // Role-specific intent modifiers (partial overrides)
+  const roleModifiers: Record<string, Partial<HiveIntent>> = {
     worker: { activityLevel: 0.6, purpose: 'construction' },
     scout: { activityLevel: 0.9, focusIntensity: 0.9, purpose: 'exploration' },
-    queen: { activityLevel: 0.3, focusIntensity: 0.8, collaborationMode: 'swarm' as const, purpose: 'governance' },
+    queen: { activityLevel: 0.3, focusIntensity: 0.8, collaborationMode: 'swarm', purpose: 'governance' },
     guard: { activityLevel: 0.7, focusIntensity: 0.95, purpose: 'protection' },
-    chronicler: { activityLevel: 0.4, focusIntensity: 0.95, collaborationMode: 'sacred' as const, purpose: 'documentation' },
-    jules: { activityLevel: 0.8, focusIntensity: 0.9, collaborationMode: 'sacred' as const, purpose: 'debugging' }
+    chronicler: { activityLevel: 0.4, focusIntensity: 0.95, collaborationMode: 'sacred', purpose: 'documentation' },
+    jules: { activityLevel: 0.8, focusIntensity: 0.9, collaborationMode: 'sacred', purpose: 'debugging' }
   }
 
-  return {
+  const calculatedIntent: HiveIntent = {
     ...baseIntent,
-    ...roleModifiers[props.type],
+    ...(roleModifiers[props.type] || {}),
     ...props.intent
   }
+
+  // If smooth transitions enabled and transitioning, return interpolated intent
+  if (props.smoothTransitions && isTransitioning.value) {
+    return getCurrentTransitionIntent(instanceId.value, calculatedIntent)
+  }
+
+  return calculatedIntent
 })
 
 // Bee metadata derived from type
@@ -419,9 +430,12 @@ const divineOpacity = computed(() =>
 // C: Connector - Pollen Protocol integration
 const emitPollenEvent = (type: string, payload: any) => {
   const event: PollenEvent = {
+    id: `${instanceId.value}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     type,
+    source: `${props.type}_${instanceId.value}`,
     payload,
-    timestamp: Date.now()
+    timestamp: Date.now(),
+    priority: 'normal'
   }
   
   if (props.onPollenEvent) {
@@ -431,6 +445,20 @@ const emitPollenEvent = (type: string, payload: any) => {
 
 // G: Genesis - Lifecycle events with optional cocoon validation
 onMounted(async () => {
+  // Initialize base intent for transitions
+  if (!baseHiveIntent.value) {
+    baseHiveIntent.value = hiveIntent.value
+  }
+  
+  // Initialize position tracking and emotional contagion
+  updateBeePosition()
+  
+  // Start emotional contagion processing
+  contagionProcessingInterval.value = setInterval(() => {
+    emotionalContagionEngine.processContagion()
+    processEmotionalContagion()
+  }, 200) // Process every 200ms
+  
   if (props.useCocoon) {
     await enterPhysicsCocoon()
   } else {
@@ -450,6 +478,17 @@ onUnmounted(() => {
   if (cocoonState.value !== 'none' && cocoonState.value !== 'emerged') {
     physicsCocoonEngine.releaseCocoon(instanceId.value)
   }
+  
+  // Clean up intent transitions
+  if (props.smoothTransitions) {
+    intentTransitionManager.cancelTransition(instanceId.value)
+  }
+  
+  // Clean up emotional contagion
+  if (contagionProcessingInterval.value) {
+    clearInterval(contagionProcessingInterval.value)
+  }
+  proximityDetector.removeBee(instanceId.value)
 })
 
 // Physics Cocoon Integration
@@ -539,6 +578,110 @@ const monitorCocoonProgress = () => {
   
   checkProgress()
 }
+
+// Intent Transition Management
+const transitionToIntent = async (newIntent: HiveIntent) => {
+  if (!props.smoothTransitions || !baseHiveIntent.value) {
+    // Direct change (existing behavior)
+    baseHiveIntent.value = newIntent
+    return
+  }
+
+  try {
+    isTransitioning.value = true
+    transitionProgress.value = 0
+
+    await createSmoothTransition(
+      instanceId.value,
+      baseHiveIntent.value,
+      newIntent,
+      {
+        duration: 1000, // 1 second
+        easing: 'divine',
+        validateTransition: true
+      }
+    )
+
+    // Update base intent after successful transition
+    baseHiveIntent.value = newIntent
+    
+  } catch (error) {
+    console.warn('Intent transition failed:', error)
+    // Fallback to direct change
+    baseHiveIntent.value = newIntent
+  } finally {
+    isTransitioning.value = false
+    transitionProgress.value = 0
+  }
+}
+
+// Emotional contagion integration
+// TODO: Consider extracting to composables for maintainability
+// Future refactoring could use: useContagion(), useIntentTransition(), usePhysicsCocoon()
+// This would reduce component complexity and improve reusability
+const beePosition = ref({ x: 0, y: 0 })
+const contagionProcessingInterval = ref<number | null>(null)
+
+// Update bee position for proximity detection
+const updateBeePosition = () => {
+  // TODO: Replace simulated positions with actual DOM positions
+  // Currently using Math.random() for testing the contagion logic independently.
+  // Future implementation should use getBoundingClientRect() or similar to get
+  // the actual rendered position of this bee component on screen.
+  // This would enable true spatial emotional contagion based on visual proximity.
+  const baseX = Math.random() * 400 + 100 // Simulate position in test area
+  const baseY = Math.random() * 300 + 100
+  
+  beePosition.value = { x: baseX, y: baseY }
+  
+  proximityDetector.updateBeePosition({
+    beeId: instanceId.value,
+    x: baseX,
+    y: baseY,
+    role: props.type,
+    emotionalState: hiveIntent.value.emotionalState,
+    timestamp: Date.now()
+  })
+}
+
+// Process emotional contagion influences
+const processEmotionalContagion = () => {
+  const influence = emotionalContagionEngine.getInfluenceForBee(instanceId.value)
+  
+  if (influence && !isTransitioning.value && baseHiveIntent.value) {
+    // Apply emotional influence through smooth transition
+    const influencedIntent: HiveIntent = {
+      ...baseHiveIntent.value,
+      emotionalState: influence.targetEmotion as any
+    }
+    
+    // Update emotional history
+    emotionalContagionEngine.updateEmotionalHistory(
+      instanceId.value, 
+      influence.targetEmotion
+    )
+    
+    // Trigger smooth transition to new emotional state
+    transitionToIntent(influencedIntent)
+  }
+}
+
+// Watch for intent prop changes and trigger smooth transitions
+watch(() => props.intent, (newIntent) => {
+  if (newIntent && baseHiveIntent.value && !isTransitioning.value) {
+    const targetIntent = {
+      ...baseHiveIntent.value,
+      ...newIntent
+    }
+    transitionToIntent(targetIntent)
+  }
+}, { deep: true })
+
+// Watch for emotional state changes to update position tracking
+watch(() => hiveIntent.value.emotionalState, (newEmotion) => {
+  updateBeePosition()
+  emotionalContagionEngine.updateEmotionalHistory(instanceId.value, newEmotion)
+})
 </script>
 
 <style scoped>
