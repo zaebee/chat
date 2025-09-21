@@ -5,10 +5,10 @@
  * These components embody the "T" principle of ATCG architecture.
  */
 
-// Transformation component implementations (to be created)
-// export * from './DataTransformer'
-// export * from './StateProcessor'
-// export * from './ContentFormatter'
+// Transformation component implementations
+export * from './RectValidator'
+export * from './HexaProcessor'
+export * from './TransformHub'
 
 // Type definitions for transformation components
 export interface TransformationComponent {
@@ -18,13 +18,16 @@ export interface TransformationComponent {
   process(data: any): any
 }
 
-// Transformation component factory (stub implementation)
+// Transformation component factory
 export function createTransformationComponent(type: string, config: any): TransformationComponent {
-  // Stub implementation - components to be created in future PRs
-  return {
-    type: 'transformation',
-    purpose: `${type} transformation component`,
-    transform: (input: any) => input,
-    process: (data: any) => data
+  switch (type) {
+    case 'rect_validator':
+      return new (await import('./RectValidator')).RectValidator(config.id || 'rect_validator')
+    case 'hexa_processor':
+      return new (await import('./HexaProcessor')).HexaProcessor(config.id || 'hexa_processor')
+    case 'transform_hub':
+      return new (await import('./TransformHub')).TransformHub(config.id || 'transform_hub')
+    default:
+      throw new Error(`Unknown transformation component type: ${type}`)
   }
 }
