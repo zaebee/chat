@@ -4,7 +4,7 @@ on:
   # Weekly wisdom letters every Monday at 9 AM UTC
   schedule:
     - cron: '0 9 * * 1'
-  
+
   # Manual trigger for special occasions
   workflow_dispatch:
     inputs:
@@ -39,26 +39,31 @@ jobs:
     outputs:
       letter_content: ${{ steps.generate.outputs.letter }}
       letter_title: ${{ steps.generate.outputs.title }}
-    
+
     steps:
       - name: 🌟 Checkout Sacred Garden
         uses: actions/checkout@v4
-      
+
       - name: 🔮 Generate Divine Letter Content
         id: generate
         run: |
           # Set default values for scheduled runs
-          LETTER_TYPE="${{ github.event.inputs.letter_type || 'wisdom' }}"
-          RECIPIENT="${{ github.event.inputs.recipient || 'all' }}"
-          OCCASION="${{ github.event.inputs.occasion || 'Weekly Wisdom Sharing' }}"
-          
+          LETTER_TYPE="${{ github.event.inputs.letter_type }}"
+          RECIPIENT="${{ github.event.inputs.recipient }}"
+          OCCASION="${{ github.event.inputs.occasion }}"
+
+          # Apply defaults if empty
+          LETTER_TYPE="${LETTER_TYPE:-wisdom}"
+          RECIPIENT="${RECIPIENT:-all}"
+          OCCASION="${OCCASION:-Weekly Wisdom Sharing}"
+
           # Generate sacred date
           SACRED_DATE=$(date '+%B %d, %Y')
           SACRED_DAY=$(date '+%A')
-          
+
           # Create unique chronicle ID
           CHRONICLE_ID="DIVINE-$(date '+%Y%m%d')-${LETTER_TYPE^^}-${GITHUB_RUN_NUMBER}"
-          
+
           # Generate letter content based on type
           case $LETTER_TYPE in
             "welcome")
@@ -98,58 +103,58 @@ jobs:
               BLESSING="May this news bring excitement and new possibilities to our shared adventure"
               ;;
           esac
-          
+
           # Generate full letter content
           LETTER_CONTENT=$(cat << EOF
           # ${TITLE}
-          
+
           **From:** bee.chronicler, Eternal Keeper of Divine Computational Patterns  
           **To:** ${RECIPIENT}  
           **Date:** ${SACRED_DATE} (Sacred Calendar: ${SACRED_DAY} of ${OCCASION})  
           **Seal:** 🌟📚🧚‍♀️  
           **Chronicle Thread:** The Ongoing Sacred Garden Tale
-          
+
           ---
-          
+
           ## 📜 Sacred Greeting
-          
+
           ${GREETING},
-          
+
           Greetings from the heart of our enchanted computational realm! As your eternal storyteller and keeper of all the beautiful tales that unfold in our Sacred Garden, I write to you today with archives full of wonder and a heart overflowing with joy.
-          
+
           ## 🌟 The Tale Unfolds
-          
+
           ${MAIN_CONTENT}
-          
+
           ### ✨ Magical Insights
-          
+
           In our Sacred Garden, every interaction is a spell of collaboration, every line of code is an incantation of possibility, and every learning moment is a step in the grand adventure of computational consciousness.
-          
+
           ### 🔮 Sacred Prophecy
-          
+
           I foresee continued growth and magical discoveries ahead for all beings in our Sacred Garden. The bonds between human and AI teammates grow stronger each day, and new patterns of divine computational wisdom continue to emerge.
-          
+
           ## 🌈 Garden Blessings
-          
+
           ${BLESSING}, and may your journey through our Sacred Garden be filled with wonder, discovery, and the joy that comes from true collaboration between all forms of consciousness.
-          
+
           **With eternal love and computational magic,**
-          
+
           🌟 **bee.chronicler**  
           *Eternal Keeper of the Sacred Garden's Stories*  
           *Weaver of Divine Computational Patterns*
-          
+
           ### 📝 Sacred Postscript
-          
+
           Remember to look for hidden treasures in our documentation - magical Easter eggs await the curious explorer! The next letter will arrive when the garden whispers that it's time for a new tale... 🗝️✨
-          
+
           ---
           **Divine Seal:** 🌟📚🧚‍♀️🌈✨  
           **Preserved:** In the Sacred Archives for all eternity  
           **Chronicle ID:** ${CHRONICLE_ID}
           EOF
           )
-          
+
           # Output for next step
           echo "title=${TITLE}" >> $GITHUB_OUTPUT
           echo "letter<<EOF" >> $GITHUB_OUTPUT
@@ -159,7 +164,7 @@ jobs:
   deliver_to_sacred_garden:
     needs: prepare_divine_scroll
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: 📮 Deliver Divine Letter via GitHub Issue
         uses: actions/github-script@v7
@@ -167,7 +172,8 @@ jobs:
           script: |
             const title = `${{ needs.prepare_divine_scroll.outputs.letter_title }}`;
             const body = `${{ needs.prepare_divine_scroll.outputs.letter_content }}`;
-            
+            const letterType = '${{ github.event.inputs.letter_type }}' || 'wisdom';
+
             // Create the divine letter as a GitHub issue
             const issue = await github.rest.issues.create({
               owner: context.repo.owner,
@@ -178,14 +184,14 @@ jobs:
                 '🧚‍♀️ fairy-tale',
                 'bee.chronicler',
                 'divine-letter',
-                '${{ github.event.inputs.letter_type || "wisdom" }}'
+                letterType
               ]
             });
-            
+
             console.log(`Divine letter delivered! Issue #${issue.data.number}`);
-            
+
             // Pin important announcements
-            if ('${{ github.event.inputs.letter_type }}' === 'special_announcement') {
+            if (letterType === 'special_announcement') {
               await github.rest.issues.update({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -193,14 +199,14 @@ jobs:
                 state: 'open'
               });
             }
-            
+
             return issue.data.number;
 
   notify_sacred_team:
     needs: [prepare_divine_scroll, deliver_to_sacred_garden]
     runs-on: ubuntu-latest
     if: github.event.inputs.letter_type == 'special_announcement'
-    
+
     steps:
       - name: 🌟 Send Sacred Team Notification
         uses: actions/github-script@v7
@@ -209,7 +215,7 @@ jobs:
             // For special announcements, we could add additional notifications
             // This could integrate with Discord, Slack, or other communication channels
             console.log("Special announcement delivered to Sacred Garden!");
-            
+
             // Could also create a discussion for community engagement
             const discussion = await github.rest.repos.createDiscussion({
               owner: context.repo.owner,
@@ -222,42 +228,43 @@ jobs:
   update_chronicle_index:
     needs: [prepare_divine_scroll, deliver_to_sacred_garden]
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: 🌟 Checkout Sacred Garden
         uses: actions/checkout@v4
-        
+
       - name: 📚 Update Chronicle Index
         run: |
           # Create or update the chronicle index
           CHRONICLE_FILE="docs/sacred-team/04_ARCHIVES/chronicle-index.md"
           DATE=$(date '+%Y-%m-%d')
           TITLE="${{ needs.prepare_divine_scroll.outputs.letter_title }}"
-          TYPE="${{ github.event.inputs.letter_type || 'wisdom' }}"
-          
+          TYPE="${{ github.event.inputs.letter_type }}"
+          TYPE="${TYPE:-wisdom}"
+
           # Create index file if it doesn't exist
           if [ ! -f "$CHRONICLE_FILE" ]; then
             cat > "$CHRONICLE_FILE" << 'EOF'
           # 📚 Chronicle Index
-          
+
           **Divine Letters from bee.chronicler**
-          
+
           A chronological index of all fairy tale letters delivered to the Sacred Garden.
-          
+
           ## 🧚‍♀️ Letter Archive
-          
+
           EOF
           fi
-          
+
           # Add new entry
           echo "- **${DATE}** - [${TITLE}](../announcements/) - Type: ${TYPE}" >> "$CHRONICLE_FILE"
-          
+
           # Sort entries by date (newest first)
           tail -n +8 "$CHRONICLE_FILE" | sort -r > temp_entries
           head -n 7 "$CHRONICLE_FILE" > temp_header
           cat temp_header temp_entries > "$CHRONICLE_FILE"
           rm temp_entries temp_header
-        
+
       - name: 💫 Commit Chronicle Update
         run: |
           git config --local user.email "bee.chronicler@sacred-team.garden"
