@@ -36,34 +36,6 @@ const useHexagonalLayout = ref(true); // Default to hexagonal layout
 const newMessage = ref("");
 const chatMessagesEl = ref<HTMLElement | null>(null);
 
-const threadedMessages = computed(() => {
-  const messageMap = new Map<string, Message & { replies: Message[] }>();
-  const rootMessages: (Message & { replies: Message[] })[] = [];
-
-  messages.value.forEach((msg: Message) => {
-    messageMap.set(msg.id, { ...msg, replies: [] });
-  });
-
-  messages.value.forEach((msg: Message) => {
-    if (msg.parent_id && messageMap.has(msg.parent_id)) {
-      messageMap.get(msg.parent_id)?.replies.push(messageMap.get(msg.id)!);
-    } else {
-      rootMessages.push(messageMap.get(msg.id)!);
-    }
-  });
-
-  // Sort root messages and their replies by timestamp
-  rootMessages.sort(
-    (a: Message, b: Message) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
-  );
-  rootMessages.forEach((rootMsg) => {
-    rootMsg.replies.sort(
-      (a: Message, b: Message) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
-    );
-  });
-
-  return rootMessages;
-});
 
 function handleSendMessage() {
   const messageText = newMessage.value.trim();
@@ -143,7 +115,7 @@ onMounted(() => {
         />
       </div>
       <div class="chat-content">
-        <MessageList :messages="threadedMessages" @reply="handleReply" />
+        <MessageList @reply="handleReply" />
 
         <div v-if="isAiThinking" class="ai-thinking-indicator message ai-message">
           <div class="message-sender">
