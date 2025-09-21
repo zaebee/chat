@@ -5,6 +5,7 @@ import { storeToRefs } from "pinia";
 import { computed, onMounted, ref } from "vue";
 import HexaLevel from "@/components/HexaLevel.vue";
 import QuestPanel from "@/components/QuestPanel.vue";
+import type { Room } from "@/stores/game";
 
 const organellasStore = useOrganellasStore();
 const userStore = useUserStore();
@@ -12,6 +13,22 @@ const { organellas } = storeToRefs(organellasStore);
 const { currentUser } = storeToRefs(userStore);
 
 const isGenesisQuestVisible = ref(false);
+
+// Mock room for QuestPanel
+const genesisRoom: Room = {
+  id: 'genesis',
+  name: 'Genesis Chamber',
+  description: 'The birthplace of new organellas',
+  type: 'journey',
+  created_by: 'system',
+  created_at: new Date().toISOString(),
+  is_archived: false,
+  level: 1,
+  unlocked: true,
+  completed: false,
+  organellas: [],
+  quests: []
+};
 
 onMounted(() => {
   // Fetch organellas for the current user
@@ -123,7 +140,7 @@ const organellasByLevel = computed(() => {
         </g>
       </svg>
     </div>
-    <QuestPanel v-if="isGenesisQuestVisible" @close="isGenesisQuestVisible = false" />
+    <QuestPanel v-if="isGenesisQuestVisible" :room="genesisRoom" @close="isGenesisQuestVisible = false" />
   </div>
 </template>
 

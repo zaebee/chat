@@ -272,8 +272,8 @@ onMounted(() => {
               />
               <InteractiveCodeBlock
                 v-else-if="message.code_content"
-                :code-content="message.code_content"
-                :code-language="message.code_language"
+                :code="message.code_content"
+                :language="message.code_language"
                 :editor-id="`editor-${message.id}`"
               />
               <div v-else class="message-content" v-html="renderMarkdown(message.text)"></div>
@@ -323,8 +323,8 @@ onMounted(() => {
               </div>
               <InteractiveCodeBlock
                 v-if="reply.code_content"
-                :code-content="reply.code_content"
-                :code-language="reply.code_language"
+                :code="reply.code_content"
+                :language="reply.code_language"
                 :editor-id="`editor-${reply.id}`"
               />
               <div v-else class="message-content" v-html="renderMarkdown(reply.text)"></div>
@@ -399,7 +399,12 @@ onMounted(() => {
 
       <div class="chat-sidebar">
         <OrganellaPanel />
-        <TeammatePresence :teammates="teammates" />
+        <div v-for="teammate in teammates" :key="teammate.id">
+          <TeammatePresence 
+            :name="teammate.name" 
+            :status="teammate.status as 'online' | 'away' | 'busy' | 'offline'" 
+          />
+        </div>
       </div>
     </div>
   </div>

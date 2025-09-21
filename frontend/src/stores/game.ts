@@ -9,6 +9,11 @@ export interface Room {
   created_by: string;
   created_at: string;
   is_archived: boolean;
+  level?: number;  // Quest level for journey rooms
+  unlocked?: boolean;  // Whether room is accessible
+  completed?: boolean;  // Whether room objectives are completed
+  organellas?: any[];  // Organellas in this room
+  quests?: any[];  // Available quests in this room
 }
 
 import { useUserStore } from "./user";

@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { challenges } from '@/challenges'
 import { useChatStore } from '@/stores/chat'
+import { useSettingsStore } from '@/stores/settings'
 import { storeToRefs } from 'pinia'
 
 const chatStore = useChatStore()
-const { language, solvedChallenges } = storeToRefs(chatStore)
+const settingsStore = useSettingsStore()
+const { solvedChallenges } = storeToRefs(chatStore)
+const { language } = storeToRefs(settingsStore)
 
 const emit = defineEmits<{
   (e: 'select-challenge', id: string): void
