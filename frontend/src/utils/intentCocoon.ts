@@ -79,7 +79,10 @@ export function interpolateIntent(
     focusIntensity: from.focusIntensity + (to.focusIntensity - from.focusIntensity) * easedProgress,
     socialAlignment: from.socialAlignment + (to.socialAlignment - from.socialAlignment) * easedProgress,
     
-    // Discrete properties change at midpoint
+    // Discrete properties change at specific progress points
+    // These can't be smoothly interpolated, so they "snap" at chosen thresholds:
+    // - collaborationMode & emotionalState: 0.5 (midpoint for clean transition)
+    // - purpose: 0.3 (earlier switch to show intent change sooner)
     collaborationMode: easedProgress < 0.5 ? from.collaborationMode : to.collaborationMode,
     purpose: easedProgress < 0.3 ? from.purpose : to.purpose,
     emotionalState: easedProgress < 0.5 ? from.emotionalState : to.emotionalState

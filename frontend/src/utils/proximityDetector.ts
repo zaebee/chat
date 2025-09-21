@@ -31,11 +31,32 @@ export interface ProximityMetrics {
   isolatedBees: number
 }
 
+// Configuration constants - extracted for easy tuning
+const DEFAULT_CONFIG = {
+  maxInfluenceDistance: 150, // pixels - range of emotional influence
+  updateInterval: 100, // ms - frequency of proximity calculations
+  roleModifiers: {
+    queen: 2.0,      // Queens have strong influence
+    chronicler: 1.8, // Sacred bees have enhanced influence
+    jules: 1.5,      // Divine debugging influence
+    guard: 1.2,      // Guards have moderate influence
+    scout: 1.0,      // Scouts have normal influence
+    worker: 0.8      // Workers have slightly less influence
+  },
+  emotionalModifiers: {
+    divine: 1.5,     // Divine state has strong influence
+    excited: 1.3,    // Excitement is contagious
+    protective: 1.2, // Protective state spreads
+    focused: 1.0,    // Focused state is neutral
+    calm: 0.8        // Calm state has gentle influence
+  }
+}
+
 export class ProximityDetector {
   private beePositions: Map<string, BeePosition> = new Map()
   private influences: Map<string, ProximityInfluence[]> = new Map()
-  private maxInfluenceDistance = 150 // pixels
-  private updateInterval = 100 // ms
+  private maxInfluenceDistance = DEFAULT_CONFIG.maxInfluenceDistance
+  private updateInterval = DEFAULT_CONFIG.updateInterval
   private lastUpdate = 0
 
   /**
@@ -105,28 +126,8 @@ export class ProximityDetector {
     // Base influence decreases with distance (inverse square law)
     const baseInfluence = Math.max(0, 1 - (distance / this.maxInfluenceDistance) ** 2)
     
-    // Role-based modifiers
-    const roleModifiers = {
-      queen: 2.0,      // Queens have strong influence
-      chronicler: 1.8, // Sacred bees have enhanced influence
-      jules: 1.5,      // Divine debugging influence
-      guard: 1.2,      // Guards have moderate influence
-      scout: 1.0,      // Scouts have normal influence
-      worker: 0.8      // Workers have slightly less influence
-    }
-    
-    const sourceModifier = roleModifiers[source.role as keyof typeof roleModifiers] || 1.0
-    
-    // Emotional state modifiers
-    const emotionalModifiers = {
-      divine: 1.5,     // Divine state has strong influence
-      excited: 1.3,    // Excitement is contagious
-      protective: 1.2, // Protective state spreads
-      focused: 1.0,    // Focused state is neutral
-      calm: 0.8        // Calm state has gentle influence
-    }
-    
-    const emotionalModifier = emotionalModifiers[source.emotionalState as keyof typeof emotionalModifiers] || 1.0
+    const sourceModifier = DEFAULT_CONFIG.roleModifiers[source.role as keyof typeof DEFAULT_CONFIG.roleModifiers] || 1.0
+    const emotionalModifier = DEFAULT_CONFIG.emotionalModifiers[source.emotionalState as keyof typeof DEFAULT_CONFIG.emotionalModifiers] || 1.0
     
     return baseInfluence * sourceModifier * emotionalModifier
   }
@@ -163,6 +164,10 @@ export class ProximityDetector {
 
   /**
    * Recalculate all proximity influences
+   * 
+   * Performance Note: This is O(n²) complexity where n = number of bees.
+   * This is acceptable for the target range of 6-12 bees but would need
+   * spatial indexing (quadtree/grid) for larger swarms.
    */
   private calculateInfluences(): void {
     // Clear existing influences

@@ -35,6 +35,25 @@ export interface ContagionConfig {
   emotionalMomentum: number // 0-1 how much bees resist change
 }
 
+// Configuration constants - extracted for easy tuning
+const DEFAULT_CONTAGION_CONFIG: ContagionConfig = {
+  enabled: true,
+  influenceStrength: 0.7,
+  propagationSpeed: 0.5,
+  resistanceFactors: {
+    queen: 0.3,      // Queens resist emotional change
+    chronicler: 0.2, // Sacred bees are emotionally stable
+    jules: 0.4,      // Debugging requires emotional control
+    guard: 0.5,      // Guards have moderate resistance
+    scout: 0.8,      // Scouts are emotionally flexible
+    worker: 0.7      // Workers are moderately influenced
+  },
+  emotionalMomentum: 0.6
+}
+
+const EMOTIONAL_HISTORY_LENGTH = 10 // Maximum emotional states to remember
+const RECENT_HISTORY_SAMPLE = 5 // Recent states used for momentum calculation
+
 export class EmotionalContagionEngine {
   private activeInfluences: Map<string, EmotionalInfluence[]> = new Map()
   private emotionalHistory: Map<string, string[]> = new Map()
@@ -42,20 +61,7 @@ export class EmotionalContagionEngine {
   private lastUpdate = 0
   private updateInterval = 200 // ms
 
-  private config: ContagionConfig = {
-    enabled: true,
-    influenceStrength: 0.7,
-    propagationSpeed: 0.5,
-    resistanceFactors: {
-      queen: 0.3,      // Queens resist emotional change
-      chronicler: 0.2, // Sacred bees are emotionally stable
-      jules: 0.4,      // Debugging requires emotional control
-      guard: 0.5,      // Guards have moderate resistance
-      scout: 0.8,      // Scouts are emotionally flexible
-      worker: 0.7      // Workers are moderately influenced
-    },
-    emotionalMomentum: 0.6
-  }
+  private config: ContagionConfig = { ...DEFAULT_CONTAGION_CONFIG }
 
   /**
    * Process emotional influences for all bees
@@ -158,7 +164,7 @@ export class EmotionalContagionEngine {
     if (history.length === 0) return 0
     
     // Count recent occurrences of current emotion
-    const recentHistory = history.slice(-5) // Last 5 states
+    const recentHistory = history.slice(-RECENT_HISTORY_SAMPLE) // Last N states for momentum
     const sameEmotionCount = recentHistory.filter(e => e === currentEmotion).length
     
     // More consistent emotions create more momentum
@@ -188,7 +194,7 @@ export class EmotionalContagionEngine {
     history.push(emotion)
     
     // Keep only recent history
-    if (history.length > 10) {
+    if (history.length > EMOTIONAL_HISTORY_LENGTH) {
       history.shift()
     }
   }
@@ -238,7 +244,11 @@ export class EmotionalContagionEngine {
     const allPositions = proximityDetector.getAllPositions()
     const sourceBee = allPositions.find(pos => pos.beeId === sourceBeeId)
     
-    if (!sourceBee) return
+    if (!sourceBee) {
+      console.warn(`EmotionalContagion: Source bee '${sourceBeeId}' not found for emotional wave. Available bees:`, 
+        allPositions.map(p => p.beeId))
+      return
+    }
 
     // Create artificial strong influence
     const waveInfluences = proximityDetector.getInfluencesForBee(sourceBeeId)

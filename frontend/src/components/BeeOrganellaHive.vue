@@ -616,13 +616,19 @@ const transitionToIntent = async (newIntent: HiveIntent) => {
 }
 
 // Emotional contagion integration
+// TODO: Consider extracting to composables for maintainability
+// Future refactoring could use: useContagion(), useIntentTransition(), usePhysicsCocoon()
+// This would reduce component complexity and improve reusability
 const beePosition = ref({ x: 0, y: 0 })
 const contagionProcessingInterval = ref<number | null>(null)
 
 // Update bee position for proximity detection
 const updateBeePosition = () => {
-  // Get the bee's position relative to the viewport
-  // This is a simplified approach - in a real implementation you'd get actual DOM position
+  // TODO: Replace simulated positions with actual DOM positions
+  // Currently using Math.random() for testing the contagion logic independently.
+  // Future implementation should use getBoundingClientRect() or similar to get
+  // the actual rendered position of this bee component on screen.
+  // This would enable true spatial emotional contagion based on visual proximity.
   const baseX = Math.random() * 400 + 100 // Simulate position in test area
   const baseY = Math.random() * 300 + 100
   
