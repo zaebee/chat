@@ -213,5 +213,9 @@ __marimo__/
 *.changes
 chat.db
 
+# Frontend dependencies (regenerated on build)
+frontend/package-lock.json
+frontend/node_modules/
+
 .gemini/
 gha-creds-*.json
