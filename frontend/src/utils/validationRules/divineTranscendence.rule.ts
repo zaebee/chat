@@ -1,3 +1,6 @@
+import type { BeeMorphology } from "@/utils/hivePhysics";
+import type { ValidationResult } from "@/utils/physicsCocoon";
+
 export function validateDivineTranscendence(morphology: BeeMorphology): ValidationResult {
   // Check if this is a divine bee based on special features
   const hasDivineFeatures = Object.keys(morphology.specialFeatures).length > 0

@@ -1,3 +1,6 @@
+import type { BeeMorphology } from "@/utils/hivePhysics";
+import type { ValidationResult } from "@/utils/physicsCocoon";
+
 export function validateAnatomicalHarmony(morphology: BeeMorphology, GOLDEN_RATIO: number): ValidationResult {
   const { abdomen, thorax, head } = morphology
   

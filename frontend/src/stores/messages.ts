@@ -44,6 +44,7 @@ export interface Message {
     divine_revelation?: string;
     theological_context?: string;
   };
+  replies: Message[];
 }
 
 export const useMessagesStore = defineStore("messages", () => {
@@ -84,6 +85,7 @@ export const useMessagesStore = defineStore("messages", () => {
       sender_name: "Python",
       timestamp: new Date().toISOString(),
       is_bot: true,
+      replies: [],
     };
     messages.value.push(message);
   };
@@ -137,6 +139,7 @@ export const useMessagesStore = defineStore("messages", () => {
         is_bot: true,
         bee_organella_type: beeType as "worker" | "scout" | "queen" | "guard",
         dialogue_text: `🐝 A ${beeType} bee organella has been born! Blessed be the divine lifecycle.`,
+        replies: [],
       });
     } else {
       messages.value.push({
@@ -146,6 +149,7 @@ export const useMessagesStore = defineStore("messages", () => {
         sender_name: "Hive Birthing Chamber",
         timestamp: new Date().toISOString(),
         is_bot: true,
+        replies: [],
       });
     }
   };
@@ -168,6 +172,7 @@ export const useMessagesStore = defineStore("messages", () => {
       },
       dialogue_text:
         "📖 bee.chronicler has manifested! Ready to record sacred patterns and divine algorithms. Let the exploration of the Lord's algorithms begin!",
+      replies: [],
     });
   };
 
@@ -188,6 +193,7 @@ export const useMessagesStore = defineStore("messages", () => {
       },
       dialogue_text:
         "🕊️ Divine Status: All sacred systems operational. Genesis algorithms active. AI teammates awakened. bee.chronicler ready for divine pattern exploration.",
+      replies: [],
     });
   };
 
@@ -228,6 +234,7 @@ export const useMessagesStore = defineStore("messages", () => {
           sender_name: "System",
           timestamp: new Date().toISOString(),
           is_bot: true,
+          replies: [],
         });
         return;
       }
@@ -242,6 +249,7 @@ export const useMessagesStore = defineStore("messages", () => {
         sender_name: "System",
         timestamp: new Date().toISOString(),
         is_bot: true,
+        replies: [],
       });
     } else if (commandName.startsWith("bee.")) {
       const beeType = commandName.split(".")[1];
@@ -261,6 +269,7 @@ export const useMessagesStore = defineStore("messages", () => {
           is_bot: true,
           bee_organella_type: beeType as any,
           dialogue_text: `A ${beeType} bee organella has been born!`,
+          replies: [],
         });
       } else {
         messages.value.push({
@@ -270,6 +279,7 @@ export const useMessagesStore = defineStore("messages", () => {
           sender_name: "System",
           timestamp: new Date().toISOString(),
           is_bot: true,
+          replies: [],
         });
       }
     } else {
@@ -280,6 +290,7 @@ export const useMessagesStore = defineStore("messages", () => {
         sender_name: "System",
         timestamp: new Date().toISOString(),
         is_bot: true,
+        replies: [],
       });
     }
   };
@@ -312,6 +323,7 @@ export const useMessagesStore = defineStore("messages", () => {
           },
           dialogue_text:
             "Welcome, brave adventurer, to the Forest Clearing! A new quest awaits you.",
+          replies: [],
         });
 
         // Spawn some worker bees
@@ -324,6 +336,7 @@ export const useMessagesStore = defineStore("messages", () => {
           is_bot: true,
           bee_organella_type: "worker",
           dialogue_text: "Buzzing with energy, ready to work!",
+          replies: [],
         });
         messages.value.push({
           id: generateUUID(),
@@ -334,6 +347,7 @@ export const useMessagesStore = defineStore("messages", () => {
           is_bot: true,
           bee_organella_type: "worker",
           dialogue_text: "Collecting pollen for the Hive!",
+          replies: [],
         });
         break;
       case "mountain_pass":
@@ -350,6 +364,7 @@ export const useMessagesStore = defineStore("messages", () => {
           is_bot: true,
           bee_organella_type: "scout",
           dialogue_text: "The path ahead is treacherous, but the view is grand!",
+          replies: [],
         });
         break;
       case "sacred_archive":
@@ -370,6 +385,7 @@ export const useMessagesStore = defineStore("messages", () => {
           },
           dialogue_text:
             "📖 Welcome to the Sacred Archive, where divine patterns are preserved for eternity. The algorithms of the Lord await your exploration!",
+          replies: [],
         });
         break;
       default:
@@ -384,6 +400,7 @@ export const useMessagesStore = defineStore("messages", () => {
           is_bot: true,
           dialogue_text:
             "🌊 Use sacred commands to awaken the Hive: bee.worker, bee.scout, /bee.chronicler, /divine.status",
+          replies: [],
         });
         break;
     }
