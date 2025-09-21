@@ -1,0 +1,199 @@
+<!-- Hive Documentation Language Switcher -->
+<!-- Adapted from medicine.git patterns for Sacred Team documentation -->
+
+<div class="hive-language-switcher">
+    <div class="language-toggle">
+        <button class="lang-btn active" data-lang="en" title="English">
+            <span class="lang-flag">🇺🇸</span>
+            <span class="lang-text">EN</span>
+        </button>
+        <button class="lang-btn" data-lang="ru" title="Русский">
+            <span class="lang-flag">🇷🇺</span>
+            <span class="lang-text">RU</span>
+        </button>
+    </div>
+    
+    <!-- Sacred Team visual enhancement -->
+    <div class="sacred-indicator">
+        <span class="sacred-icon">🐝</span>
+        <span class="sacred-text" data-translate="hive_core.sacred_team">Sacred Team</span>
+    </div>
+</div>
+
+<!-- Interactive enhancement script injection -->
+<script>
+    // Ensure hive-interactive-navigation.js is loaded
+    if (!window.HiveDocumentationEnhancer) {
+        const script = document.createElement('script');
+        script.src = '/docs/assets/js/hive-interactive-navigation.js';
+        script.async = true;
+        document.head.appendChild(script);
+    }
+    
+    // Initialize language switcher when DOM is ready
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set up language switching
+        const langButtons = document.querySelectorAll('.lang-btn');
+        langButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const newLang = this.dataset.lang;
+                
+                // Update active button
+                langButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Switch language content
+                switchLanguageContent(newLang);
+                
+                // Store preference
+                localStorage.setItem('hive_language', newLang);
+                
+                // Update URL
+                const url = new URL(window.location);
+                url.searchParams.set('lang', newLang);
+                window.history.replaceState({}, '', url);
+            });
+        });
+        
+        // Load saved language preference
+        const savedLang = localStorage.getItem('hive_language') || 
+                          new URLSearchParams(window.location.search).get('lang') || 
+                          'en';
+        
+        if (savedLang !== 'en') {
+            const targetButton = document.querySelector(`[data-lang="${savedLang}"]`);
+            if (targetButton) {
+                targetButton.click();
+            }
+        }
+    });
+    
+    function switchLanguageContent(lang) {
+        // Hide all language content
+        document.querySelectorAll('.language-content').forEach(content => {
+            content.style.display = 'none';
+        });
+        
+        // Show selected language content
+        document.querySelectorAll(`[data-lang="${lang}"]`).forEach(content => {
+            content.style.display = 'block';
+        });
+        
+        // Update document language
+        document.documentElement.lang = lang;
+        
+        // Trigger custom event for other components
+        window.dispatchEvent(new CustomEvent('languageChanged', { detail: { language: lang } }));
+    }
+</script>
+
+<!-- Sacred Team styling -->
+<style>
+    .hive-language-switcher {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 10px;
+    }
+    
+    .language-toggle {
+        display: flex;
+        background: #FFF8DC;
+        border-radius: 25px;
+        padding: 5px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        border: 2px solid #FFD700;
+    }
+    
+    .lang-btn {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        padding: 8px 12px;
+        border: none;
+        background: transparent;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: bold;
+        color: #2F4F4F;
+        font-size: 14px;
+    }
+    
+    .lang-btn:hover {
+        background: rgba(255, 215, 0, 0.2);
+        transform: translateY(-1px);
+    }
+    
+    .lang-btn.active {
+        background: #FFD700;
+        color: #8B4513;
+        box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+    }
+    
+    .lang-flag {
+        font-size: 16px;
+    }
+    
+    .lang-text {
+        font-size: 12px;
+        font-weight: bold;
+    }
+    
+    .sacred-indicator {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        background: rgba(255, 215, 0, 0.1);
+        padding: 5px 10px;
+        border-radius: 15px;
+        font-size: 12px;
+        color: #8B4513;
+        border: 1px solid rgba(255, 215, 0, 0.3);
+    }
+    
+    .sacred-icon {
+        animation: gentle-pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes gentle-pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+    
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+        .hive-language-switcher {
+            position: relative;
+            top: auto;
+            right: auto;
+            margin: 10px 0;
+            align-items: center;
+        }
+        
+        .language-toggle {
+            margin-bottom: 5px;
+        }
+        
+        .sacred-indicator {
+            font-size: 11px;
+        }
+    }
+    
+    /* Language content styling */
+    .language-content {
+        transition: opacity 0.3s ease;
+    }
+    
+    .language-content[style*="display: none"] {
+        opacity: 0;
+    }
+    
+    .language-content:not([style*="display: none"]) {
+        opacity: 1;
+    }
+</style>

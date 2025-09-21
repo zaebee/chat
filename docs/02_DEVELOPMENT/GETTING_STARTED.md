@@ -1,19 +1,40 @@
 ---
 title: "Getting Started with Hive Development"
+title_ru: "Начало Разработки в Улье"
 description: "Quick setup guide for new developers joining the Hive ecosystem"
+description_ru: "Краткое руководство по настройке для новых разработчиков экосистемы Улья"
 category: "development"
 audience: "developer"
 complexity: "beginner"
 last_updated: "2025-01-20"
 related_docs: ["ENVIRONMENT.md", "CONTRIBUTING.md"]
 code_examples: true
+bilingual: true
+lang_switcher: true
+interactive_nav: true
+sacred_theme: true
+mermaid_enhanced: true
+translation_status: "partial"
+translation_priority: "high"
 ---
 
-# Getting Started with Hive Development
+# <span data-translate="ui.getting_started">Getting Started</span> with <span data-translate="hive_core.hive_ecosystem">Hive</span> Development
+
+<div class="language-content" data-lang="en">
 
 ## Welcome to the Hive! 🐝
 
 This guide will get you up and running with the Hive Chat ecosystem in under 30 minutes. The Hive is more than just a chat application—it's a "Living Application" that demonstrates the future of human-AI collaborative software.
+
+</div>
+
+<div class="language-content" data-lang="ru" style="display: none;">
+
+## Добро пожаловать в Улей! 🐝
+
+Это руководство поможет вам настроить экосистему Hive Chat менее чем за 30 минут. Улей - это больше чем просто чат-приложение, это "Живое Приложение", демонстрирующее будущее совместного программного обеспечения человека и ИИ.
+
+</div>
 
 ## Prerequisites
 

@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="{{ page.lang | default: site.default_language | default: 'en' }}">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <!-- SEO -->
+    <title>{% if page.title %}{{ page.title }} | {% endif %}{{ site.title }}</title>
+    <meta name="description" content="{% if page.description %}{{ page.description }}{% else %}{{ site.description }}{% endif %}">
+    <meta name="author" content="{{ site.author }}">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="{% if page.title %}{{ page.title }}{% else %}{{ site.title }}{% endif %}">
+    <meta property="og:description" content="{% if page.description %}{{ page.description }}{% else %}{{ site.description }}{% endif %}">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ page.url | absolute_url }}">
+    
+    <!-- Sacred Team Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐝</text></svg>">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Sacred Team CSS -->
+    <style>
+        :root {
+            --sacred-primary: #FFD700;
+            --sacred-secondary: #8B4513;
+            --sacred-accent: #FF6B35;
+            --sacred-background: #FFF8DC;
+            --sacred-text: #2F4F4F;
+            --sacred-light: #F0E68C;
+            --sacred-white: #FFFFFF;
+            --sacred-shadow: rgba(255, 215, 0, 0.2);
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--sacred-text);
+            background: linear-gradient(135deg, var(--sacred-white) 0%, var(--sacred-background) 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        
+        .sacred-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Sacred Header */
+        .sacred-header {
+            background: linear-gradient(135deg, var(--sacred-primary) 0%, var(--sacred-light) 100%);
+            border-bottom: 3px solid var(--sacred-secondary);
+            padding: 20px 0;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px var(--sacred-shadow);
+        }
+        
+        .sacred-header h1 {
+            margin: 0;
+            color: var(--sacred-secondary);
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .sacred-header .subtitle {
+            text-align: center;
+            color: var(--sacred-text);
+            font-size: 1.1rem;
+            margin-top: 10px;
+            opacity: 0.8;
+        }
+        
+        /* Sacred Content */
+        .sacred-content {
+            background: var(--sacred-white);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 25px var(--sacred-shadow);
+            border: 2px solid var(--sacred-primary);
+            margin-bottom: 30px;
+        }
+        
+        /* Typography */
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--sacred-secondary);
+            font-weight: 600;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        h1 { font-size: 2.5rem; }
+        h2 { font-size: 2rem; }
+        h3 { font-size: 1.5rem; }
+        h4 { font-size: 1.25rem; }
+        
+        p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+        
+        a {
+            color: var(--sacred-accent);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        a:hover {
+            color: var(--sacred-secondary);
+            text-decoration: underline;
+        }
+        
+        /* Code styling */
+        code {
+            background: var(--sacred-background);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+            border: 1px solid var(--sacred-light);
+        }
+        
+        pre {
+            background: var(--sacred-background);
+            padding: 20px;
+            border-radius: 10px;
+            overflow-x: auto;
+            border: 2px solid var(--sacred-light);
+            margin: 1.5rem 0;
+        }
+        
+        pre code {
+            background: none;
+            padding: 0;
+            border: none;
+        }
+        
+        /* Lists */
+        ul, ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+        
+        li {
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: var(--sacred-white);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px var(--sacred-shadow);
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--sacred-light);
+        }
+        
+        th {
+            background: var(--sacred-primary);
+            color: var(--sacred-secondary);
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background: var(--sacred-background);
+        }
+        
+        /* Blockquotes */
+        blockquote {
+            border-left: 4px solid var(--sacred-primary);
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            background: var(--sacred-background);
+            border-radius: 0 10px 10px 0;
+            font-style: italic;
+        }
+        
+        /* Sacred Footer */
+        .sacred-footer {
+            background: var(--sacred-secondary);
+            color: var(--sacred-background);
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 50px;
+        }
+        
+        .sacred-footer a {
+            color: var(--sacred-primary);
+        }
+        
+        .sacred-footer .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .sacred-footer .footer-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(255, 215, 0, 0.2);
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .sacred-footer .footer-link:hover {
+            background: var(--sacred-primary);
+            color: var(--sacred-secondary);
+            transform: translateY(-2px);
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .sacred-container {
+                padding: 15px;
+            }
+            
+            .sacred-header h1 {
+                font-size: 2rem;
+            }
+            
+            .sacred-content {
+                padding: 20px;
+            }
+            
+            .sacred-footer .footer-links {
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+            }
+        }
+        
+        /* Sacred animations */
+        @keyframes gentle-pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.02); opacity: 0.9; }
+        }
+        
+        .sacred-pulse {
+            animation: gentle-pulse 3s ease-in-out infinite;
+        }
+        
+        /* Language content transitions */
+        .language-content {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        
+        .language-content[style*="display: none"] {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        
+        .language-content:not([style*="display: none"]) {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+    
+    <!-- Mermaid for Sacred Team diagrams -->
+    {% if page.mermaid_enhanced or site.hive.mermaid_enhanced %}
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    {% endif %}
+</head>
+
+<body class="sacred-theme">
+    <!-- Sacred Header -->
+    <header class="sacred-header">
+        <div class="sacred-container">
+            <h1 class="sacred-pulse">
+                🐝 {{ site.title }}
+            </h1>
+            <div class="subtitle">
+                {{ site.description | truncate: 100 }}
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="sacred-container">
+        <div class="sacred-content">
+            {{ content }}
+        </div>
+    </main>
+
+    <!-- Sacred Footer -->
+    <footer class="sacred-footer">
+        <div class="sacred-container">
+            <div class="footer-links">
+                {% for link in site.footer.links %}
+                <a href="{{ link.url }}" class="footer-link">
+                    {% if link.icon == 'github' %}🐙{% elsif link.icon == 'bee' %}🐝{% elsif link.icon == 'book' %}📚{% else %}🔗{% endif %}
+                    {{ link.title }}
+                </a>
+                {% endfor %}
+            </div>
+            <p>
+                Made with 💛 by the Sacred Team | 
+                <span data-translate="hive_core.living_application">Living Application</span> | 
+                Powered by 🐝 Hive Ecosystem
+            </p>
+        </div>
+    </footer>
+
+    <!-- Enhanced JavaScript -->
+    {% if page.interactive_nav or site.hive.interactive_navigation %}
+    <script src="{{ '/assets/js/hive-interactive-navigation.js' | relative_url }}"></script>
+    {% endif %}
+    
+    {% if page.mermaid_enhanced or site.hive.mermaid_enhanced %}
+    {% include sacred-mermaid-theme.html %}
+    {% endif %}
+    
+    <!-- Glossary data injection for JavaScript -->
+    <script>
+        window.hiveGlossary = {{ site.data.hive_glossary | jsonify }};
+    </script>
+</body>
+</html>

@@ -1,0 +1,189 @@
+# Hive Ecosystem Documentation Configuration
+# Enhanced with bilingual support and Sacred Team theming
+# Adapted from medicine.git patterns
+
+title: Hive Ecosystem Documentation
+email: sacred-team@hive.ecosystem
+description: >-
+  Interactive bilingual documentation for the Hive Living Application
+  with Sacred Team collaboration patterns and ATCG architecture.
+  Comprehensive guide for developers, users, and AI teammates.
+
+baseurl: "" # the subpath of your site, e.g. /blog
+url: "https://hive.ecosystem" # the base hostname & protocol for your site
+repository: zaebee/chat # GitHub repository for SEO and site generation
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+
+# Plugins (GitHub Pages supported plugins only)
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+# Kramdown configuration
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    block:
+      line_numbers: false
+
+# Default front matter
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: "default"
+      sacred_theme: true
+      interactive_nav: true
+
+# Bilingual support configuration
+languages: ["en", "ru"]
+default_language: "en"
+
+# Hive-specific configuration
+hive:
+  sacred_team_theme: true
+  interactive_navigation: true
+  bilingual_support: true
+  pollen_protocol: true
+  atcg_patterns: true
+  living_application: true
+
+# Sacred Team configuration
+sacred_team:
+  enable_chronicles: true
+  enable_coordination: true
+  enable_reviews: true
+  theme_color: "#FFD700"
+  accent_color: "#FF6B35"
+  background_color: "#FFF8DC"
+
+# Exclude from processing
+exclude:
+  - .sass-cache/
+  - .jekyll-cache/
+  - gemfiles/
+  - Gemfile
+  - Gemfile.lock
+  - node_modules/
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/
+  - prototype_*.py
+  - bee_saga_*.py
+  - paradigm_transformer_*.py
+  - rapid_iteration_*.py
+
+# Include files that start with underscore
+include:
+  - _pages
+  - _data
+  - _includes
+
+# Sass configuration
+sass:
+  style: compressed
+  sass_dir: _sass
+
+# Pagination
+paginate: 5
+paginate_path: "/page:num/"
+
+# SEO settings
+author: Sacred Team
+twitter:
+  username: # Add if needed
+facebook:
+  app_id: # Add if needed
+  publisher: # Add if needed
+
+# Google Analytics (optional)
+google_analytics: # Add GA tracking ID if needed
+
+# Mermaid configuration for Sacred Team diagrams
+mermaid:
+  enable: true
+  theme: "sacred_team"
+  config:
+    theme: 'base'
+    themeVariables:
+      primaryColor: '#FFD700'
+      primaryTextColor: '#2F4F4F'
+      primaryBorderColor: '#8B4513'
+      lineColor: '#FF6B35'
+      secondaryColor: '#FFF8DC'
+      tertiaryColor: '#F0E68C'
+
+# Collections for Sacred Team content
+collections:
+  chronicles:
+    output: true
+    permalink: /:collection/:name/
+  coordination:
+    output: true
+    permalink: /:collection/:name/
+  reviews:
+    output: true
+    permalink: /:collection/:name/
+
+# Navigation structure
+navigation:
+  main:
+    - title: "Home"
+      title_ru: "Главная"
+      url: "/"
+    - title: "Getting Started"
+      title_ru: "Начало Работы"
+      url: "/02_DEVELOPMENT/GETTING_STARTED/"
+    - title: "Architecture"
+      title_ru: "Архитектура"
+      url: "/01_ARCHITECTURE/"
+    - title: "API Reference"
+      title_ru: "Справочник API"
+      url: "/03_API/"
+    - title: "Sacred Team"
+      title_ru: "Священная Команда"
+      url: "/sacred-team/"
+
+# Footer configuration
+footer:
+  links:
+    - title: "GitHub"
+      url: "https://github.com/zaebee/chat"
+      icon: "github"
+    - title: "Sacred Team"
+      url: "/sacred-team/"
+      icon: "bee"
+    - title: "Chronicles"
+      url: "/sacred-team/chronicles/"
+      icon: "book"
+
+# Search configuration
+search:
+  enabled: true
+  provider: "lunr"
+  lunr:
+    search_within: "content"
+    search_full_content: false
+
+# Comments (if needed)
+comments:
+  provider: false # Can be enabled later
+
+# Analytics
+analytics:
+  provider: false # Can be enabled later
+
+# Compression
+compress_html:
+  clippings: all
+  comments: all
+  endings: all
+  startings: []
+  blanklines: false
+  profile: false

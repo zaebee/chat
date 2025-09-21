@@ -1,0 +1,408 @@
+# Hive Ecosystem Bilingual Glossary
+# Adapted from medicine.git patterns for Sacred Team documentation
+# Structure: category.term.language
+
+# Core Hive Concepts
+hive_core:
+  sacred_team:
+    en: "Sacred Team"
+    ru: "Священная Команда"
+  living_application:
+    en: "Living Application"
+    ru: "Живое Приложение"
+  hive_ecosystem:
+    en: "Hive Ecosystem"
+    ru: "Экосистема Улья"
+  pollen_protocol:
+    en: "Pollen Protocol"
+    ru: "Протокол Пыльцы"
+  bee_chronicler:
+    en: "bee.chronicler"
+    ru: "bee.chronicler"
+  divine_patterns:
+    en: "Divine Patterns"
+    ru: "Божественные Паттерны"
+
+# ATCG Architecture
+atcg:
+  atcg_patterns:
+    en: "ATCG Patterns"
+    ru: "ATCG Паттерны"
+  aggregate:
+    en: "Aggregate"
+    ru: "Агрегат"
+  transformation:
+    en: "Transformation"
+    ru: "Трансформация"
+  connector:
+    en: "Connector"
+    ru: "Коннектор"
+  genesis_event:
+    en: "Genesis Event"
+    ru: "Событие Генезиса"
+  genetic_patterns:
+    en: "Genetic Patterns"
+    ru: "Генетические Паттерны"
+
+# Paradigms
+paradigms:
+  rectangular:
+    en: "Rectangular"
+    ru: "Прямоугольный"
+  hexagonal:
+    en: "Hexagonal"
+    ru: "Шестиугольный"
+  soft_merge:
+    en: "Soft Merge"
+    ru: "Мягкое Слияние"
+  paradigm_transformation:
+    en: "Paradigm Transformation"
+    ru: "Трансформация Парадигм"
+  rect_hexa:
+    en: "[rect<hexa>]"
+    ru: "[прям<шест>]"
+
+# UI/Navigation Terms
+ui:
+  documentation:
+    en: "Documentation"
+    ru: "Документация"
+  architecture:
+    en: "Architecture"
+    ru: "Архитектура"
+  development:
+    en: "Development"
+    ru: "Разработка"
+  getting_started:
+    en: "Getting Started"
+    ru: "Начало Работы"
+  api_reference:
+    en: "API Reference"
+    ru: "Справочник API"
+  user_guides:
+    en: "User Guides"
+    ru: "Руководства Пользователя"
+  sacred_chronicles:
+    en: "Sacred Chronicles"
+    ru: "Священные Хроники"
+  team_coordination:
+    en: "Team Coordination"
+    ru: "Координация Команды"
+  home:
+    en: "Home"
+    ru: "Главная"
+  navigation:
+    en: "Quick Navigation"
+    ru: "Быстрая Навигация"
+  search:
+    en: "Search"
+    ru: "Поиск"
+  theme:
+    en: "Theme"
+    ru: "Тема"
+  light_theme:
+    en: "Light"
+    ru: "Светлая"
+  dark_theme:
+    en: "Dark"
+    ru: "Тёмная"
+  toggle_theme:
+    en: "Toggle Theme"
+    ru: "Переключить Тему"
+  language:
+    en: "Language"
+    ru: "Язык"
+  english:
+    en: "English"
+    ru: "Английский"
+  russian:
+    en: "Russian"
+    ru: "Русский"
+
+# Technical Terms
+technical:
+  backend:
+    en: "Backend"
+    ru: "Бэкенд"
+  frontend:
+    en: "Frontend"
+    ru: "Фронтенд"
+  database:
+    en: "Database"
+    ru: "База Данных"
+  api:
+    en: "API"
+    ru: "API"
+  websocket:
+    en: "WebSocket"
+    ru: "WebSocket"
+  real_time:
+    en: "Real-time"
+    ru: "Реальное Время"
+  event_driven:
+    en: "Event-driven"
+    ru: "Событийно-ориентированный"
+  microservices:
+    en: "Microservices"
+    ru: "Микросервисы"
+  deployment:
+    en: "Deployment"
+    ru: "Развертывание"
+  configuration:
+    en: "Configuration"
+    ru: "Конфигурация"
+
+# Development Terms
+development:
+  setup:
+    en: "Setup"
+    ru: "Настройка"
+  installation:
+    en: "Installation"
+    ru: "Установка"
+  prerequisites:
+    en: "Prerequisites"
+    ru: "Предварительные Требования"
+  quick_start:
+    en: "Quick Start"
+    ru: "Быстрый Старт"
+  environment:
+    en: "Environment"
+    ru: "Окружение"
+  dependencies:
+    en: "Dependencies"
+    ru: "Зависимости"
+  build:
+    en: "Build"
+    ru: "Сборка"
+  testing:
+    en: "Testing"
+    ru: "Тестирование"
+  debugging:
+    en: "Debugging"
+    ru: "Отладка"
+  contributing:
+    en: "Contributing"
+    ru: "Участие в Разработке"
+
+# Sacred Team Roles
+roles:
+  beekeeper:
+    en: "Beekeeper"
+    ru: "Пчеловод"
+  worker_bee:
+    en: "Worker Bee"
+    ru: "Рабочая Пчела"
+  queen_bee:
+    en: "Queen Bee"
+    ru: "Пчелиная Матка"
+  drone:
+    en: "Drone"
+    ru: "Трутень"
+  scout_bee:
+    en: "Scout Bee"
+    ru: "Пчела-Разведчик"
+  guard_bee:
+    en: "Guard Bee"
+    ru: "Пчела-Охранник"
+
+# Collaboration Terms
+collaboration:
+  session:
+    en: "Session"
+    ru: "Сессия"
+  iteration:
+    en: "Iteration"
+    ru: "Итерация"
+  collaboration:
+    en: "Collaboration"
+    ru: "Сотрудничество"
+  coordination:
+    en: "Coordination"
+    ru: "Координация"
+  brainstorming:
+    en: "Brainstorming"
+    ru: "Мозговой Штурм"
+  consultation:
+    en: "Consultation"
+    ru: "Консультация"
+  review:
+    en: "Review"
+    ru: "Обзор"
+  feedback:
+    en: "Feedback"
+    ru: "Обратная Связь"
+  consensus:
+    en: "Consensus"
+    ru: "Консенсус"
+  decision:
+    en: "Decision"
+    ru: "Решение"
+
+# Status Terms
+status:
+  active:
+    en: "Active"
+    ru: "Активный"
+  inactive:
+    en: "Inactive"
+    ru: "Неактивный"
+  pending:
+    en: "Pending"
+    ru: "Ожидающий"
+  completed:
+    en: "Completed"
+    ru: "Завершенный"
+  in_progress:
+    en: "In Progress"
+    ru: "В Процессе"
+  draft:
+    en: "Draft"
+    ru: "Черновик"
+  published:
+    en: "Published"
+    ru: "Опубликованный"
+  archived:
+    en: "Archived"
+    ru: "Архивированный"
+  deprecated:
+    en: "Deprecated"
+    ru: "Устаревший"
+  experimental:
+    en: "Experimental"
+    ru: "Экспериментальный"
+
+# Quality Terms
+quality:
+  excellent:
+    en: "Excellent"
+    ru: "Отличный"
+  good:
+    en: "Good"
+    ru: "Хороший"
+  average:
+    en: "Average"
+    ru: "Средний"
+  poor:
+    en: "Poor"
+    ru: "Плохой"
+  critical:
+    en: "Critical"
+    ru: "Критический"
+  high_priority:
+    en: "High Priority"
+    ru: "Высокий Приоритет"
+  medium_priority:
+    en: "Medium Priority"
+    ru: "Средний Приоритет"
+  low_priority:
+    en: "Low Priority"
+    ru: "Низкий Приоритет"
+
+# Actions
+actions:
+  create:
+    en: "Create"
+    ru: "Создать"
+  read:
+    en: "Read"
+    ru: "Читать"
+  update:
+    en: "Update"
+    ru: "Обновить"
+  delete:
+    en: "Delete"
+    ru: "Удалить"
+  edit:
+    en: "Edit"
+    ru: "Редактировать"
+  save:
+    en: "Save"
+    ru: "Сохранить"
+  cancel:
+    en: "Cancel"
+    ru: "Отменить"
+  submit:
+    en: "Submit"
+    ru: "Отправить"
+  download:
+    en: "Download"
+    ru: "Скачать"
+  upload:
+    en: "Upload"
+    ru: "Загрузить"
+  share:
+    en: "Share"
+    ru: "Поделиться"
+  copy:
+    en: "Copy"
+    ru: "Копировать"
+  paste:
+    en: "Paste"
+    ru: "Вставить"
+
+# Time Terms
+time:
+  now:
+    en: "Now"
+    ru: "Сейчас"
+  today:
+    en: "Today"
+    ru: "Сегодня"
+  yesterday:
+    en: "Yesterday"
+    ru: "Вчера"
+  tomorrow:
+    en: "Tomorrow"
+    ru: "Завтра"
+  week:
+    en: "Week"
+    ru: "Неделя"
+  month:
+    en: "Month"
+    ru: "Месяц"
+  year:
+    en: "Year"
+    ru: "Год"
+  minute:
+    en: "Minute"
+    ru: "Минута"
+  hour:
+    en: "Hour"
+    ru: "Час"
+  day:
+    en: "Day"
+    ru: "День"
+
+# Messages
+messages:
+  welcome:
+    en: "Welcome to the Hive!"
+    ru: "Добро пожаловать в Улей!"
+  loading:
+    en: "Loading..."
+    ru: "Загрузка..."
+  error:
+    en: "Error"
+    ru: "Ошибка"
+  success:
+    en: "Success"
+    ru: "Успех"
+  warning:
+    en: "Warning"
+    ru: "Предупреждение"
+  info:
+    en: "Information"
+    ru: "Информация"
+  not_found:
+    en: "Not Found"
+    ru: "Не Найдено"
+  access_denied:
+    en: "Access Denied"
+    ru: "Доступ Запрещен"
+  coming_soon:
+    en: "Coming Soon"
+    ru: "Скоро"
+  under_construction:
+    en: "Under Construction"
+    ru: "В Разработке"

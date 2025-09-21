@@ -1,17 +1,36 @@
 ---
 title: "Hive Documentation Index"
+title_ru: "Индекс Документации Улья"
 description: "Complete guide to navigating the Hive ecosystem documentation"
+description_ru: "Полное руководство по навигации в документации экосистемы Улья"
 category: "foundation"
 audience: "developer|user|ai-agent"
 complexity: "beginner"
 last_updated: "2025-01-20"
 related_docs: ["00_FOUNDATION/VISION.md", "02_DEVELOPMENT/GETTING_STARTED.md"]
 code_examples: false
+bilingual: true
+lang_switcher: true
+interactive_nav: true
+sacred_theme: true
+mermaid_enhanced: true
+translation_status: "partial"
+translation_priority: "high"
 ---
 
-# Hive Documentation Index
+# <span data-translate="hive_core.hive_ecosystem">Hive</span> Documentation Index
 
+{% include language-switcher.html %}
+
+<div class="language-content" data-lang="en">
 Welcome to the comprehensive documentation for the Hive Chat ecosystem—a "Living Application" that demonstrates the future of human-AI collaborative software.
+</div>
+
+<div class="language-content" data-lang="ru" style="display: none;">
+Добро пожаловать в полную документацию экосистемы Hive Chat — "Живого Приложения", демонстрирующего будущее совместного программного обеспечения человека и ИИ.
+</div>
+
+{% include sacred-navigation.html %}
 
 ## Quick Navigation
 

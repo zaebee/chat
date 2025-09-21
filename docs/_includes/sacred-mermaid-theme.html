@@ -1,0 +1,437 @@
+<!-- Sacred Team Mermaid Diagram Enhancement -->
+<!-- Visual integration patterns from medicine.git with Sacred Team theming -->
+
+<script>
+// Sacred Team Mermaid Configuration
+window.sacredMermaidConfig = {
+    theme: 'base',
+    themeVariables: {
+        // Sacred Team Color Palette
+        primaryColor: '#FFD700',        // Sacred Gold
+        primaryTextColor: '#2F4F4F',    // Sacred Dark Slate
+        primaryBorderColor: '#8B4513',  // Sacred Brown
+        lineColor: '#FF6B35',           // Sacred Orange
+        secondaryColor: '#FFF8DC',      // Sacred Cream
+        tertiaryColor: '#F0E68C',       // Sacred Khaki
+        
+        // Background colors
+        background: '#FFFFFF',
+        mainBkg: '#FFF8DC',
+        secondBkg: '#F0E68C',
+        tertiaryBkg: '#FFD700',
+        
+        // Text colors
+        textColor: '#2F4F4F',
+        darkTextColor: '#8B4513',
+        
+        // Node styling
+        nodeBkg: '#FFD700',
+        nodeBorder: '#8B4513',
+        clusterBkg: '#FFF8DC',
+        clusterBorder: '#FFD700',
+        
+        // Flowchart specific
+        edgeLabelBackground: '#FFFFFF',
+        activeTaskBkgColor: '#FF6B35',
+        activeTaskBorderColor: '#8B4513',
+        gridColor: '#F0E68C',
+        
+        // Git graph
+        git0: '#FFD700',
+        git1: '#FF6B35', 
+        git2: '#8B4513',
+        git3: '#F0E68C',
+        git4: '#FFF8DC',
+        
+        // Journey diagram
+        fillType0: '#FFD700',
+        fillType1: '#FF6B35',
+        fillType2: '#8B4513',
+        fillType3: '#F0E68C',
+        fillType4: '#FFF8DC'
+    },
+    
+    // Sacred Team specific configurations
+    flowchart: {
+        diagramMarginX: 20,
+        diagramMarginY: 20,
+        nodeSpacing: 50,
+        rankSpacing: 50,
+        curve: 'basis'
+    },
+    
+    journey: {
+        diagramMarginX: 50,
+        diagramMarginY: 20,
+        leftMargin: 150,
+        width: 150,
+        height: 50,
+        boxMargin: 10,
+        boxTextMargin: 5,
+        noteMargin: 10,
+        messageMargin: 35,
+        mirrorActors: true
+    },
+    
+    sequence: {
+        diagramMarginX: 50,
+        diagramMarginY: 10,
+        actorMargin: 50,
+        width: 150,
+        height: 65,
+        boxMargin: 10,
+        boxTextMargin: 5,
+        noteMargin: 10,
+        messageMargin: 35,
+        mirrorActors: true
+    }
+};
+
+// Initialize Sacred Mermaid when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    initializeSacredMermaid();
+});
+
+function initializeSacredMermaid() {
+    // Wait for Mermaid to be available
+    if (typeof mermaid === 'undefined') {
+        // Load Mermaid if not already loaded
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js';
+        script.onload = function() {
+            configureSacredMermaid();
+        };
+        document.head.appendChild(script);
+    } else {
+        configureSacredMermaid();
+    }
+}
+
+function configureSacredMermaid() {
+    // Initialize Mermaid with Sacred Team theme
+    mermaid.initialize(window.sacredMermaidConfig);
+    
+    // Add Sacred Team enhancements to diagrams
+    enhanceMermaidDiagrams();
+    
+    // Add click-to-navigate functionality
+    addMermaidNavigation();
+    
+    console.log('🐝 Sacred Team Mermaid theme initialized');
+}
+
+function enhanceMermaidDiagrams() {
+    // Find all Mermaid diagrams
+    const diagrams = document.querySelectorAll('.mermaid, pre code.language-mermaid');
+    
+    diagrams.forEach((diagram, index) => {
+        // Add Sacred Team styling
+        diagram.classList.add('sacred-mermaid');
+        
+        // Add container for enhanced features
+        const container = document.createElement('div');
+        container.className = 'sacred-mermaid-container';
+        container.innerHTML = `
+            <div class="mermaid-header">
+                <span class="mermaid-icon">🐝</span>
+                <span class="mermaid-title">Sacred Team Diagram</span>
+                <div class="mermaid-controls">
+                    <button class="mermaid-fullscreen" title="Fullscreen" aria-label="View diagram in fullscreen">
+                        🔍
+                    </button>
+                    <button class="mermaid-download" title="Download" aria-label="Download diagram">
+                        💾
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        // Wrap diagram in container
+        diagram.parentNode.insertBefore(container, diagram);
+        container.appendChild(diagram);
+        
+        // Add event listeners
+        addDiagramControls(container, diagram, index);
+    });
+}
+
+function addDiagramControls(container, diagram, index) {
+    const fullscreenBtn = container.querySelector('.mermaid-fullscreen');
+    const downloadBtn = container.querySelector('.mermaid-download');
+    
+    // Fullscreen functionality
+    if (fullscreenBtn) {
+        fullscreenBtn.addEventListener('click', function() {
+            toggleDiagramFullscreen(container);
+        });
+    }
+    
+    // Download functionality
+    if (downloadBtn) {
+        downloadBtn.addEventListener('click', function() {
+            downloadDiagram(diagram, `sacred-diagram-${index + 1}`);
+        });
+    }
+}
+
+function toggleDiagramFullscreen(container) {
+    if (container.classList.contains('fullscreen')) {
+        container.classList.remove('fullscreen');
+        document.body.style.overflow = '';
+    } else {
+        container.classList.add('fullscreen');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    // Close fullscreen on escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && container.classList.contains('fullscreen')) {
+            container.classList.remove('fullscreen');
+            document.body.style.overflow = '';
+        }
+    });
+}
+
+function downloadDiagram(diagram, filename) {
+    // Simple download functionality
+    // In a real implementation, you'd convert the SVG to PNG/PDF
+    const svgElement = diagram.querySelector('svg');
+    if (svgElement) {
+        const svgData = new XMLSerializer().serializeToString(svgElement);
+        const blob = new Blob([svgData], { type: 'image/svg+xml' });
+        const url = URL.createObjectURL(blob);
+        
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${filename}.svg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }
+}
+
+function addMermaidNavigation() {
+    // Add click-to-navigate functionality for Sacred Team concepts
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.sacred-mermaid')) {
+            handleMermaidNavigation(e);
+        }
+    });
+}
+
+function handleMermaidNavigation(event) {
+    const target = event.target;
+    const nodeText = target.textContent?.trim();
+    
+    if (!nodeText) return;
+    
+    // Sacred Team navigation mapping
+    const navigationMap = {
+        // ATCG Patterns
+        'ATCG': '/docs/01_ARCHITECTURE/',
+        'Aggregate': '/docs/01_ARCHITECTURE/#aggregate',
+        'Transformation': '/docs/01_ARCHITECTURE/#transformation',
+        'Connector': '/docs/01_ARCHITECTURE/#connector',
+        'Genesis': '/docs/01_ARCHITECTURE/#genesis',
+        
+        // Hive Components
+        'Hive': '/docs/',
+        'Sacred Team': '/docs/sacred-team/',
+        'bee.chronicler': '/docs/sacred-team/chronicles/',
+        'Pollen Protocol': '/docs/03_API/',
+        'Living Application': '/docs/01_ARCHITECTURE/',
+        
+        // Development
+        'Frontend': '/docs/02_DEVELOPMENT/',
+        'Backend': '/docs/02_DEVELOPMENT/',
+        'API': '/docs/03_API/',
+        'Database': '/docs/02_DEVELOPMENT/ENVIRONMENT.md',
+        
+        // Sacred Team Roles
+        'Beekeeper': '/docs/sacred-team/',
+        'Worker Bee': '/docs/sacred-team/',
+        'Queen Bee': '/docs/sacred-team/',
+        'Scout Bee': '/docs/sacred-team/',
+        
+        // Documentation
+        'Documentation': '/docs/',
+        'Getting Started': '/docs/02_DEVELOPMENT/GETTING_STARTED.md',
+        'User Guides': '/docs/04_USER_GUIDES/',
+        'Chronicles': '/docs/sacred-team/chronicles/'
+    };
+    
+    // Check for navigation match
+    const destination = navigationMap[nodeText];
+    if (destination) {
+        // Add visual feedback
+        target.style.cursor = 'pointer';
+        target.style.opacity = '0.7';
+        
+        setTimeout(() => {
+            window.location.href = destination;
+        }, 150);
+    }
+}
+
+// Add Sacred Team Mermaid styling
+const sacredMermaidStyle = document.createElement('style');
+sacredMermaidStyle.textContent = `
+    /* Sacred Team Mermaid Container */
+    .sacred-mermaid-container {
+        background: linear-gradient(135deg, #FFF8DC 0%, #F0E68C 100%);
+        border: 2px solid #FFD700;
+        border-radius: 15px;
+        margin: 20px 0;
+        overflow: hidden;
+        box-shadow: 0 8px 25px rgba(255, 215, 0, 0.2);
+        transition: all 0.3s ease;
+    }
+    
+    .sacred-mermaid-container:hover {
+        box-shadow: 0 12px 35px rgba(255, 215, 0, 0.3);
+        transform: translateY(-2px);
+    }
+    
+    /* Mermaid Header */
+    .mermaid-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 20px;
+        background: rgba(255, 215, 0, 0.3);
+        border-bottom: 1px solid rgba(255, 215, 0, 0.5);
+    }
+    
+    .mermaid-icon {
+        font-size: 18px;
+        margin-right: 8px;
+        animation: gentle-pulse 3s ease-in-out infinite;
+    }
+    
+    .mermaid-title {
+        font-weight: bold;
+        color: #8B4513;
+        font-size: 14px;
+    }
+    
+    .mermaid-controls {
+        display: flex;
+        gap: 8px;
+    }
+    
+    .mermaid-controls button {
+        background: #FFD700;
+        border: 1px solid #8B4513;
+        border-radius: 6px;
+        padding: 6px 10px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.2s ease;
+    }
+    
+    .mermaid-controls button:hover {
+        background: #FF6B35;
+        color: white;
+        transform: scale(1.05);
+    }
+    
+    /* Sacred Mermaid Diagram */
+    .sacred-mermaid {
+        padding: 20px;
+        background: white;
+        min-height: 200px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .sacred-mermaid svg {
+        max-width: 100%;
+        height: auto;
+    }
+    
+    /* Fullscreen Mode */
+    .sacred-mermaid-container.fullscreen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 9999;
+        border-radius: 0;
+        margin: 0;
+    }
+    
+    .sacred-mermaid-container.fullscreen .sacred-mermaid {
+        height: calc(100vh - 60px);
+        padding: 40px;
+    }
+    
+    /* Interactive Elements */
+    .sacred-mermaid [data-id] {
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .sacred-mermaid [data-id]:hover {
+        opacity: 0.8;
+        transform: scale(1.02);
+    }
+    
+    /* Sacred Team specific node styling */
+    .sacred-mermaid .node rect,
+    .sacred-mermaid .node circle,
+    .sacred-mermaid .node ellipse {
+        stroke-width: 2px;
+        filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.1));
+    }
+    
+    .sacred-mermaid .edgePath path {
+        stroke-width: 2px;
+        filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.1));
+    }
+    
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+        .mermaid-header {
+            padding: 10px 15px;
+        }
+        
+        .mermaid-title {
+            font-size: 12px;
+        }
+        
+        .mermaid-controls button {
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+        
+        .sacred-mermaid {
+            padding: 15px;
+        }
+        
+        .sacred-mermaid-container.fullscreen .sacred-mermaid {
+            padding: 20px;
+        }
+    }
+    
+    /* Animation for Sacred elements */
+    @keyframes gentle-pulse {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.05); opacity: 0.8; }
+    }
+`;
+
+document.head.appendChild(sacredMermaidStyle);
+</script>
+
+<!-- Mermaid CDN (if not already loaded) -->
+<script>
+if (typeof mermaid === 'undefined') {
+    const mermaidScript = document.createElement('script');
+    mermaidScript.src = 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js';
+    mermaidScript.async = true;
+    document.head.appendChild(mermaidScript);
+}
+</script>
