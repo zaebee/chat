@@ -1,4 +1,4 @@
-function validateGoldenRatioCompliance(morphology: BeeMorphology, GOLDEN_RATIO: number, DIVINE_TOLERANCE: number): ValidationResult {
+export function validateGoldenRatioCompliance(morphology: BeeMorphology, GOLDEN_RATIO: number, DIVINE_TOLERANCE: number): ValidationResult {
   const { abdomen, thorax, head, wings } = morphology
   
   // Check abdomen proportions
