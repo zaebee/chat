@@ -3,7 +3,7 @@ import { ref, computed } from "vue";
 import { useRoute } from "vue-router";
 import CodeEditor from "@/components/CodeEditor.vue";
 import ChallengeList from "@/components/ChallengeList.vue";
-import { challenges, type Challenge, SkillDomain, ATCGPhase } from "@/challenges";
+import { challenges, type Challenge } from "@/challenges";
 import { useSettingsStore } from "@/stores/settings";
 import { storeToRefs } from "pinia";
 
@@ -30,10 +30,8 @@ const questChallenge = computed((): Challenge | null => {
       },
       startingCode: "def let_there_be_light():\n  # Your implementation here\n\nlet_there_be_light()",
       visualOutput: false,
-      skillDomains: [SkillDomain.FUNCTION],
-      skillUnlocks: [],
-      atcgSequence: [ATCGPhase.GENESIS],
-      difficultyTier: 1,
+      difficulty: "beginner",
+      skillFocus: ["function_definition", "basic_output"],
     };
   }
   return null;
