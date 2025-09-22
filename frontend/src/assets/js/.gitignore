@@ -1,0 +1,3 @@
+# Prevent JavaScript compilation artifacts from being committed
+*.js
+*.js.map
