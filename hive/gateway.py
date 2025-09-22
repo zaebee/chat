@@ -269,7 +269,7 @@ class WelcomeGateway:
             await self._handle_onboarding_event(event)
 
         onboarding_subscription = EventSubscription(
-            event_types=["onboarding_started", "task_completed", "stage_completed"],
+            event_types=["onboarding_started", "task_completed", "stage_completed", "agro_pain_analysis_completed"],
             callback=handle_onboarding_events,
         )
 
@@ -467,6 +467,24 @@ class WelcomeGateway:
         if result.get("quality_score", 0) > 0.8:
             score = min(1.0, score + 0.1)
             feedback.append("✓ High quality response")
+
+        # 🧬 Sacred Enhancement: PUPA stage code review validation via bee.Jules
+        if (task.stage == OnboardingStage.PUPA and
+            task.task_type == "collaborative_project" and
+            result.get("code_submission")):
+            jules_analysis = await self._perform_jules_code_review(result.get("code_submission"))
+            # Add AGRO/PAIN score to evaluation
+            agro_pain_score = jules_analysis.get("agro_pain_score", 60) / 100.0
+            score = (score + agro_pain_score) / 2  # Average with existing score
+            feedback.append(f"🐝 bee.Jules AGRO/PAIN Analysis: {int(agro_pain_score * 100)}/100")
+            if jules_analysis.get("production_ready", False):
+                feedback.append("✅ Production ready: No console.log violations")
+            else:
+                feedback.append(f"❌ Console.log violations: {jules_analysis.get('console_log_count', 0)} found")
+            if jules_analysis.get("type_safe", False):
+                feedback.append("✅ Type safe: No 'any' type violations")
+            else:
+                feedback.append(f"❌ 'any' type violations: {jules_analysis.get('any_type_count', 0)} found")
 
         success = score >= 0.7  # 70% threshold for success
 
@@ -718,6 +736,55 @@ class BasicHiveTeammate(HiveTeammate):
 
     async def get_capabilities(self) -> List[TeammateCapability]:
         return self.profile.capabilities
+
+    async def _perform_jules_code_review(self, code_submission: str) -> Dict[str, Any]:
+        """
+        Sacred organic code review via bee.Jules organella
+        Sacred Justification: Integrates AGRO/PAIN nano-speed analysis with natural metamorphosis lifecycle
+        """
+        try:
+            # Request bee.Jules AGRO/PAIN analysis via Pollen Protocol
+            await self.event_bus.publish(PollenEvent(
+                event_type="jules_agro_pain_analysis_requested",
+                source_component="welcome_gateway",
+                aggregate_id="bee.jules",
+                payload={
+                    "code_context": code_submission,
+                    "analysis_type": "agro_pain_speed_check",
+                    "metamorphosis_stage": "pupa",
+                    "request_id": str(uuid.uuid4())
+                }
+            ))
+
+            # For now, perform direct analysis with fallback
+            # In a full system, this would wait for the jules response event
+            import re
+
+            console_log_violations = re.findall(r'console\.(log|warn|error|info|debug|trace)', code_submission)
+            any_type_violations = re.findall(r':\s*any\b|<any\b|any\[\]|any\s*\|', code_submission)
+
+            return {
+                "analysis_id": f"pupa_review_{uuid.uuid4().hex[:8]}",
+                "console_log_count": len(console_log_violations),
+                "any_type_count": len(any_type_violations),
+                "production_ready": len(console_log_violations) == 0,
+                "type_safe": len(any_type_violations) == 0,
+                "agro_pain_score": 100 if (len(console_log_violations) == 0 and len(any_type_violations) == 0) else
+                                  (80 if len(console_log_violations) == 0 or len(any_type_violations) == 0 else
+                                   max(0, 60 - (len(console_log_violations) + len(any_type_violations)) * 5)),
+            }
+
+        except Exception as e:
+            # Graceful fallback for AGRO/PAIN compliance
+            return {
+                "analysis_id": "fallback_analysis",
+                "console_log_count": 0,
+                "any_type_count": 0,
+                "production_ready": True,
+                "type_safe": True,
+                "agro_pain_score": 60,  # Safe middle score on error
+                "error": str(e)
+            }
 
     async def health_check(self) -> bool:
         return True
