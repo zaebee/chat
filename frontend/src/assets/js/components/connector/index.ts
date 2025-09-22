@@ -5,10 +5,9 @@
  * These components embody the "C" principle of ATCG architecture.
  */
 
-// Connector component implementations (to be created)
-// export * from './APIConnector'
-// export * from './WebSocketHandler'
-// export * from './ProtocolManager'
+// Sacred Connector implementations
+export * from './SacredConnector'
+export * from './HiveEventBridge'
 
 // Type definitions for connector components
 export interface ConnectorComponent {
@@ -16,19 +15,40 @@ export interface ConnectorComponent {
   readonly purpose: string
   connect(): Promise<void>
   disconnect(): Promise<void>
-  send(data: any): Promise<any>
-  receive(): Promise<any>
+  send(data: unknown): Promise<unknown>
+  receive(): Promise<unknown>
 }
 
-// Connector component factory (stub implementation)
-export function createConnectorComponent(type: string, config: any): ConnectorComponent {
-  // Stub implementation - components to be created in future PRs
-  return {
-    type: 'connector',
-    purpose: `${type} connector component`,
-    connect: async () => console.log(`Connecting ${type}`),
-    disconnect: async () => console.log(`Disconnecting ${type}`),
-    send: async (data: any) => data,
-    receive: async () => ({})
+// Connector component types
+export type ConnectorComponentType = 'sacred' | 'websocket' | 'api' | 'protocol'
+
+// Connector component factory
+export function createConnectorComponent(
+  type: ConnectorComponentType, 
+  config: { id: string; [key: string]: unknown }
+): ConnectorComponent {
+  switch (type) {
+    case 'sacred':
+      // Import and create SacredConnector
+      const { createSacredConnector } = require('./SacredConnector')
+      return createSacredConnector(config)
+    
+    case 'websocket':
+    case 'api':
+    case 'protocol':
+      // Future connector implementations
+      return {
+        type: 'connector',
+        purpose: `${type} connector component`,
+        connect: async () => console.log(`Connecting ${type}`),
+        disconnect: async () => console.log(`Disconnecting ${type}`),
+        send: async (data: unknown) => data,
+        receive: async () => ({})
+      }
+    
+    default:
+      // Exhaustive checking pattern for type safety
+      const exhaustiveCheck: never = type
+      throw new Error(`Unknown connector type: ${exhaustiveCheck}`)
   }
 }
