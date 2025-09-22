@@ -1,7 +1,7 @@
 # Implementation Strategy
 
-- Хранить диаграммы в Markdown с Mermaid-блоками.
-- Использовать GitHub/GitLab для рендеринга Mermaid или внешний рендерер в CI.
-- Собираемый процесс (ATCG) парсит `core/honey.md` и по `@include` собирает итоговый документ.
-- Возможно: программная генерация Mermaid из метаданных (Python скрипты).
-- Рекомендация: добавить linting для `core/honey.md` (проверка ссылок и порядка).
+- Store diagrams in Markdown with Mermaid blocks.
+- Use GitHub/GitLab for Mermaid rendering or an external renderer in CI.
+- The assembly process (ATCG) parses `core/honey.md` and collects the final document using `@include` directives.
+- Possible: programmatic generation of Mermaid from metadata (Python scripts).
+- Recommendation: add linting for `core/honey.md` (checking links and order).
