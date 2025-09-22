@@ -93,6 +93,12 @@ export class SacredAggregator implements AggregateComponent {
   private static readonly IONIC_MAX_STRENGTH = 4000 // kJ/mol - MgO lattice maximum
   private static readonly COULOMB_CONSTANT = 8.99e9 // N⋅m²/C² - Electrostatic constant
   private static readonly HARMONIC_FREQUENCIES = [1, 2, 3, 4, 5, 6, 8, 9, 10, 12, 15, 16] // Sacred harmonic series
+  
+  // Security constraints - Defense against chaos
+  private static readonly MAX_ELEMENTS = 100 // Maximum elements to prevent O(N²) DoS attacks
+  private static readonly MAX_ELEMENT_CHARGE = 10 // Maximum absolute charge value
+  private static readonly MIN_ELEMENT_SIZE = 0.1 // Minimum element size (Å)
+  private static readonly MAX_ELEMENT_SIZE = 5.0 // Maximum element size (Å)
 
   constructor(id: string) {
     this.id = id
@@ -226,17 +232,30 @@ export class SacredAggregator implements AggregateComponent {
 
   /**
    * Determine structure type based on organization
+   * 
+   * Threshold Justification (Empirical Chemistry):
+   * - Bond density ≥2.0: Each element participates in ≥2 bonds (coordination number)
+   * - Average strength ≥1000 kJ/mol: Above median ionic bond strength (NaCl=411, MgO=3850)
+   * - Crystalline threshold: Based on coordination chemistry and lattice stability
+   * - Harmonic priority: Sacred patterns override density-based classification
+   * - Amorphous fallback: Lower organization structures (glasses, liquids)
    */
   private determineStructureType(elements: SacredElement[], bonds: IonicBond[]): 'crystalline' | 'amorphous' | 'harmonic' {
+    if (bonds.length === 0) return 'amorphous' // No bonds = no structure
+    
     const bondDensity = bonds.length / elements.length
     const averageStrength = bonds.reduce((sum, bond) => sum + bond.strength, 0) / bonds.length
     
-    if (bondDensity >= 2.0 && averageStrength >= 1000) {
+    // Crystalline: High coordination + strong bonds (empirical thresholds)
+    const CRYSTALLINE_BOND_DENSITY = 2.0 // Coordination number ≥2
+    const CRYSTALLINE_STRENGTH_THRESHOLD = 1000 // kJ/mol - above median ionic strength
+    
+    if (bondDensity >= CRYSTALLINE_BOND_DENSITY && averageStrength >= CRYSTALLINE_STRENGTH_THRESHOLD) {
       return 'crystalline' // High organization, strong bonds
     } else if (this.hasHarmonicPattern(elements)) {
-      return 'harmonic' // Sacred harmonic organization
+      return 'harmonic' // Sacred harmonic organization takes priority
     } else {
-      return 'amorphous' // Lower organization
+      return 'amorphous' // Lower organization (glasses, liquids, weak structures)
     }
   }
 
@@ -246,18 +265,32 @@ export class SacredAggregator implements AggregateComponent {
    * Sacred Justification:
    * - Harmonic series: 1:2:3:4:5... ratios in element properties
    * - Musical harmony: Sacred frequencies for optimal resonance
-   * - Golden ratio: φ appears in harmonic relationships
+   * - Tolerance 0.1: Allows for ±10% deviation (empirical measurement uncertainty)
+   * - Minimum 3 elements: Statistical significance for pattern recognition
+   * - Golden ratio: φ appears in harmonic relationships throughout nature
+   * 
+   * Tolerance Justification:
+   * - 0.1 (10%) tolerance accounts for:
+   *   * Experimental measurement uncertainty in ionic charges
+   *   * Floating-point precision limitations
+   *   * Natural variation in chemical systems
+   *   * Quantum mechanical charge distribution effects
    */
   private hasHarmonicPattern(elements: SacredElement[]): boolean {
-    if (elements.length < 3) return false
+    if (elements.length < 3) return false // Minimum for statistical pattern
     
     // Check if element charges follow harmonic ratios
     const charges = elements.map(e => Math.abs(e.charge)).sort((a, b) => a - b)
     
+    // Avoid division by zero
+    if (charges[0] === 0) return false
+    
+    const HARMONIC_TOLERANCE = 0.1 // ±10% tolerance for measurement uncertainty
+    
     for (let i = 1; i < charges.length; i++) {
       const ratio = charges[i] / charges[0]
       const isHarmonic = SacredAggregator.HARMONIC_FREQUENCIES.some(freq => 
-        Math.abs(ratio - freq) < 0.1
+        Math.abs(ratio - freq) < HARMONIC_TOLERANCE
       )
       if (!isHarmonic) return false
     }
@@ -268,19 +301,26 @@ export class SacredAggregator implements AggregateComponent {
   /**
    * Calculate structural stability
    * 
-   * Sacred Justification:
-   * - Stability factor: Lattice energy per bond (kJ/mol per bond)
-   * - Minimum threshold: 200 kJ/mol per bond for stable structure
-   * - Maximum stability: 1.0 for perfect crystalline organization
+   * Stability Threshold Justification (Empirical Chemistry):
+   * - Minimum 200 kJ/mol per bond: Weak ionic bonds (e.g., CsI = 600 kJ/mol total, ~150 per bond)
+   * - Maximum 2000 kJ/mol per bond: Strong ionic bonds (e.g., MgO = 3850 kJ/mol total, ~960 per bond)
+   * - Linear scaling: Maps bond strength to 0-1 stability range
+   * - Zero bonds = zero stability: No structure without bonds
+   * - Capped at 1.0: Perfect stability ceiling for normalization
    */
   private calculateStructuralStability(bonds: IonicBond[], latticeEnergy: number): number {
-    if (bonds.length === 0) return 0
+    if (bonds.length === 0) return 0 // No bonds = no stability
     
     const energyPerBond = latticeEnergy / bonds.length
-    const stabilityThreshold = 200 // kJ/mol per bond minimum
-    const maxStability = 2000 // kJ/mol per bond maximum
     
-    return Math.min(1.0, Math.max(0, (energyPerBond - stabilityThreshold) / (maxStability - stabilityThreshold)))
+    // Empirical thresholds from ionic crystal chemistry
+    const STABILITY_THRESHOLD_MIN = 200 // kJ/mol per bond - weak ionic minimum
+    const STABILITY_THRESHOLD_MAX = 2000 // kJ/mol per bond - strong ionic maximum
+    
+    const normalizedStability = (energyPerBond - STABILITY_THRESHOLD_MIN) / 
+                               (STABILITY_THRESHOLD_MAX - STABILITY_THRESHOLD_MIN)
+    
+    return Math.min(1.0, Math.max(0, normalizedStability))
   }
 
   /**
@@ -454,6 +494,73 @@ export class SacredAggregator implements AggregateComponent {
   }
 
   /**
+   * Validate input element for security and chemical constraints
+   * 
+   * Security Justification:
+   * - Size limits prevent O(N²) DoS attacks (max 100 elements)
+   * - Charge limits prevent extreme bond strength calculations
+   * - Size bounds ensure realistic ionic radii (0.1-5.0 Å range)
+   * - Null/undefined protection prevents runtime errors
+   */
+  private validateElement(item: unknown, index: number): SacredElement {
+    // Handle null/undefined elements explicitly
+    if (item === null || item === undefined) {
+      throw new Error(`Invalid element at index ${index}: null or undefined not allowed`)
+    }
+    
+    if (typeof item === 'object') {
+      const obj = item as Record<string, unknown>
+      
+      // Validate and constrain charge
+      let charge: number
+      if (typeof obj.charge === 'number') {
+        if (!Number.isFinite(obj.charge)) {
+          throw new Error(`Invalid element at index ${index}: charge must be finite`)
+        }
+        if (Math.abs(obj.charge) > SacredAggregator.MAX_ELEMENT_CHARGE) {
+          throw new Error(`Invalid element at index ${index}: charge magnitude exceeds ${SacredAggregator.MAX_ELEMENT_CHARGE}`)
+        }
+        charge = obj.charge
+      } else {
+        charge = index % 2 === 0 ? 1 : -1 // Alternating charges for bonding
+      }
+      
+      // Validate and constrain size
+      let size: number
+      if (typeof obj.size === 'number') {
+        if (!Number.isFinite(obj.size) || obj.size <= 0) {
+          throw new Error(`Invalid element at index ${index}: size must be positive and finite`)
+        }
+        if (obj.size < SacredAggregator.MIN_ELEMENT_SIZE || obj.size > SacredAggregator.MAX_ELEMENT_SIZE) {
+          throw new Error(`Invalid element at index ${index}: size must be between ${SacredAggregator.MIN_ELEMENT_SIZE} and ${SacredAggregator.MAX_ELEMENT_SIZE} Å`)
+        }
+        size = obj.size
+      } else {
+        size = 1.0
+      }
+      
+      return {
+        id: typeof obj.id === 'string' ? obj.id : `element_${index}`,
+        charge,
+        size,
+        data: obj
+      }
+    } else {
+      // Primitive value - validate it's not NaN or infinite
+      if (typeof item === 'number' && !Number.isFinite(item)) {
+        throw new Error(`Invalid element at index ${index}: primitive value must be finite`)
+      }
+      
+      return {
+        id: `element_${index}`,
+        charge: index % 2 === 0 ? 1 : -1,
+        size: 1.0,
+        data: { value: item }
+      }
+    }
+  }
+
+  /**
    * Aggregate data through divine ionic organization
    */
   async aggregate(input: unknown): Promise<SacredAggregationOutput> {
@@ -461,26 +568,14 @@ export class SacredAggregator implements AggregateComponent {
     if (!Array.isArray(input)) {
       throw new Error('Invalid input: expected array of elements for aggregation')
     }
-
-    // Convert input to SacredElement array
-    const elements: SacredElement[] = input.map((item, index) => {
-      if (typeof item === 'object' && item !== null) {
-        const obj = item as Record<string, unknown>
-        return {
-          id: typeof obj.id === 'string' ? obj.id : `element_${index}`,
-          charge: typeof obj.charge === 'number' ? obj.charge : (index % 2 === 0 ? 1 : -1),
-          size: typeof obj.size === 'number' ? obj.size : 1.0,
-          data: obj
-        }
-      } else {
-        return {
-          id: `element_${index}`,
-          charge: index % 2 === 0 ? 1 : -1, // Alternating charges for bonding
-          size: 1.0,
-          data: { value: item }
-        }
-      }
-    })
+    
+    // Security: Prevent O(N²) DoS attacks
+    if (input.length > SacredAggregator.MAX_ELEMENTS) {
+      throw new Error(`Input size exceeds maximum allowed elements (${SacredAggregator.MAX_ELEMENTS}). This prevents O(N²) performance degradation.`)
+    }
+    
+    // Convert input to SacredElement array with validation
+    const elements: SacredElement[] = input.map((item, index) => this.validateElement(item, index))
 
     const aggregation = this.applyDivineAggregation(elements)
     const structuralLaws = this.calculateStructuralLaws(aggregation.aggregated)
@@ -527,12 +622,25 @@ export class SacredAggregator implements AggregateComponent {
       golden_ratio: SacredAggregator.GOLDEN_RATIO,
       ionic_strength_range: `${SacredAggregator.IONIC_BASE_STRENGTH}-${SacredAggregator.IONIC_MAX_STRENGTH} kJ/mol`,
       harmonic_frequencies: SacredAggregator.HARMONIC_FREQUENCIES,
+      security_constraints: {
+        max_elements: SacredAggregator.MAX_ELEMENTS,
+        max_charge: SacredAggregator.MAX_ELEMENT_CHARGE,
+        size_range: `${SacredAggregator.MIN_ELEMENT_SIZE}-${SacredAggregator.MAX_ELEMENT_SIZE} Å`
+      },
       structural_principles: {
         charge_neutrality: 'Electrostatic balance requirement',
         lattice_energy: 'Crystalline stability optimization',
         harmonic_resonance: 'Sacred frequency alignment',
         ionic_dominance: 'A component characteristic (80-100%)'
-      }
+      },
+      known_limitations: {
+        complexity: 'O(N²) for bond calculations - mitigated by input size limits',
+        empirical_constants: 'Based on experimental chemistry data - may not cover all edge cases',
+        floating_point: 'Subject to IEEE 754 precision limitations',
+        classification_thresholds: 'Discrete boundaries for continuous phenomena',
+        harmonic_tolerance: '±10% tolerance may allow false positives in edge cases'
+      },
+      design_philosophy: 'Sacred architecture embraces imperfection as a path to resilience'
     }
   }
 }

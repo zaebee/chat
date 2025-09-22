@@ -26,15 +26,40 @@ export interface AggregateComponent extends ATCGComponent {
   getStatus(): Record<string, unknown>
 }
 
-// Minimal aggregate component factory
+// Aggregate component type registry for extensibility
+export type AggregateComponentType = 'sacred_aggregator_engine'
+
+// Extensible aggregate component factory
 export async function createAggregateComponent(
-  type: 'sacred_aggregator_engine', 
+  type: AggregateComponentType, 
   config: { id: string }
 ): Promise<AggregateComponent> {
   switch (type) {
     case 'sacred_aggregator_engine':
       return new (await import('./SacredAggregator')).SacredAggregator(config.id)
     default:
-      throw new Error(`Unknown aggregate component type: ${type}`)
+      // Exhaustive check ensures all types are handled
+      const _exhaustiveCheck: never = type
+      throw new Error(`Unknown aggregate component type: ${_exhaustiveCheck}`)
   }
 }
+
+/**
+ * Factory Extensibility Design Justification:
+ * 
+ * Current Design Choice: Minimal but Extensible
+ * - Uses TypeScript union types for compile-time safety
+ * - Exhaustive checking prevents runtime errors for new types
+ * - Switch statement allows easy addition of new aggregator types
+ * - Dynamic imports enable code splitting and lazy loading
+ * 
+ * Future Extension Pattern:
+ * 1. Add new type to AggregateComponentType union
+ * 2. Add corresponding case to switch statement
+ * 3. TypeScript compiler enforces exhaustive handling
+ * 
+ * Alternative Considered: Plugin Registry Pattern
+ * - More flexible but adds complexity for minimal scope
+ * - Current approach balances simplicity with extensibility
+ * - Can be refactored to registry pattern when needed
+ */

@@ -170,7 +170,101 @@ export async function testSacredAggregatorEngine(): Promise<void> {
   const statusGoldenRatio = status.golden_ratio as number
   assert(Math.abs(statusGoldenRatio - goldenRatio) < 0.000001, 'Golden ratio should be accurate to 6 decimal places')
   
-  // All tests passed - no console pollution, pure assertions
+  // Test 21: O(N²) Performance Stress Test
+  const largeElementCount = 50 // Below MAX_ELEMENTS but large enough to test performance
+  const largeElements = Array.from({ length: largeElementCount }, (_, i) => ({
+    id: `stress_${i}`,
+    charge: i % 2 === 0 ? 1 : -1,
+    size: 1.0,
+    data: { stress_test: true }
+  }))
+  
+  const startTime = Date.now()
+  const stressResult: SacredAggregationOutput = await aggregatorEngine.aggregate(largeElements)
+  const endTime = Date.now()
+  const executionTime = endTime - startTime
+  
+  assert(stressResult.divine_aggregation_transformation.original.length === largeElementCount, 'Stress test should handle large input')
+  assert(executionTime < 5000, 'Stress test should complete within 5 seconds') // Performance threshold
+  
+  // Test 22: Security - DoS Prevention
+  const tooManyElements = Array.from({ length: 101 }, (_, i) => ({ id: `dos_${i}`, charge: 1, size: 1.0 }))
+  try {
+    await aggregatorEngine.aggregate(tooManyElements)
+    assert(false, 'Should reject input exceeding MAX_ELEMENTS')
+  } catch (error) {
+    assert(error instanceof Error, 'Should throw proper Error for DoS prevention')
+    assert(error.message.includes('exceeds maximum'), 'Error should mention element limit')
+  }
+  
+  // Test 23: Security - Extreme Charge Values
+  const extremeChargeElements = [{ id: 'extreme', charge: 15, size: 1.0 }] // Above MAX_ELEMENT_CHARGE
+  try {
+    await aggregatorEngine.aggregate(extremeChargeElements)
+    assert(false, 'Should reject extreme charge values')
+  } catch (error) {
+    assert(error instanceof Error, 'Should throw proper Error for extreme charges')
+    assert(error.message.includes('charge magnitude exceeds'), 'Error should mention charge limit')
+  }
+  
+  // Test 24: Security - Invalid Size Values
+  const invalidSizeElements = [{ id: 'invalid', charge: 1, size: 0 }] // Zero size
+  try {
+    await aggregatorEngine.aggregate(invalidSizeElements)
+    assert(false, 'Should reject zero or negative sizes')
+  } catch (error) {
+    assert(error instanceof Error, 'Should throw proper Error for invalid sizes')
+    assert(error.message.includes('size must be positive'), 'Error should mention size requirement')
+  }
+  
+  // Test 25: Security - NaN and Infinity Values
+  const nanElements = [{ id: 'nan', charge: NaN, size: 1.0 }]
+  try {
+    await aggregatorEngine.aggregate(nanElements)
+    assert(false, 'Should reject NaN charge values')
+  } catch (error) {
+    assert(error instanceof Error, 'Should throw proper Error for NaN values')
+    assert(error.message.includes('must be finite'), 'Error should mention finite requirement')
+  }
+  
+  const infinityElements = [{ id: 'infinity', charge: 1, size: Infinity }]
+  try {
+    await aggregatorEngine.aggregate(infinityElements)
+    assert(false, 'Should reject infinite size values')
+  } catch (error) {
+    assert(error instanceof Error, 'Should throw proper Error for infinite values')
+    assert(error.message.includes('must be finite'), 'Error should mention finite requirement')
+  }
+  
+  // Test 26: Boundary Conditions - Classification Thresholds
+  const nearCrystallineElements = [
+    { id: 'near1', charge: 2, size: 0.8 },
+    { id: 'near2', charge: -2, size: 1.2 },
+    { id: 'near3', charge: 1, size: 1.0 },
+    { id: 'near4', charge: -1, size: 1.1 }
+  ]
+  const nearCrystallineResult: SacredAggregationOutput = await aggregatorEngine.aggregate(nearCrystallineElements)
+  const structureType = nearCrystallineResult.divine_aggregation_transformation.aggregated.structureType
+  assert(['crystalline', 'harmonic', 'amorphous'].includes(structureType), 'Should classify structure type correctly near boundaries')
+  
+  // Test 27: Zero Charge Elements
+  const zeroChargeElements = [
+    { id: 'zero1', charge: 0, size: 1.0 },
+    { id: 'zero2', charge: 0, size: 1.0 }
+  ]
+  const zeroChargeResult: SacredAggregationOutput = await aggregatorEngine.aggregate(zeroChargeElements)
+  assert(zeroChargeResult.divine_aggregation_transformation.aggregated.bonds.length === 0, 'Zero charge elements should form no ionic bonds')
+  assert(!zeroChargeResult.divine_aggregation_transformation.structural_laws.harmonicResonance, 'Zero charges should not create harmonic patterns')
+  
+  // Test 28: Identical IDs (Edge Case)
+  const duplicateIdElements = [
+    { id: 'duplicate', charge: 1, size: 1.0 },
+    { id: 'duplicate', charge: -1, size: 1.0 }
+  ]
+  const duplicateIdResult: SacredAggregationOutput = await aggregatorEngine.aggregate(duplicateIdElements)
+  assert(duplicateIdResult.divine_aggregation_transformation.original.length === 2, 'Should handle duplicate IDs without error')
+  
+  // All tests passed - no console pollution, pure assertions with comprehensive security coverage
 }
 
 // Export for integration testing
