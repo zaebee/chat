@@ -10,13 +10,65 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
 // Hive ecosystem imports (would be actual imports in real implementation)
+interface JulesAnalysisResult {
+  analysis_id: string
+  console_log_count: number
+  any_type_count: number
+  production_ready: boolean
+  type_safe: boolean
+  agro_pain_score: number
+  analysis_method: string
+}
+
+interface PollenEventBus {
+  publish(event: PollenEvent): Promise<void>
+  subscribe(eventType: string, callback: (event: PollenEvent) => void): void
+}
+
+interface SacredTeam {
+  requestBlessing(type: string, context: unknown): Promise<boolean>
+  getStatus(): Record<string, unknown>
+}
+
+interface NarrativeProgression {
+  chapter_gaps: number[]
+  narrative_arcs: NarrativeArc[]
+  completion_rate: number
+}
+
+interface NarrativeArc {
+  type: string
+  start?: number
+  chapter?: number
+}
+
+interface CollaborationPatterns {
+  collaboration_frequency: number
+  most_collaborative_pairs: Record<string, number>
+  team_dynamics: TeamDynamics
+}
+
+interface TeamDynamics {
+  average_team_size: number
+  max_team_size: number
+  collaboration_types: Record<string, number>
+}
+
+interface TaleInsights {
+  total_chapters: number
+  organella_participation: Record<string, number>
+  narrative_progression: NarrativeProgression
+  sacred_content_ratio: number
+  collaboration_patterns: CollaborationPatterns
+}
+
 interface PollenEvent {
   event_id: string
   event_type: string
   version: string
   timestamp: string
   aggregate_id: string
-  payload: Record<string, any>
+  payload: Record<string, unknown>
   source_component?: string
   correlation_id?: string
   tags?: string[]
@@ -43,7 +95,7 @@ export interface TaleChapter {
   sacred_data?: {
     divine_blessing: boolean
     chronicler_notes?: string
-    jules_analysis?: any
+    jules_analysis?: JulesAnalysisResult
     theological_coherence?: number
   }
   pollen_events?: PollenEvent[]
@@ -146,7 +198,7 @@ class TalesTransformation {
     })
   }
 
-  static generateTaleInsights(tales: TaleChapter[]): any {
+  static generateTaleInsights(tales: TaleChapter[]): TaleInsights {
     return {
       total_chapters: tales.length,
       organella_participation: this.analyzeOrganellaParticipation(tales),
@@ -166,7 +218,7 @@ class TalesTransformation {
     return participation
   }
 
-  private static analyzeNarrativeProgression(tales: TaleChapter[]): any {
+  private static analyzeNarrativeProgression(tales: TaleChapter[]): NarrativeProgression {
     const sorted = tales.sort((a, b) => a.chapter_number - b.chapter_number)
     return {
       chapter_gaps: this.findChapterGaps(sorted),
@@ -175,7 +227,7 @@ class TalesTransformation {
     }
   }
 
-  private static analyzeCollaborationPatterns(tales: TaleChapter[]): any {
+  private static analyzeCollaborationPatterns(tales: TaleChapter[]): CollaborationPatterns {
     const collaborations = tales.filter(t => t.organella_involved.length > 1)
     return {
       collaboration_frequency: collaborations.length / tales.length,
@@ -193,9 +245,9 @@ class TalesTransformation {
     return gaps
   }
 
-  private static identifyNarrativeArcs(tales: TaleChapter[]): any[] {
+  private static identifyNarrativeArcs(tales: TaleChapter[]): NarrativeArc[] {
     // Simplified arc identification
-    return tales.reduce((arcs: any[], tale, index) => {
+    return tales.reduce((arcs: NarrativeArc[], tale, index) => {
       if (tale.type === 'discovery' && index === 0) {
         arcs.push({ type: 'origin', start: index })
       } else if (tale.type === 'transformation') {
@@ -225,7 +277,7 @@ class TalesTransformation {
     return pairs
   }
 
-  private static analyzeTeamDynamics(tales: TaleChapter[]): any {
+  private static analyzeTeamDynamics(tales: TaleChapter[]): TeamDynamics {
     return {
       average_team_size: tales.reduce((sum, t) => sum + t.organella_involved.length, 0) / tales.length,
       max_team_size: Math.max(...tales.map(t => t.organella_involved.length)),
@@ -240,9 +292,9 @@ class TalesTransformation {
 // ATCG Primitive: Connector - API and protocol integration
 class TalesConnector {
   private baseUrl: string
-  private pollenEventBus: any // Would be actual event bus
+  private pollenEventBus: PollenEventBus | null // Would be actual event bus
 
-  constructor(baseUrl: string, eventBus: any) {
+  constructor(baseUrl: string, eventBus: PollenEventBus | null) {
     this.baseUrl = baseUrl
     this.pollenEventBus = eventBus
   }
@@ -393,15 +445,15 @@ class TalesConnector {
 
 // ATCG Primitive: Genesis - Event generation and system evolution
 class TalesGenesis {
-  private eventBus: any
-  private sacredTeam: any
+  private eventBus: PollenEventBus | null
+  private sacredTeam: SacredTeam | null
 
-  constructor(eventBus: any, sacredTeam: any) {
+  constructor(eventBus: PollenEventBus | null, sacredTeam: SacredTeam | null) {
     this.eventBus = eventBus
     this.sacredTeam = sacredTeam
   }
 
-  async generateNarrativeEvent(context: any): Promise<PollenEvent> {
+  async generateNarrativeEvent(context: unknown): Promise<PollenEvent> {
     const event: PollenEvent = {
       event_id: crypto.randomUUID(),
       event_type: 'narrative_event_generated',
@@ -458,7 +510,7 @@ class TalesGenesis {
     return replicatedTale as TaleChapter
   }
 
-  private async requestSacredBlessing(context: any): Promise<boolean> {
+  private async requestSacredBlessing(context: unknown): Promise<boolean> {
     // Request blessing from Sacred Team
     if (this.sacredTeam) {
       return await this.sacredTeam.requestBlessing('narrative_generation', context)
