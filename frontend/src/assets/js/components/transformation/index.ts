@@ -12,14 +12,15 @@ import type { ATCGComponent } from '../index'
 
 // Export the sacred lambda engine
 export * from './SacredLambdaEngine'
+import type { SacredTransformationOutput } from './SacredLambdaEngine'
 
 // Minimal transformation component interface
 export interface TransformationComponent extends ATCGComponent {
   readonly type: 'transformation'
   readonly purpose: string
   readonly id: string
-  transform(input: unknown): Promise<unknown>
-  process(data: unknown): Promise<unknown>
+  transform(input: unknown): Promise<SacredTransformationOutput>
+  process(data: unknown): Promise<SacredTransformationOutput>
   initialize(): Promise<void>
   destroy(): Promise<void>
   getStatus(): Record<string, unknown>
