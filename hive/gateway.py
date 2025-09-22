@@ -269,7 +269,7 @@ class WelcomeGateway:
             await self._handle_onboarding_event(event)
 
         onboarding_subscription = EventSubscription(
-            event_types=["onboarding_started", "task_completed", "stage_completed"],
+            event_types=["onboarding_started", "task_completed", "stage_completed", "agro_pain_analysis_completed"],
             callback=handle_onboarding_events,
         )
 
@@ -467,6 +467,24 @@ class WelcomeGateway:
         if result.get("quality_score", 0) > 0.8:
             score = min(1.0, score + 0.1)
             feedback.append("✓ High quality response")
+
+        # 🧬 Sacred Enhancement: PUPA stage code review validation via bee.Jules
+        if (task.stage == OnboardingStage.PUPA and
+            task.task_type == "collaborative_project" and
+            result.get("code_submission")):
+            jules_analysis = await self._perform_jules_code_review(result.get("code_submission"))
+            # Add AGRO/PAIN score to evaluation
+            agro_pain_score = jules_analysis.get("agro_pain_score", 60) / 100.0
+            score = (score + agro_pain_score) / 2  # Average with existing score
+            feedback.append(f"🐝 bee.Jules AGRO/PAIN Analysis: {int(agro_pain_score * 100)}/100")
+            if jules_analysis.get("production_ready", False):
+                feedback.append("✅ Production ready: No console.log violations")
+            else:
+                feedback.append(f"❌ Console.log violations: {jules_analysis.get('console_log_count', 0)} found")
+            if jules_analysis.get("type_safe", False):
+                feedback.append("✅ Type safe: No 'any' type violations")
+            else:
+                feedback.append(f"❌ 'any' type violations: {jules_analysis.get('any_type_count', 0)} found")
 
         success = score >= 0.7  # 70% threshold for success
 
@@ -718,6 +736,33 @@ class BasicHiveTeammate(HiveTeammate):
 
     async def get_capabilities(self) -> List[TeammateCapability]:
         return self.profile.capabilities
+
+    async def _perform_jules_code_review(self, code_submission: str) -> Dict[str, Any]:
+        """
+        Sacred organic code review via bee.Jules organella (Pure Event-Driven)
+        Sacred Justification: Single responsibility - gateway only orchestrates, jules analyzes
+        """
+        # Request bee.Jules AGRO/PAIN analysis via Pollen Protocol
+        request_id = str(uuid.uuid4())
+        await self.event_bus.publish(PollenEvent(
+            event_type="jules_agro_pain_analysis_requested",
+            source_component="welcome_gateway",
+            aggregate_id="bee.jules",
+            payload={
+                "code_context": code_submission,
+                "analysis_type": "agro_pain_speed_check",
+                "metamorphosis_stage": "pupa",
+                "request_id": request_id
+            }
+        ))
+
+        # Direct invocation for immediate response (synchronous metamorphosis requirement)
+        # This maintains organic integration while eliminating duplication
+        jules_agent = self.registry.get_teammate("bee.jules")
+        if not jules_agent:
+            raise RuntimeError("bee.Jules organella not available for PUPA stage validation")
+
+        return await jules_agent.perform_agro_pain_analysis(code_submission)
 
     async def health_check(self) -> bool:
         return True
