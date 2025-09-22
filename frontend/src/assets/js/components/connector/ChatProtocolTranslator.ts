@@ -6,6 +6,7 @@
  */
 
 import type { PollenEvent, WebSocketMessage, SynapticMessage } from './SacredConnector'
+import { validatePollenEventType } from '../../../utils/linguisticValidator'
 
 // Chat-specific message types
 export interface ChatMessage {
@@ -272,13 +273,15 @@ export class ChatProtocolTranslator {
       }
     }
 
-    // Validate event_type is past-tense
-    if (!event.event_type.endsWith('ed') && 
-        !event.event_type.endsWith('en') && 
-        !event.event_type.endsWith('ted') &&
-        !event.event_type.endsWith('ied') &&
-        !event.event_type.endsWith('ued')) {
-      console.warn(`Event type '${event.event_type}' should be past-tense`)
+    // Validate event_type using comprehensive linguistic analysis
+    const validationResult = validatePollenEventType(event.event_type)
+    if (!validationResult.isValid) {
+      console.warn(`Invalid event_type '${event.event_type}': ${validationResult.reason}`)
+      if (validationResult.suggestions.length > 0) {
+        console.warn(`Suggestions: ${validationResult.suggestions.join(', ')}`)
+      }
+    } else if (validationResult.confidence < 0.8) {
+      console.warn(`Low confidence past-tense detection for '${event.event_type}' (${validationResult.confidence.toFixed(2)})`)
     }
 
     return true
