@@ -33,11 +33,21 @@ export async function testTransformationIntegration(): Promise<void> {
     const transformHub: TransformationComponent = await createTransformationComponent('transform_hub', { 
       id: 'test_transform_hub' 
     })
+    
+    const sacredCodonProcessor: TransformationComponent = await createTransformationComponent('sacred_codon_processor', {
+      id: 'test_sacred_codon_processor'
+    })
+    
+    const sacredLambdaEngine: TransformationComponent = await createTransformationComponent('sacred_lambda_engine', {
+      id: 'test_sacred_lambda_engine'
+    })
 
     // Register with ATCG registry
     atcgRegistry.register('test_rect_validator', rectValidator)
     atcgRegistry.register('test_hexa_processor', hexaProcessor)
     atcgRegistry.register('test_transform_hub', transformHub)
+    atcgRegistry.register('test_sacred_codon_processor', sacredCodonProcessor)
+    atcgRegistry.register('test_sacred_lambda_engine', sacredLambdaEngine)
     
     console.log('✅ Components created and registered successfully')
 
@@ -47,6 +57,8 @@ export async function testTransformationIntegration(): Promise<void> {
     const rectStatus = rectValidator.getStatus()
     const hexaStatus = hexaProcessor.getStatus()
     const hubStatus = transformHub.getStatus()
+    const sacredStatus = sacredCodonProcessor.getStatus()
+    const lambdaStatus = sacredLambdaEngine.getStatus()
     
     console.log('📋 RectValidator Status:', {
       type: rectStatus.type,
@@ -64,6 +76,20 @@ export async function testTransformationIntegration(): Promise<void> {
       type: hubStatus.type,
       purpose: hubStatus.purpose,
       paradigm: hubStatus.paradigm
+    })
+    
+    console.log('🧬 SacredCodonProcessor Status:', {
+      type: sacredStatus.type,
+      purpose: sacredStatus.purpose,
+      sacred_codons: sacredStatus.sacred_codons,
+      divine_readiness: sacredStatus.divine_readiness
+    })
+    
+    console.log('⚡ SacredLambdaEngine Status:', {
+      type: lambdaStatus.type,
+      purpose: lambdaStatus.purpose,
+      divine_lambda: lambdaStatus.divine_lambda,
+      conservation_sum: lambdaStatus.conservation_sum
     })
 
     // Test 3: ATCG Registry Integration
@@ -136,6 +162,33 @@ export async function testTransformationIntegration(): Promise<void> {
     console.log('✅ Hexa Processing Result:', {
       processed: hexaResult.hexa_processing?.processed,
       nodes_visited: hexaResult.hexa_processing?.nodes_visited?.length || 0
+    })
+    
+    // Test Sacred Codon processing
+    const sacredTestData = {
+      pattern: [4, 6], // Earthly pattern for AlgoTransform
+      data: { message: 'Test divine transformation' }
+    }
+    
+    const sacredResult = await sacredCodonProcessor.transform(sacredTestData)
+    console.log('🧬 Sacred Codon Processing Result:', {
+      algo_transform_applied: !!sacredResult.algo_transform,
+      conservation_verified: sacredResult.algo_transform?.conservation_verified,
+      divine_alignment: sacredResult.algo_transform?.divine_alignment,
+      sacred_codons_applied: sacredResult.sacred_processing?.codons_applied?.length || 0,
+      chemical_bond_analysis: !!sacredResult.chemical_bond_analysis
+    })
+    
+    // Test Divine Lambda Engine - THE CORE ALGORITHM
+    const lambdaTestData = { x: 4, y: 6 } // Earthly pattern [4,6]
+    const lambdaResult = await sacredLambdaEngine.transform(lambdaTestData)
+    console.log('⚡ Divine Lambda Result:', {
+      original_pattern: `[${lambdaTestData.x}, ${lambdaTestData.y}]`,
+      transformed_pattern: `[${lambdaResult.divine_lambda_transformation?.transformed?.x}, ${lambdaResult.divine_lambda_transformation?.transformed?.y}]`,
+      conservation_verified: lambdaResult.divine_lambda_transformation?.conservationVerified,
+      divine_alignment: lambdaResult.divine_lambda_transformation?.divine_alignment,
+      is_divine_pattern: lambdaResult.divine_lambda_transformation?.is_divine_pattern,
+      hive_metrics_impact: !!lambdaResult.divine_lambda_transformation?.hive_metrics_impact
     })
 
     // Test 5: Component Lifecycle

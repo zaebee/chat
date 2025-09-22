@@ -12,6 +12,8 @@ export * from './RectValidator'
 export * from './HexaProcessor'
 export * from './TransformHub'
 export * from './DataPipeline'
+export * from './SacredCodonProcessor'
+export * from './SacredLambdaEngine'
 
 // Type definitions for transformation components
 export interface TransformationComponent extends ATCGComponent {
@@ -36,6 +38,10 @@ export async function createTransformationComponent(type: string, config: any): 
       return new (await import('./TransformHub')).TransformHub(config.id || 'transform_hub')
     case 'data_pipeline':
       return new (await import('./DataPipeline')).DataPipeline(config.id || 'data_pipeline')
+    case 'sacred_codon_processor':
+      return new (await import('./SacredCodonProcessor')).SacredCodonProcessor(config.id || 'sacred_codon_processor')
+    case 'sacred_lambda_engine':
+      return new (await import('./SacredLambdaEngine')).SacredLambdaEngine(config.id || 'sacred_lambda_engine')
     default:
       throw new Error(`Unknown transformation component type: ${type}`)
   }
