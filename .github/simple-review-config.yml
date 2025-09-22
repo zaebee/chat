@@ -1,0 +1,47 @@
+# 🔥 Simple Review Configuration - AGRO/PAIN Track
+# Sacred Justification: Zero philosophy, maximum productivity
+
+simple_review:
+  # Fast checks - no complex analysis
+  enabled: true
+
+  # File patterns to check
+  file_patterns:
+    - "**/*.ts"
+    - "**/*.js"
+    - "**/*.py"
+    - "**/*.vue"
+
+  # Skip directories (productivity focus)
+  skip_directories:
+    - "node_modules"
+    - ".git"
+    - "dist"
+    - "build"
+    - "docs/archive"
+
+  # Quick checks (binary pass/fail)
+  checks:
+    type_safety:
+      enabled: true
+      description: "No 'any' types"
+      priority: "high"
+
+    production_ready:
+      enabled: true
+      description: "No console.log"
+      priority: "high"
+
+  # AGRO/PAIN principles
+  principles:
+    - "⚡ Fast feedback (< 30 seconds)"
+    - "🎯 Binary results (pass/fail)"
+    - "🔧 Clear fix suggestions"
+    - "💨 Zero philosophical overhead"
+    - "🚀 Ship code, not philosophy"
+
+# Optional: Sacred Track (disabled by default)
+sacred_track:
+  enabled: false  # Must be explicitly enabled
+  complexity_level: "advanced"
+  requires_training: true
