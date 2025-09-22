@@ -739,52 +739,30 @@ class BasicHiveTeammate(HiveTeammate):
 
     async def _perform_jules_code_review(self, code_submission: str) -> Dict[str, Any]:
         """
-        Sacred organic code review via bee.Jules organella
-        Sacred Justification: Integrates AGRO/PAIN nano-speed analysis with natural metamorphosis lifecycle
+        Sacred organic code review via bee.Jules organella (Pure Event-Driven)
+        Sacred Justification: Single responsibility - gateway only orchestrates, jules analyzes
         """
-        try:
-            # Request bee.Jules AGRO/PAIN analysis via Pollen Protocol
-            await self.event_bus.publish(PollenEvent(
-                event_type="jules_agro_pain_analysis_requested",
-                source_component="welcome_gateway",
-                aggregate_id="bee.jules",
-                payload={
-                    "code_context": code_submission,
-                    "analysis_type": "agro_pain_speed_check",
-                    "metamorphosis_stage": "pupa",
-                    "request_id": str(uuid.uuid4())
-                }
-            ))
-
-            # For now, perform direct analysis with fallback
-            # In a full system, this would wait for the jules response event
-            import re
-
-            console_log_violations = re.findall(r'console\.(log|warn|error|info|debug|trace)', code_submission)
-            any_type_violations = re.findall(r':\s*any\b|<any\b|any\[\]|any\s*\|', code_submission)
-
-            return {
-                "analysis_id": f"pupa_review_{uuid.uuid4().hex[:8]}",
-                "console_log_count": len(console_log_violations),
-                "any_type_count": len(any_type_violations),
-                "production_ready": len(console_log_violations) == 0,
-                "type_safe": len(any_type_violations) == 0,
-                "agro_pain_score": 100 if (len(console_log_violations) == 0 and len(any_type_violations) == 0) else
-                                  (80 if len(console_log_violations) == 0 or len(any_type_violations) == 0 else
-                                   max(0, 60 - (len(console_log_violations) + len(any_type_violations)) * 5)),
+        # Request bee.Jules AGRO/PAIN analysis via Pollen Protocol
+        request_id = str(uuid.uuid4())
+        await self.event_bus.publish(PollenEvent(
+            event_type="jules_agro_pain_analysis_requested",
+            source_component="welcome_gateway",
+            aggregate_id="bee.jules",
+            payload={
+                "code_context": code_submission,
+                "analysis_type": "agro_pain_speed_check",
+                "metamorphosis_stage": "pupa",
+                "request_id": request_id
             }
+        ))
 
-        except Exception as e:
-            # Graceful fallback for AGRO/PAIN compliance
-            return {
-                "analysis_id": "fallback_analysis",
-                "console_log_count": 0,
-                "any_type_count": 0,
-                "production_ready": True,
-                "type_safe": True,
-                "agro_pain_score": 60,  # Safe middle score on error
-                "error": str(e)
-            }
+        # Direct invocation for immediate response (synchronous metamorphosis requirement)
+        # This maintains organic integration while eliminating duplication
+        jules_agent = self.registry.get_teammate("bee.jules")
+        if not jules_agent:
+            raise RuntimeError("bee.Jules organella not available for PUPA stage validation")
+
+        return await jules_agent.perform_agro_pain_analysis(code_submission)
 
     async def health_check(self) -> bool:
         return True

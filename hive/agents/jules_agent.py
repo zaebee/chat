@@ -14,7 +14,7 @@ This module implements bee.Jules, a sacred agent specialized in:
 import asyncio
 import json
 import uuid
-import re
+import ast
 from datetime import datetime
 from typing import Dict, Any, List, Optional, Union
 from dataclasses import dataclass, asdict
@@ -61,6 +61,76 @@ class JulesDebuggingSession:
     resolution_status: str
     divine_guidance: str
     timestamp: str
+
+
+class ConsoleLogDetector(ast.NodeVisitor):
+    """AST visitor to detect console.log and related calls"""
+
+    def __init__(self):
+        self.console_calls = []
+
+    def visit_Call(self, node):
+        if (isinstance(node.func, ast.Attribute) and
+            isinstance(node.func.value, ast.Name) and
+            node.func.value.id == 'console' and
+            node.func.attr in ['log', 'warn', 'error', 'info', 'debug', 'trace']):
+            self.console_calls.append({
+                'line': node.lineno,
+                'method': node.func.attr,
+                'type': 'console_call'
+            })
+        self.generic_visit(node)
+
+
+class AnyTypeDetector(ast.NodeVisitor):
+    """AST visitor to detect 'any' type annotations"""
+
+    def __init__(self):
+        self.any_types = []
+
+    def visit_AnnAssign(self, node):
+        """Visit annotated assignments (x: any = ...)"""
+        if self._is_any_type(node.annotation):
+            self.any_types.append({
+                'line': node.lineno,
+                'context': 'variable_annotation',
+                'type': 'any_type'
+            })
+        self.generic_visit(node)
+
+    def visit_arg(self, node):
+        """Visit function arguments with type annotations"""
+        if node.annotation and self._is_any_type(node.annotation):
+            self.any_types.append({
+                'line': node.lineno,
+                'context': 'function_parameter',
+                'type': 'any_type'
+            })
+        self.generic_visit(node)
+
+    def visit_FunctionDef(self, node):
+        """Visit function definitions with return type annotations"""
+        if node.returns and self._is_any_type(node.returns):
+            self.any_types.append({
+                'line': node.lineno,
+                'context': 'function_return',
+                'type': 'any_type'
+            })
+        self.generic_visit(node)
+
+    def _is_any_type(self, annotation_node):
+        """Check if annotation represents 'any' type"""
+        if isinstance(annotation_node, ast.Name) and annotation_node.id == 'any':
+            return True
+        if isinstance(annotation_node, ast.Attribute) and annotation_node.attr == 'any':
+            return True
+        if isinstance(annotation_node, ast.Subscript):
+            if isinstance(annotation_node.value, ast.Name) and annotation_node.value.id == 'Union':
+                if isinstance(annotation_node.slice, ast.Tuple):
+                    return any(self._is_any_type(elt) for elt in annotation_node.slice.elts)
+                else:
+                    return self._is_any_type(annotation_node.slice)
+        return False
 
 
 class BeeJules(HiveTeammate):
@@ -136,6 +206,10 @@ class BeeJules(HiveTeammate):
         self.event_bus.subscribe(EventSubscription(
             event_types=["jules_collaboration_requested"],
             callback=self._handle_collaboration_request
+        ))
+        self.event_bus.subscribe(EventSubscription(
+            event_types=["jules_agro_pain_analysis_requested"],
+            callback=self._handle_agro_pain_analysis_request
         ))
     
     def _initialize_sacred_knowledge(self) -> Dict[str, Any]:
@@ -396,6 +470,23 @@ class BeeJules(HiveTeammate):
         """Handle collaboration request events"""
         if event.payload and "topic" in event.payload:
             await self.collaborate_with_chronicler(event.payload["topic"])
+
+    async def _handle_agro_pain_analysis_request(self, event: PollenEvent):
+        """Handle AGRO/PAIN analysis request events"""
+        if event.payload and "code_context" in event.payload:
+            analysis_result = await self.perform_agro_pain_analysis(event.payload["code_context"])
+
+            # Emit response event for gateway or other requesters
+            await self.event_bus.publish(PollenEvent(
+                event_type="jules_agro_pain_analysis_response",
+                source_component="bee.jules",
+                aggregate_id=event.source_component,
+                payload={
+                    "request_id": event.payload.get("request_id"),
+                    "analysis_result": analysis_result,
+                    "metamorphosis_stage": event.payload.get("metamorphosis_stage")
+                }
+            ))
     
     async def get_status(self) -> Dict[str, Any]:
         """Get bee.Jules sacred status"""
@@ -530,31 +621,56 @@ class BeeJules(HiveTeammate):
     
     async def perform_agro_pain_analysis(self, code_context: str) -> Dict[str, Any]:
         """
-        AGRO/PAIN Speed Analysis - Nano/Femto Level Checks
-        Sacred Justification: Provides instant productivity feedback honoring both AGRO/PAIN demands and Sacred Architecture
+        AGRO/PAIN Speed Analysis - AST-Based Nano/Femto Level Checks
+        Sacred Justification: Provides instant productivity feedback through engineering truth (AST parsing)
         """
         analysis_id = f"agro_pain_{uuid.uuid4().hex[:8]}"
 
-        # Fast nano-speed checks (grep-like performance)
-        console_log_violations = re.findall(r'console\.(log|warn|error|info|debug|trace)', code_context)
-        any_type_violations = re.findall(r':\s*any\b|<any\b|any\[\]|any\s*\|', code_context)
+        try:
+            # Parse code into AST for robust analysis
+            tree = ast.parse(code_context)
 
-        violations = {
-            "analysis_id": analysis_id,
-            "console_log_count": len(console_log_violations),
-            "any_type_count": len(any_type_violations),
-            "production_ready": len(console_log_violations) == 0,
-            "type_safe": len(any_type_violations) == 0,
-            "agro_pain_score": 100 if (len(console_log_violations) == 0 and len(any_type_violations) == 0) else
-                              (80 if len(console_log_violations) == 0 or len(any_type_violations) == 0 else
-                               max(0, 60 - (len(console_log_violations) + len(any_type_violations)) * 5)),
-        }
+            # Perform AST-based detection
+            console_detector = ConsoleLogDetector()
+            any_type_detector = AnyTypeDetector()
+
+            console_detector.visit(tree)
+            any_type_detector.visit(tree)
+
+            console_violations = console_detector.console_calls
+            any_type_violations = any_type_detector.any_types
+
+            violations = {
+                "analysis_id": analysis_id,
+                "console_log_count": len(console_violations),
+                "any_type_count": len(any_type_violations),
+                "console_details": console_violations,
+                "any_type_details": any_type_violations,
+                "production_ready": len(console_violations) == 0,
+                "type_safe": len(any_type_violations) == 0,
+                "agro_pain_score": 100 if (len(console_violations) == 0 and len(any_type_violations) == 0) else
+                                  (80 if len(console_violations) == 0 or len(any_type_violations) == 0 else
+                                   max(0, 60 - (len(console_violations) + len(any_type_violations)) * 5)),
+                "analysis_method": "ast_based",
+                "parsing_successful": True
+            }
+
+        except SyntaxError as e:
+            # Honest failure handling - no graceful fallbacks
+            violations = {
+                "analysis_id": analysis_id,
+                "error": f"Syntax error in code: {str(e)}",
+                "line": e.lineno,
+                "parsing_successful": False,
+                "analysis_method": "ast_based",
+                "agro_pain_score": 0
+            }
 
         # Emit organic Pollen Protocol event
         await self.event_bus.publish(PollenEvent(
             event_type="agro_pain_analysis_completed",
             source_component="bee.jules",
-            payload={**violations, "divine_blessing": violations["agro_pain_score"] >= 90}
+            payload={**violations, "divine_blessing": violations.get("agro_pain_score", 0) >= 90}
         ))
 
         return violations
