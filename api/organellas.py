@@ -6,25 +6,10 @@ from typing import Optional
 from pydantic import BaseModel
 
 from database import get_db
+from models import OrganellaCreate, OrganellaUpdate
 
 router = APIRouter()
 
-class OrganellaCreate(BaseModel):
-    user_id: str
-    name: str
-    type: str
-    stage: str = "egg"
-    skills: Optional[dict] = None
-    mystical_appearance: Optional[str] = None
-
-class OrganellaUpdate(BaseModel):
-    name: Optional[str] = None
-    stage: Optional[str] = None
-    level: Optional[int] = None
-    experience_points: Optional[int] = None
-    skills: Optional[dict] = None
-    mystical_appearance: Optional[str] = None
-    unlocked_sections: Optional[list] = None
 
 @router.post("/api/organellas")
 async def create_organella(organella: OrganellaCreate, conn: sqlite3.Connection = Depends(get_db)):

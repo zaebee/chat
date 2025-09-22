@@ -6,20 +6,9 @@ from typing import Optional
 from pydantic import BaseModel
 
 from database import get_db
+from models import UserCreate, UserUpdate
 
 router = APIRouter()
-
-class UserCreate(BaseModel):
-    id: str
-    username: str
-    email: Optional[str] = None
-
-class UserUpdate(BaseModel):
-    username: Optional[str] = None
-    email: Optional[str] = None
-    experience: Optional[int] = None
-    level: Optional[int] = None
-    stats: Optional[dict] = None
 
 @router.post("/api/users")
 async def create_user(user: UserCreate, conn: sqlite3.Connection = Depends(get_db)):
