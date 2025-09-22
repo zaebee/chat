@@ -1,7 +1,7 @@
 # Hive Architecture Honeycomb (ATCG Assembly Manifest)
 
-Этот документ — "соты" (Honey).
-ATCG использует его как план для сборки финальной документации.
+This document is the "honeycomb" (Honey).
+ATCG uses it as a plan for assembling the final documentation.
 
 ---
 
