@@ -38,6 +38,16 @@ Welcome to the comprehensive documentation for the Hive Chat ecosystem—a "Livi
 
 ## Documentation Structure
 
+### 🤖 For AI Agents
+- **[Agent Framework](01_ARCHITECTURE/AGENT_FRAMEWORK.md)** - Building AI teammates
+- **[Event System](01_ARCHITECTURE/EVENT_SYSTEM.md)** - Pollen Protocol specification
+- **[Teammate Interface](03_API/AGENT_API.md)** - AI agent integration guide
+
+### 📚 Assembled Documentation
+- **[Honeycomb Manifest](core/honey.md)** - The central entry point for assembled documentation
+
+## Documentation Structure
+
 ```
 docs/
 ├── 00_FOUNDATION/          # Core philosophy and vision
