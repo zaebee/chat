@@ -1,0 +1,29 @@
+# Sacred Review Automation Dependencies
+# Pinned versions for security and reproducibility
+
+# Core analysis dependencies
+ast-grep==0.12.1          # AST pattern matching for code analysis
+ripgrep-py==0.4.5          # Fast text search for pattern detection
+
+# GitHub API integration
+PyGithub==1.58.2          # GitHub API interaction
+requests==2.31.0          # HTTP requests for API calls
+
+# Data processing and serialization
+pyyaml==6.0.1             # YAML configuration parsing
+jsonschema==4.19.2        # Configuration validation
+typing-extensions==4.8.0  # Enhanced typing support
+
+# Text processing and pattern matching
+regex==2023.10.3          # Advanced regex patterns for Sacred Architecture detection
+
+# Development and testing (optional)
+pytest==7.4.3            # Unit testing framework
+pytest-cov==4.1.0        # Coverage reporting
+black==23.11.0           # Code formatting
+flake8==6.1.0            # Code linting
+mypy==1.7.1              # Type checking
+
+# Security scanning
+safety==2.3.5            # Dependency vulnerability checking
+bandit==1.7.5            # Python security linting

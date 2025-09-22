@@ -143,7 +143,7 @@ atcg_patterns:
 performance_patterns:
   nested_loops:
     severity: "medium"
-    description: "Potential O(N²) complexity"
+    description: "Potential O(N^2) complexity"
     suggestion: "Add input size validation or algorithmic optimization"
 
   large_array_ops:
