@@ -271,11 +271,11 @@ export class SacredLambdaEngine implements TransformationComponent {
    * Component lifecycle methods
    */
   async initialize(): Promise<void> {
-    console.log(`🔧 SacredLambdaEngine ${this.id} initialized with divine algorithm`)
+    // Sacred lambda engine initialization complete
   }
 
   async destroy(): Promise<void> {
-    console.log(`🧹 SacredLambdaEngine ${this.id} destroyed`)
+    // Sacred lambda engine cleanup complete
   }
 
   getStatus(): Record<string, unknown> {
