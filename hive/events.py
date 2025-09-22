@@ -20,6 +20,8 @@ from typing import Dict, Any, List, Callable, Awaitable
 from datetime import datetime
 from enum import Enum
 
+from .linguistic_validator import LinguisticValidator, ValidationResult
+
 
 class EventVersion(str, Enum):
     """Supported event protocol versions."""
@@ -51,13 +53,35 @@ class PollenEvent:
     tags: List[str] = field(default_factory=list)
 
     def __post_init__(self):
-        """Validate the event structure."""
+        """Validate the event structure using comprehensive linguistic analysis."""
         if not self.event_type:
             raise ValueError("event_type is required and must be a past-tense verb")
 
-        if not self.event_type.endswith(("ed", "en", "ted", "ied", "ued")):
-            # This is a simplified check - in reality we'd have a more sophisticated validator
-            print(f"Warning: event_type '{self.event_type}' should be past-tense")
+        # Use advanced linguistic validation
+        validator = LinguisticValidator()
+        result = validator.validate_past_tense(self.event_type)
+
+        if not result.is_valid:
+            error_msg = f"Invalid event_type '{self.event_type}': {result.reason}"
+            if result.suggestions:
+                error_msg += f". Suggestions: {', '.join(result.suggestions)}"
+
+            # For development/testing, show warning. In production, might want to raise error
+            if result.confidence == 0.0:  # Completely invalid
+                print(f"WARNING: {error_msg}")
+            else:
+                raise ValueError(error_msg)
+        elif result.confidence < 0.8:
+            # Low confidence - show warning but allow
+            print(f"LOW CONFIDENCE: event_type '{self.event_type}' detected as {result.detected_tense} "
+                  f"(confidence: {result.confidence:.2f})")
+
+        # Additional style validation
+        style_result = validator.validate_event_name_style(self.event_type)
+        if not style_result.is_valid and style_result.confidence < 0.7:
+            print(f"STYLE WARNING: {style_result.reason}")
+            if style_result.suggestions:
+                print(f"  Suggestions: {', '.join(style_result.suggestions)}")
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for serialization."""
