@@ -1,0 +1,169 @@
+# Sacred Architecture Review Configuration
+# Configuration for automated bee-to-peer review system
+
+review_automation:
+  # Enable/disable automated reviews
+  enabled: true
+
+  # File patterns to analyze
+  file_patterns:
+    - "**/*.ts"
+    - "**/*.js"
+    - "**/*.py"
+    - "**/*.vue"
+
+  # Directories to exclude from analysis
+  excluded_directories:
+    - "node_modules"
+    - ".git"
+    - "__pycache__"
+    - "dist"
+    - "build"
+    - ".venv"
+    - "docs/archive"  # Skip archived files
+    - "frontend/node_modules"
+
+# Sacred Metrics Configuration
+sacred_metrics:
+  # Scoring weights (must sum to 1.0)
+  weights:
+    any_type_score: 0.25      # Type safety emphasis
+    console_log_score: 0.20   # Production readiness
+    atcg_compliance: 0.20     # Architectural patterns
+    sacred_justifications: 0.15 # Documentation
+    performance_score: 0.10   # Algorithmic efficiency
+    security_score: 0.10      # Vulnerability protection
+
+  # Violation severity thresholds
+  thresholds:
+    any_types:
+      warning: 5
+      critical: 15
+    console_logs:
+      warning: 10
+      critical: 50
+    performance_risks:
+      warning: 3
+      critical: 10
+    security_risks:
+      warning: 2
+      critical: 5
+
+# Reviewer Persona Configuration
+reviewers:
+  fury_bee:
+    enabled: true
+    focus_areas:
+      - "type_safety"
+      - "production_readiness"
+      - "atcg_compliance"
+      - "sacred_documentation"
+
+  nuclear_audit:
+    enabled: true
+    focus_areas:
+      - "security_vulnerabilities"
+      - "performance_risks"
+      - "input_validation"
+      - "memory_safety"
+
+  synthesis:
+    enabled: true
+    priority_weights:
+      critical: 1.0
+      high: 0.7
+      medium: 0.4
+      low: 0.1
+
+# PR Comment Configuration
+pr_comments:
+  # Post review comments automatically
+  auto_comment: true
+
+  # Update existing comments instead of creating new ones
+  update_existing: true
+
+  # Maximum comment length (GitHub limit)
+  max_length: 65536
+
+  # Include detailed metrics in comment
+  include_metrics: true
+
+# GitHub Actions Integration
+github_actions:
+  # Trigger conditions
+  triggers:
+    - "pull_request"
+    - "workflow_dispatch"
+
+  # Branch patterns to analyze
+  branches:
+    - "main"
+    - "feat/*"
+    - "fix/*"
+    - "refactor/*"
+    - "sacred-*"
+
+  # File size limits (in bytes)
+  limits:
+    max_file_size: 1048576  # 1MB
+    max_total_size: 10485760  # 10MB
+
+# Sacred Architecture Patterns
+atcg_patterns:
+  aggregate:
+    patterns:
+      - "(interface|class|type).*Aggregate"
+      - "(interface|class|type).*Aggregat(or|ion)"
+      - "SacredAggregat"
+    weight: 25
+
+  transformation:
+    patterns:
+      - "(interface|class|type).*(Transform|Lambda)"
+      - "SacredLambda"
+      - "TransformationEngine"
+    weight: 25
+
+  connector:
+    patterns:
+      - "(interface|class|type).*Connect"
+      - "SacredConnect"
+      - "ConnectorEngine"
+    weight: 25
+
+  genesis:
+    patterns:
+      - "(interface|class|type).*Genesis"
+      - "GenesisEvent"
+      - "SacredGenesis"
+    weight: 25
+
+# Performance Risk Patterns
+performance_patterns:
+  nested_loops:
+    severity: "medium"
+    description: "Potential O(N²) complexity"
+    suggestion: "Add input size validation or algorithmic optimization"
+
+  large_array_ops:
+    severity: "medium"
+    description: "Large array operations without pagination"
+    suggestion: "Implement pagination or chunking"
+
+# Security Risk Patterns
+security_patterns:
+  eval_usage:
+    severity: "critical"
+    description: "Dangerous eval() usage"
+    suggestion: "Replace with safe alternatives"
+
+  innerHTML_xss:
+    severity: "high"
+    description: "Potential XSS via innerHTML"
+    suggestion: "Use textContent or proper sanitization"
+
+  hardcoded_limits:
+    severity: "medium"
+    description: "Hardcoded security limits"
+    suggestion: "Implement proper input validation"

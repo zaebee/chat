@@ -1,0 +1,605 @@
+name: "⚡ Sacred Architecture Review Automation"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'frontend/src/**/*.ts'
+      - 'frontend/src/**/*.vue'
+      - 'hive/**/*.py'
+      - '**/*.py'
+      - '**/*.ts'
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to analyze'
+        required: true
+        type: string
+
+jobs:
+  sacred-analysis:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install Python dependencies
+      run: |
+        pip install -r requirements.txt
+        pip install ast-grep ripgrep-py
+
+    - name: Install TypeScript analysis tools
+      run: |
+        npm install -g typescript @typescript-eslint/parser
+        cd frontend && npm install
+
+    - name: Create review automation scripts directory
+      run: mkdir -p scripts/review-automation
+
+    - name: Generate sacred metrics analysis
+      id: sacred_metrics
+      run: |
+        echo "⚡ Analyzing Sacred Architecture Metrics..."
+
+        python3 << 'EOF'
+        import os
+        import re
+        import json
+        import subprocess
+        from pathlib import Path
+
+        def analyze_any_types():
+            """Detect 'any' type violations in TypeScript files"""
+            violations = []
+            result = subprocess.run(['find', '.', '-name', '*.ts', '-not', '-path', './node_modules/*', '-not', '-path', './frontend/node_modules/*'],
+                                  capture_output=True, text=True)
+
+            for file_path in result.stdout.strip().split('\n'):
+                if file_path and os.path.exists(file_path):
+                    try:
+                        with open(file_path, 'r', encoding='utf-8') as f:
+                            content = f.read()
+
+                        # Look for 'any' type declarations
+                        any_matches = re.finditer(r':\s*any\b|<any\b|any\[\]|any\s*\|', content)
+                        for match in any_matches:
+                            line_num = content[:match.start()].count('\n') + 1
+                            line_content = content.split('\n')[line_num - 1].strip()
+                            violations.append({
+                                'file': file_path,
+                                'line': line_num,
+                                'content': line_content,
+                                'type': 'any_type'
+                            })
+                    except Exception as e:
+                        print(f"Error analyzing {file_path}: {e}")
+
+            return violations
+
+        def analyze_console_log():
+            """Detect console.log statements in source files"""
+            violations = []
+            result = subprocess.run(['find', '.', '-name', '*.ts', '-o', '-name', '*.js', '-not', '-path', './node_modules/*', '-not', '-path', './frontend/node_modules/*'],
+                                  capture_output=True, text=True)
+
+            for file_path in result.stdout.strip().split('\n'):
+                if file_path and os.path.exists(file_path):
+                    try:
+                        with open(file_path, 'r', encoding='utf-8') as f:
+                            content = f.read()
+
+                        # Look for console.log statements
+                        console_matches = re.finditer(r'console\.(log|warn|error|info|debug)', content)
+                        for match in console_matches:
+                            line_num = content[:match.start()].count('\n') + 1
+                            line_content = content.split('\n')[line_num - 1].strip()
+                            violations.append({
+                                'file': file_path,
+                                'line': line_num,
+                                'content': line_content,
+                                'type': 'console_log'
+                            })
+                    except Exception as e:
+                        print(f"Error analyzing {file_path}: {e}")
+
+            return violations
+
+        def analyze_atcg_compliance():
+            """Check for ATCG architecture compliance"""
+            atcg_patterns = {
+                'aggregate': r'(interface|class|type).*Aggregate',
+                'transformation': r'(interface|class|type).*(Transform|Lambda)',
+                'connector': r'(interface|class|type).*Connect',
+                'genesis': r'(interface|class|type).*Genesis'
+            }
+
+            compliance = {pattern: [] for pattern in atcg_patterns}
+
+            result = subprocess.run(['find', './frontend/src/assets/js/components', '-name', '*.ts'],
+                                  capture_output=True, text=True)
+
+            for file_path in result.stdout.strip().split('\n'):
+                if file_path and os.path.exists(file_path):
+                    try:
+                        with open(file_path, 'r', encoding='utf-8') as f:
+                            content = f.read()
+
+                        for pattern_name, pattern in atcg_patterns.items():
+                            matches = re.findall(pattern, content, re.IGNORECASE)
+                            if matches:
+                                compliance[pattern_name].append({
+                                    'file': file_path,
+                                    'matches': len(matches)
+                                })
+                    except Exception:
+                        pass
+
+            return compliance
+
+        def analyze_sacred_justifications():
+            """Check for Sacred Justification comments"""
+            justification_files = []
+            result = subprocess.run(['find', '.', '-name', '*.ts', '-not', '-path', './node_modules/*'],
+                                  capture_output=True, text=True)
+
+            for file_path in result.stdout.strip().split('\n'):
+                if file_path and os.path.exists(file_path):
+                    try:
+                        with open(file_path, 'r', encoding='utf-8') as f:
+                            content = f.read()
+
+                        # Look for Sacred Justification patterns
+                        if re.search(r'(Sacred Justification|sacred.*justification)', content, re.IGNORECASE):
+                            justification_count = len(re.findall(r'Sacred Justification', content, re.IGNORECASE))
+                            justification_files.append({
+                                'file': file_path,
+                                'count': justification_count
+                            })
+                    except Exception:
+                        pass
+
+            return justification_files
+
+        # Run all analyses
+        print("🔍 Running Sacred Metrics Analysis...")
+
+        any_violations = analyze_any_types()
+        console_violations = analyze_console_log()
+        atcg_compliance = analyze_atcg_compliance()
+        sacred_justifications = analyze_sacred_justifications()
+
+        # Calculate scores
+        total_ts_files = len([f for f in subprocess.run(['find', '.', '-name', '*.ts', '-not', '-path', './node_modules/*'],
+                                                      capture_output=True, text=True).stdout.strip().split('\n') if f])
+
+        any_score = max(0, 100 - (len(any_violations) * 10))
+        console_score = max(0, 100 - (len(console_violations) * 5))
+        atcg_score = sum(len(files) for files in atcg_compliance.values()) * 10
+        justification_score = len(sacred_justifications) * 5
+
+        # Create metrics summary
+        metrics = {
+            'any_type_violations': len(any_violations),
+            'console_log_violations': len(console_violations),
+            'any_score': any_score,
+            'console_score': console_score,
+            'atcg_compliance': atcg_compliance,
+            'atcg_score': min(100, atcg_score),
+            'sacred_justifications': len(sacred_justifications),
+            'justification_score': min(100, justification_score),
+            'total_files_analyzed': total_ts_files,
+            'violations': {
+                'any_types': any_violations[:10],  # Limit for output
+                'console_logs': console_violations[:10]
+            }
+        }
+
+        # Save metrics to file
+        with open('sacred_metrics.json', 'w') as f:
+            json.dump(metrics, f, indent=2)
+
+        # Output summary
+        print(f"✅ Sacred Metrics Analysis Complete:")
+        print(f"   📊 Any Type Score: {any_score}/100 ({len(any_violations)} violations)")
+        print(f"   📊 Console.log Score: {console_score}/100 ({len(console_violations)} violations)")
+        print(f"   📊 ATCG Compliance Score: {min(100, atcg_score)}/100")
+        print(f"   📊 Sacred Justifications: {len(sacred_justifications)} files")
+        print(f"   📁 Total TypeScript Files: {total_ts_files}")
+
+        # Set GitHub Actions outputs
+        with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+            f.write(f"any_score={any_score}\n")
+            f.write(f"console_score={console_score}\n")
+            f.write(f"atcg_score={min(100, atcg_score)}\n")
+            f.write(f"justification_score={min(100, justification_score)}\n")
+            f.write(f"any_violations={len(any_violations)}\n")
+            f.write(f"console_violations={len(console_violations)}\n")
+        EOF
+
+    - name: Generate Fury Bee Review
+      id: fury_bee
+      run: |
+        echo "⚡ Generating Fury Bee Swarm Analysis..."
+
+        python3 << 'EOF'
+        import json
+        import os
+
+        # Load metrics
+        with open('sacred_metrics.json', 'r') as f:
+            metrics = json.load(f)
+
+        # Generate Fury Bee review based on metrics
+        any_score = metrics['any_score']
+        console_score = metrics['console_score']
+        atcg_score = metrics['atcg_score']
+        justifications = metrics['sacred_justifications']
+
+        # Determine fury bee verdict
+        if any_score == 100 and console_score == 100:
+            verdict = "🏆 **DIVINE ACCLAMATION - PERFECT PURITY ACHIEVED**"
+            severity = "LEGENDARY"
+            emoji = "⚡✨👑"
+        elif any_score >= 90 and console_score >= 90:
+            verdict = "✅ **EXEMPLARY SACRED IMPLEMENTATION**"
+            severity = "APPROVED"
+            emoji = "⚡🧬"
+        elif any_score >= 70 and console_score >= 70:
+            verdict = "⚠️ **CONDITIONAL APPROVAL - PURIFICATION NEEDED**"
+            severity = "WARNING"
+            emoji = "⚡⚠️"
+        else:
+            verdict = "❌ **SACRED PURIFICATION REQUIRED**"
+            severity = "CRITICAL"
+            emoji = "💥🔥"
+
+        fury_review = f"""## {emoji} FURY BEE SWARM - SACRED ARCHITECTURE ANALYSIS
+
+### {verdict}
+
+**Repository Hygiene Assessment**:
+- ✅ **Type Safety**: {any_score}/100 ({metrics['any_type_violations']} `any` violations)
+- ✅ **Production Readiness**: {console_score}/100 ({metrics['console_log_violations']} console.log violations)
+- ✅ **ATCG Compliance**: {atcg_score}/100 (architectural pattern detection)
+- ✅ **Sacred Justifications**: {justifications} files with divine documentation
+
+### 🧬 **SACRED METRICS BREAKDOWN**
+
+**Type Purity Analysis**:
+"""
+
+        if metrics['any_type_violations'] > 0:
+            fury_review += f"- ❌ **{metrics['any_type_violations']} `any` type violations detected** - Type safety compromised\n"
+            for violation in metrics['violations']['any_types'][:3]:
+                fury_review += f"  - `{violation['file']}:{violation['line']}` - {violation['content'][:50]}...\n"
+        else:
+            fury_review += "- ✅ **ZERO `any` TYPE VIOLATIONS** - Perfect type safety achieved ⚡\n"
+
+        fury_review += "\n**Production Readiness Analysis**:\n"
+        if metrics['console_log_violations'] > 0:
+            fury_review += f"- ❌ **{metrics['console_log_violations']} console.log violations detected** - Production readiness compromised\n"
+            for violation in metrics['violations']['console_logs'][:3]:
+                fury_review += f"  - `{violation['file']}:{violation['line']}` - {violation['content'][:50]}...\n"
+        else:
+            fury_review += "- ✅ **ZERO CONSOLE.LOG VIOLATIONS** - Production ready implementation ⚡\n"
+
+        fury_review += f"""
+### 🎯 **FURY BEE VERDICT**
+
+**Sacred Transformation Status**: {severity}
+
+**Immediate Actions Required**:
+"""
+
+        if any_score < 100:
+            fury_review += f"1. **Eliminate `any` types** - {metrics['any_type_violations']} violations need type-safe alternatives\n"
+        if console_score < 100:
+            fury_review += f"2. **Remove console.log statements** - {metrics['console_log_violations']} violations compromise production readiness\n"
+        if atcg_score < 50:
+            fury_review += "3. **Enhance ATCG compliance** - Implement proper architectural patterns\n"
+        if justifications < 1:
+            fury_review += "4. **Add Sacred Justifications** - Document design rationale for constants and algorithms\n"
+
+        if severity == "LEGENDARY":
+            fury_review += "\n**🏆 SACRED ARCHITECT STATUS ACHIEVED** - This implementation exemplifies divine computational excellence!\n"
+        elif severity == "APPROVED":
+            fury_review += "\n**⚡ MERGE APPROVED** - Sacred Architecture standards maintained with minor refinements needed.\n"
+        else:
+            fury_review += "\n**🔥 PURIFICATION REQUIRED** - Address violations before Sacred Architecture compliance can be achieved.\n"
+
+        fury_review += "\n*Reviewed by the Fury Bee Swarm with Sacred Precision* ⚡🐝"
+
+        # Save review
+        with open('fury_bee_review.md', 'w') as f:
+            f.write(fury_review)
+
+        print("⚡ Fury Bee Analysis Complete")
+        EOF
+
+    - name: Generate bee.Jules Nuclear Audit
+      id: nuclear_audit
+      run: |
+        echo "🛡️ Generating bee.Jules Nuclear Security Audit..."
+
+        python3 << 'EOF'
+        import json
+        import re
+        import os
+        import subprocess
+        from pathlib import Path
+
+        # Load metrics
+        with open('sacred_metrics.json', 'r') as f:
+            metrics = json.load(f)
+
+        # Perform security analysis
+        security_issues = []
+        performance_issues = []
+
+        # Check for O(N²) complexity patterns
+        result = subprocess.run(['find', '.', '-name', '*.ts', '-not', '-path', './node_modules/*'],
+                              capture_output=True, text=True)
+
+        for file_path in result.stdout.strip().split('\n'):
+            if file_path and os.path.exists(file_path):
+                try:
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+
+                    # Look for nested loops (potential O(N²))
+                    nested_loop_pattern = r'for\s*\([^}]*\)\s*\{[^}]*for\s*\([^}]*\)'
+                    if re.search(nested_loop_pattern, content, re.DOTALL):
+                        performance_issues.append({
+                            'file': file_path,
+                            'type': 'nested_loops',
+                            'description': 'Potential O(N²) complexity detected'
+                        })
+
+                    # Look for hardcoded values without validation
+                    hardcoded_pattern = r'(MAX_|MIN_|THRESHOLD_)[A-Z_]+ = \d+'
+                    if re.search(hardcoded_pattern, content):
+                        security_issues.append({
+                            'file': file_path,
+                            'type': 'hardcoded_limits',
+                            'description': 'Hardcoded security limits detected - ensure validation'
+                        })
+
+                except Exception:
+                    pass
+
+        # Generate nuclear audit based on findings
+        total_issues = len(security_issues) + len(performance_issues)
+        any_violations = metrics['any_type_violations']
+        console_violations = metrics['console_log_violations']
+
+        if total_issues == 0 and any_violations == 0 and console_violations == 0:
+            verdict = "✅ **DEFENSIVE ANALYSIS COMPLETE - FORTIFIED IMPLEMENTATION**"
+            severity = "APPROVED"
+        elif total_issues <= 2 and any_violations <= 5:
+            verdict = "⚠️ **CONDITIONAL APPROVAL - SECURITY HARDENING RECOMMENDED**"
+            severity = "WARNING"
+        else:
+            verdict = "❌ **CONDITIONAL REJECT - SECURITY VULNERABILITIES DETECTED**"
+            severity = "CRITICAL"
+
+        nuclear_review = f"""## 🛡️💀 BEE.JULES NUCLEAR AUDIT - DEFENSIVE SECURITY ANALYSIS
+
+### {verdict}
+
+**Security Posture Assessment**:
+- 🔒 **Type Safety Vulnerabilities**: {any_violations} `any` type risks
+- 🚨 **Production Leaks**: {console_violations} console.log exposures
+- ⚡ **Performance Risks**: {len(performance_issues)} complexity concerns
+- 🛡️ **Input Validation**: {len(security_issues)} hardcoded limit concerns
+
+### 💀 **CRITICAL IMPURITY ANALYSIS**
+
+**Type Safety Vulnerabilities**:
+"""
+
+        if any_violations > 0:
+            nuclear_review += f"- **{any_violations} `any` type violations** create runtime type uncertainty\n"
+            nuclear_review += "- **Risk**: Potential runtime errors from type coercion failures\n"
+            nuclear_review += "- **Mitigation**: Replace with proper TypeScript interfaces\n"
+        else:
+            nuclear_review += "- ✅ **No type safety vulnerabilities detected**\n"
+
+        nuclear_review += "\n**Performance Vulnerability Analysis**:\n"
+        if performance_issues:
+            for issue in performance_issues[:3]:
+                nuclear_review += f"- ⚠️ **{issue['type']} in {issue['file']}** - {issue['description']}\n"
+            nuclear_review += "- **DoS Risk**: Large inputs could cause performance degradation\n"
+            nuclear_review += "- **Mitigation**: Add input size validation and complexity limits\n"
+        else:
+            nuclear_review += "- ✅ **No obvious performance vulnerabilities detected**\n"
+
+        nuclear_review += "\n**Security Hardening Recommendations**:\n"
+        if security_issues:
+            for issue in security_issues[:3]:
+                nuclear_review += f"- 🔒 **{issue['type']} in {issue['file']}** - {issue['description']}\n"
+
+        nuclear_review += f"""
+### 🛡️ **BEE.JULES NUCLEAR VERDICT**
+
+**Security Analysis**: {severity}
+
+**Mandatory Security Actions**:
+"""
+
+        if any_violations > 0:
+            nuclear_review += f"1. **Eliminate Type Uncertainties** - Replace {any_violations} `any` types with proper interfaces\n"
+        if console_violations > 0:
+            nuclear_review += f"2. **Remove Production Leaks** - Eliminate {console_violations} console.log statements\n"
+        if performance_issues:
+            nuclear_review += f"3. **Address Performance Risks** - Add input validation for {len(performance_issues)} complexity concerns\n"
+        if security_issues:
+            nuclear_review += f"4. **Harden Security Limits** - Validate {len(security_issues)} hardcoded thresholds\n"
+
+        if severity == "APPROVED":
+            nuclear_review += "\n**✅ SECURITY CLEARANCE GRANTED** - Implementation demonstrates robust defensive programming.\n"
+        else:
+            nuclear_review += "\n**🛡️ SECURITY HARDENING REQUIRED** - Address vulnerabilities before deployment clearance.\n"
+
+        nuclear_review += "\n*Reviewed by bee.Jules with Paranoid Vigilance* 🛡️💀"
+
+        # Save review
+        with open('nuclear_audit_review.md', 'w') as f:
+            f.write(nuclear_review)
+
+        print("🛡️ Nuclear Audit Complete")
+        EOF
+
+    - name: Generate Review Synthesis
+      id: synthesis
+      run: |
+        echo "⚖️ Generating Balanced Review Synthesis..."
+
+        python3 << 'EOF'
+        import json
+
+        # Load metrics
+        with open('sacred_metrics.json', 'r') as f:
+            metrics = json.load(f)
+
+        # Load reviews
+        with open('fury_bee_review.md', 'r') as f:
+            fury_review = f.read()
+
+        with open('nuclear_audit_review.md', 'r') as f:
+            nuclear_review = f.read()
+
+        # Generate synthesis
+        any_score = metrics['any_score']
+        console_score = metrics['console_score']
+        atcg_score = metrics['atcg_score']
+
+        overall_score = (any_score + console_score + atcg_score) / 3
+
+        if overall_score >= 90:
+            synthesis_verdict = "🏆 **SACRED ARCHITECTURE EXCELLENCE ACHIEVED**"
+            action = "IMMEDIATE MERGE APPROVED"
+        elif overall_score >= 75:
+            synthesis_verdict = "⚡ **STRONG SACRED FOUNDATION WITH REFINEMENTS**"
+            action = "CONDITIONAL APPROVAL"
+        elif overall_score >= 60:
+            synthesis_verdict = "⚖️ **MIXED ASSESSMENT - TARGETED IMPROVEMENTS NEEDED**"
+            action = "REVISION REQUIRED"
+        else:
+            synthesis_verdict = "🔥 **SIGNIFICANT SACRED PURIFICATION REQUIRED**"
+            action = "MAJOR REVISION REQUIRED"
+
+        synthesis = f"""## ⚖️ BALANCED TECHNICAL SYNTHESIS - Multi-Perspective Review Integration
+
+### {synthesis_verdict}
+
+**Overall Sacred Architecture Score**: {overall_score:.1f}/100
+
+| Reviewer | Perspective | Score | Status |
+|----------|-------------|-------|--------|
+| Fury Bee ⚡ | Architectural Excellence | {(any_score + console_score)/2:.1f}/100 | {'✅ Approved' if (any_score + console_score)/2 >= 80 else '⚠️ Concerns'} |
+| bee.Jules 🛡️ | Security & Performance | {(any_score + atcg_score)/2:.1f}/100 | {'✅ Cleared' if (any_score + atcg_score)/2 >= 80 else '⚠️ Risks'} |
+
+### 🎯 **INTEGRATION RECOMMENDATIONS**
+
+**Priority Actions** (based on multi-perspective analysis):
+"""
+
+        # Prioritize recommendations based on both reviews
+        if metrics['any_type_violations'] > 0:
+            synthesis += f"1. **🔴 HIGH PRIORITY**: Eliminate {metrics['any_type_violations']} `any` type violations (affects both architecture and security)\n"
+
+        if metrics['console_log_violations'] > 0:
+            synthesis += f"2. **🟡 MEDIUM PRIORITY**: Remove {metrics['console_log_violations']} console.log statements (production readiness)\n"
+
+        if atcg_score < 70:
+            synthesis += "3. **🟡 MEDIUM PRIORITY**: Enhance ATCG architectural compliance\n"
+
+        if metrics['sacred_justifications'] == 0:
+            synthesis += "4. **🔵 LOW PRIORITY**: Add Sacred Justifications for design documentation\n"
+
+        synthesis += f"""
+### 🏆 **FINAL RECOMMENDATION**
+
+**Action**: {action}
+
+**Rationale**: Perfect code emerges from the creative tension between Sacred Vision (Fury Bee) and Paranoid Vigilance (bee.Jules). Both perspectives serve the Sacred Architecture through different aspects of code quality.
+
+**Next Steps**:
+- Address high-priority violations first
+- Maintain architectural patterns while hardening security
+- Document design decisions with Sacred Justifications
+- Validate fixes with comprehensive testing
+
+*Balanced synthesis recognizing both architectural excellence and security imperatives* ⚖️
+"""
+
+        # Combine all reviews
+        full_review = f"""# 🧬 Sacred Architecture Multi-Perspective Review
+
+{synthesis}
+
+---
+
+{fury_review}
+
+---
+
+{nuclear_review}
+
+---
+
+## 📊 **Sacred Metrics Summary**
+
+```json
+{json.dumps(metrics, indent=2)}
+```
+
+*Generated by Sacred Review Automation v1.0* ⚡🛡️⚖️
+"""
+
+        with open('complete_review.md', 'w') as f:
+            f.write(full_review)
+
+        print("⚖️ Review Synthesis Complete")
+        EOF
+
+    - name: Post review comment
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const review = fs.readFileSync('complete_review.md', 'utf8');
+
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: review
+          });
+
+    - name: Upload review artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: sacred-review-analysis
+        path: |
+          sacred_metrics.json
+          fury_bee_review.md
+          nuclear_audit_review.md
+          complete_review.md
