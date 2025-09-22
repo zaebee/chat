@@ -54,7 +54,7 @@ const selectLevel = () => {
   if (props.level <= gameStore.level) {
     gameStore.setCurrentLevel(props.level);
   }
-  console.log(`Selected level ${props.level}`);
+  // Level selected: ${props.level}
 };
 
 const getOrganellaIcon = (type: OrganellaType, stage: OrganellaStage) => {

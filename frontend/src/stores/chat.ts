@@ -98,7 +98,7 @@ export const useChatStore = defineStore("chat", () => {
       return;
     }
     if (solvedChallenges.value.includes(challengeId)) {
-      console.log(`Challenge ${challengeId} already solved by ${userStore.currentUser.username}`);
+      // Challenge already solved
       return;
     }
 
@@ -114,7 +114,7 @@ export const useChatStore = defineStore("chat", () => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log(data.message);
+        // Challenge solved successfully
         solvedChallenges.value.push(challengeId);
         gameStore.recordChallengeSolved(challengeId);
 
@@ -147,7 +147,7 @@ export const useChatStore = defineStore("chat", () => {
 
     socket.onopen = () => {
       isConnected.value = true;
-      console.log("WebSocket connected");
+      // WebSocket connected
     };
 
     socket.onmessage = (event) => {
@@ -192,7 +192,7 @@ export const useChatStore = defineStore("chat", () => {
     socket.onclose = () => {
       isConnected.value = false;
       socket = null;
-      console.log("WebSocket disconnected");
+      // WebSocket disconnected
     };
 
     socket.onerror = (error) => {

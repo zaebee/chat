@@ -77,11 +77,11 @@ class PythonRunner {
     }
 
     pyodidePromise = (async () => {
-      console.log("Loading Pyodide...");
+      // Loading Pyodide...
       const pyodide = await loadPyodide({
         indexURL: "https://cdn.jsdelivr.net/pyodide/v0.28.2/full/",
       });
-      console.log("Pyodide loaded.");
+      // Pyodide loaded successfully
       return pyodide;
     })();
 
@@ -175,7 +175,7 @@ run_tests('${functionName}', '${testCasesJson}')
       if (captureSvg) {
         // Get the SVG output
         const turtleSvgObject = pyodide.globals.get("turtle").svg();
-        console.log("Raw SVG object from Pyodide:", turtleSvgObject);
+        // Raw SVG object received from Pyodide
         svgOutput = objectToSvgString(turtleSvgObject);
       }
 

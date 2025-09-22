@@ -255,7 +255,7 @@ export const useOrganellasStore = defineStore('organellas', () => {
    */
   const distributeXpToOrganellas = async (userId: string, totalXp: number): Promise<void> => {
     if (organellas.value.length === 0) {
-      console.log("No organellas to distribute XP to");
+      // No organellas to distribute XP to
       return;
     }
 
@@ -320,12 +320,12 @@ export const useOrganellasStore = defineStore('organellas', () => {
         // Log skill improvements
         if (skillEvolutionResults.length > 0) {
           skillEvolutionResults.forEach(result => {
-            console.log(`✨ ${updatedOrganella.name}'s ${result.skillName} improved to level ${result.newLevel}!`);
+            // Skill improvement: ${updatedOrganella.name}'s ${result.skillName} improved to level ${result.newLevel}
           });
         }
       }
 
-      console.log(`🐝 ${updatedOrganella.name} gained ${xpGain} XP! (Total: ${updatedOrganella.experience_points})`);
+      // XP gained: ${updatedOrganella.name} gained ${xpGain} XP (Total: ${updatedOrganella.experience_points})
     } catch (error) {
       console.error("Error adding XP to organella:", error);
     }

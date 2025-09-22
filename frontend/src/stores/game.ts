@@ -13,8 +13,8 @@ export interface Room {
   level?: number;  // Quest level for journey rooms
   unlocked?: boolean;  // Whether room is accessible
   completed?: boolean;  // Whether room objectives are completed
-  organellas?: any[];  // Organellas in this room
-  quests?: any[];  // Available quests in this room
+  organellas?: unknown[];  // Organellas in this room
+  quests?: unknown[];  // Available quests in this room
 }
 
 import { useUserStore } from "./user";
@@ -88,7 +88,7 @@ export const useGameStore = defineStore("game", () => {
    */
   const grantSpiritualBoon = (amount: number) => {
     totalXp.value += amount;
-    console.log(`🌟 Spiritual boon granted: +${amount} XP! Total: ${totalXp.value}`);
+    // Spiritual boon granted: +${amount} XP! Total: ${totalXp.value}
   };
 
   /**
@@ -101,14 +101,14 @@ export const useGameStore = defineStore("game", () => {
         throw new Error(`Failed to fetch rooms: ${response.statusText}`);
       }
       const data = await response.json();
-      console.log("API response for rooms:", data);
+      // API response for rooms received
 
       // Handle API response structure: {"rooms": [...]}
       const roomsArray = data.rooms || data;
 
       // Ensure we have an array and add missing fields with defaults
       if (Array.isArray(roomsArray)) {
-        rooms.value = roomsArray.map((room: any) => ({
+        rooms.value = roomsArray.map((room: Record<string, unknown>) => ({
           id: room.id,
           name: room.name,
           description: room.description,
@@ -117,7 +117,7 @@ export const useGameStore = defineStore("game", () => {
           created_at: room.created_at,
           is_archived: room.is_archived || false, // Default not archived
         }));
-        console.log("Processed rooms:", rooms.value);
+        // Processed rooms data
       } else {
         console.warn("Rooms data is not an array:", roomsArray);
         rooms.value = [];

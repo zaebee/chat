@@ -209,7 +209,7 @@ const props = defineProps<{
   size?: number
   physics?: Partial<HivePhysics>
   intent?: Partial<HiveIntent>
-  onPollenEvent?: (event: any) => void
+  onPollenEvent?: (event: unknown) => void
   useCocoon?: boolean  // Enable physics cocoon validation
   smoothTransitions?: boolean  // Enable smooth intent transitions
 }>()
@@ -220,7 +220,7 @@ const instanceId = ref(`bee_${Date.now()}_${Math.random().toString(36).substr(2,
 // Cocoon state
 const cocoonState = ref<'none' | 'calculating' | 'validating' | 'manifesting' | 'emerged'>('none')
 const cocoonProgress = ref(0)
-const validationResults = ref<any[]>([])
+const validationResults = ref<Record<string, unknown>[]>([])
 const emergenceReady = ref(false)
 
 // Intent transition state
@@ -428,7 +428,7 @@ const divineOpacity = computed(() =>
 )
 
 // C: Connector - Pollen Protocol integration
-const emitPollenEvent = (type: string, payload: any) => {
+const emitPollenEvent = (type: string, payload: Record<string, unknown>) => {
   const event: PollenEvent = {
     id: `${instanceId.value}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     type,

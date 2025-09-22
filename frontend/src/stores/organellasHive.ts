@@ -441,10 +441,10 @@ export const useHiveOrganellasStore = defineStore('hiveOrganellas', () => {
     organellas.value[index] = evolvedOrganella
     
     // Log fairy tale progression
-    console.log(`🐝 ${evolvedOrganella.name} ${evolvedOrganella.currentMood} (+${experienceGain} experience)`)
+    // Evolution logged: ${evolvedOrganella.name} ${evolvedOrganella.currentMood} (+${experienceGain} experience)
     
     if (evolvedOrganella.stage !== oldOrganella.stage) {
-      console.log(`✨ ${evolvedOrganella.name} has evolved to ${evolvedOrganella.stage} stage!`)
+      // Stage evolution: ${evolvedOrganella.name} evolved to ${evolvedOrganella.stage}
     }
   }
 

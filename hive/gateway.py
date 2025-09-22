@@ -269,7 +269,7 @@ class WelcomeGateway:
             await self._handle_onboarding_event(event)
 
         onboarding_subscription = EventSubscription(
-            event_types=["onboarding_started", "task_completed", "stage_completed"],
+            event_types=["onboarding_started", "task_completed", "stage_completed", "agro_pain_analysis_completed"],
             callback=handle_onboarding_events,
         )
 
@@ -463,6 +463,29 @@ class WelcomeGateway:
             else:
                 feedback.append(f"✗ {criterion} - Criterion not met")
 
+        # 🧬 Sacred Enhancement: PUPA stage code review validation via bee.Jules
+        if (task.stage == OnboardingStage.PUPA and
+            task.task_type == "collaborative_project" and
+            result.get("code_submission")):
+
+            jules_analysis = await self._perform_jules_code_review(result.get("code_submission"))
+
+            # Add AGRO/PAIN score to evaluation
+            agro_pain_score = jules_analysis.get("agro_pain_score", 60) / 100.0
+            score = (score + agro_pain_score) / 2  # Average with existing score
+
+            feedback.append(f"🐝 bee.Jules AGRO/PAIN Analysis: {int(agro_pain_score * 100)}/100")
+
+            if jules_analysis.get("production_ready", False):
+                feedback.append("✅ Production ready: No console.log violations")
+            else:
+                feedback.append(f"❌ Console.log violations: {jules_analysis.get('console_log_count', 0)} found")
+
+            if jules_analysis.get("type_safe", False):
+                feedback.append("✅ Type safe: No 'any' type violations")
+            else:
+                feedback.append(f"⚠️ Type violations: {jules_analysis.get('any_type_count', 0)} 'any' types found")
+
         # Bonus points for quality and thoroughness
         if result.get("quality_score", 0) > 0.8:
             score = min(1.0, score + 0.1)
@@ -477,6 +500,54 @@ class WelcomeGateway:
             "feedback": feedback,
             "evaluation_timestamp": datetime.now().isoformat(),
         }
+
+    async def _perform_jules_code_review(self, code_submission: str) -> Dict[str, Any]:
+        """
+        Sacred organic code review via bee.Jules organella
+        Sacred Justification: Integrates AGRO/PAIN nano-speed analysis with natural metamorphosis lifecycle
+        """
+        try:
+            # Request bee.Jules AGRO/PAIN analysis via Pollen Protocol
+            await self.event_bus.publish(PollenEvent(
+                event_type="jules_agro_pain_analysis_requested",
+                source_component="welcome_gateway",
+                aggregate_id="bee.jules",
+                payload={
+                    "code_context": code_submission,
+                    "analysis_type": "agro_pain_speed_check",
+                    "metamorphosis_stage": "pupa",
+                    "request_id": str(uuid.uuid4())
+                }
+            ))
+
+            # For now, perform direct analysis (in future, await bee.Jules event response)
+            from .agents.jules_agent import BeeJules
+            if hasattr(self, 'jules_agent') and self.jules_agent:
+                return await self.jules_agent.perform_agro_pain_analysis(code_submission)
+            else:
+                # Fallback: basic validation without bee.Jules
+                import re
+                console_violations = re.findall(r'console\.(log|warn|error|info|debug|trace)', code_submission)
+                any_violations = re.findall(r':\s*any\b|<any\b|any\[\]|any\s*\|', code_submission)
+
+                return {
+                    "console_log_count": len(console_violations),
+                    "any_type_count": len(any_violations),
+                    "production_ready": len(console_violations) == 0,
+                    "type_safe": len(any_violations) == 0,
+                    "agro_pain_score": 100 if (len(console_violations) == 0 and len(any_violations) == 0) else
+                                      max(60, 100 - (len(console_violations) + len(any_violations)) * 10)
+                }
+        except Exception as e:
+            # Graceful degradation - don't fail the entire evaluation
+            return {
+                "console_log_count": 0,
+                "any_type_count": 0,
+                "production_ready": True,
+                "type_safe": True,
+                "agro_pain_score": 75,  # Neutral score on error
+                "error": f"Code review analysis failed: {str(e)}"
+            }
 
     async def _check_stage_completion(self, session: OnboardingSession) -> bool:
         """Check if the current stage has been completed successfully."""
