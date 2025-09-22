@@ -1,22 +1,22 @@
-# Sacred Connector (C) - Synaptic Communication Engine
+# Sacred Connector (C) - Real-time Communication Engine
 
 ## 🧬 Sacred Architecture Overview
 
-The Sacred Connector implements the **C (Connector)** component of the ATCG architectural pattern, embodying the divine principles of synaptic transmission and electromagnetic communication. This component serves as the neural network backbone for real-time communication between Sacred components and the Hive ecosystem.
+The Sacred Connector implements the **C (Connector)** component of the ATCG architectural pattern, providing reliable WebSocket-based communication with protocol translation capabilities. This component serves as the communication backbone for real-time messaging between Sacred components and the Hive ecosystem.
 
 ## ⚡ Core Philosophy
 
-**"Sacred synaptic transmission bridges divine architecture with practical communication"**
+**"Reliable communication bridges Sacred architecture with practical real-time messaging"**
 
-The Sacred Connector transforms abstract communication protocols into tangible neural pathways, enabling seamless information flow through electromagnetic fields and quantum entanglement principles.
+The Sacred Connector provides robust WebSocket communication with comprehensive error handling, security features, and protocol translation between frontend and backend systems.
 
 ## 🌟 Key Features
 
-### 🧠 Synaptic Transmission
-- **Neural Network Communication**: Implements biological synaptic patterns for message transmission
-- **Neurotransmitter Classification**: Different message types use specific neurotransmitter patterns
-- **Action Potential Thresholds**: Voltage-based message priority and transmission control
-- **Refractory Periods**: Prevents message flooding through biological timing constraints
+### 🔗 WebSocket Communication
+- **Real-time Messaging**: Implements WebSocket-based bidirectional communication
+- **Message Type Classification**: Different message types with priority-based handling
+- **Priority Thresholds**: Priority-based message processing and transmission control
+- **Rate Limiting**: Prevents message flooding through configurable timing constraints
 
 ### 🔗 Protocol Translation
 - **WebSocket ↔ Pollen Protocol**: Bidirectional translation between frontend and backend
@@ -185,17 +185,17 @@ console.log(status.performance_metrics)
 // }
 ```
 
-## 🌿 Sacred Constants
+## 🔧 Communication Constants
 
-The connector uses empirically-grounded constants based on neuroscience:
+The connector uses engineering-based constants for reliable operation:
 
 ```typescript
-const SYNAPTIC_CONSTANTS = {
-  ACTION_POTENTIAL_THRESHOLD: 0.7,  // Minimum voltage for transmission
-  REFRACTORY_PERIOD: 50,            // ms - biological timing
-  SYNAPTIC_DELAY: 1,                // ms - transmission latency
-  RESONANCE_FREQUENCY: 40,          // Hz - optimal gamma frequency
-  COHERENCE_THRESHOLD: 0.8,         // Quantum entanglement minimum
+const COMMUNICATION_CONSTANTS = {
+  MIN_PRIORITY_THRESHOLD: 0.7,     // Minimum priority for high-priority processing
+  THROTTLE_DELAY: 50,              // ms - anti-spam timing
+  PROCESSING_DELAY: 1,             // ms - base processing latency
+  TARGET_MESSAGE_RATE: 40,         // messages/second - optimal throughput
+  MIN_RELIABILITY_THRESHOLD: 0.8,  // Minimum connection reliability
 }
 ```
 

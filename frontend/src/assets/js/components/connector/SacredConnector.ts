@@ -1,22 +1,22 @@
 /**
- * SacredConnector - The Divine Synaptic Communication Engine
+ * SacredConnector - Real-time Communication Engine
  * 
- * Implements neural synaptic transmission principles for real-time communication
- * This is the electromagnetic essence of information flow and protocol translation
- * following the ATCG architectural pattern for Connector components.
+ * Implements WebSocket-based communication with protocol translation capabilities
+ * Provides secure, rate-limited messaging following ATCG architectural patterns
+ * for Connector components with comprehensive error handling and reconnection.
  */
 
 import type { ConnectorComponent } from './index'
 
-// Sacred Communication Types - Zero 'any' violations
-export interface SynapticMessage {
+// Communication Types - Zero 'any' violations
+export interface ConnectorMessage {
   readonly id: string
-  readonly neurotransmitter: string // Message type
+  readonly messageType: string // Message type
   readonly payload: Record<string, unknown>
-  readonly voltage: number // Message priority (0-10)
+  readonly priority: number // Message priority (0-10)
   readonly timestamp: string
-  readonly sourceNeuron: string
-  readonly targetNeuron: string
+  readonly sourceId: string
+  readonly targetId: string
 }
 
 export interface PollenEvent {
@@ -38,38 +38,29 @@ export interface WebSocketMessage {
   readonly id?: string
 }
 
-export interface SynapticChannel {
+export interface MessageChannel {
   readonly channelId: string
-  readonly neurotransmitterType: string
+  readonly messageTypes: string
   readonly isOpen: boolean
-  readonly conductance: number // 0-1, transmission efficiency
+  readonly efficiency: number // 0-1, transmission efficiency
   readonly lastActivity: string
   readonly messageCount: number
 }
 
-export interface ElectromagneticField {
-  readonly fieldId: string
-  readonly frequency: number // Hz - message frequency
-  readonly amplitude: number // Signal strength
-  readonly wavelength: number // Message complexity
-  readonly interference: number // Noise level (0-1)
-  readonly resonance: boolean // Harmonic alignment
+export interface ConnectionMetrics {
+  readonly connectionId: string
+  readonly messageFrequency: number // Messages per second
+  readonly signalStrength: number // Connection quality (0-1)
+  readonly latency: number // Average latency in ms
+  readonly errorRate: number // Error rate (0-1)
+  readonly isStable: boolean // Connection stability
 }
 
-export interface QuantumEntanglement {
-  readonly entanglementId: string
-  readonly particleA: string // Local endpoint
-  readonly particleB: string // Remote endpoint
-  readonly coherence: number // 0-1, synchronization quality
-  readonly lastSynchronization: string
-  readonly stateCorrelation: boolean
-}
-
-export interface SynapticTransmissionResult {
-  readonly original: SynapticMessage | PollenEvent | WebSocketMessage
-  readonly translated: SynapticMessage | PollenEvent | WebSocketMessage
+export interface MessageTransmissionResult {
+  readonly original: ConnectorMessage | PollenEvent | WebSocketMessage
+  readonly translated: ConnectorMessage | PollenEvent | WebSocketMessage
   readonly transmissionSuccess: boolean
-  readonly protocolTranslation: 'websocket_to_pollen' | 'pollen_to_websocket' | 'synaptic_internal'
+  readonly protocolTranslation: 'websocket_to_pollen' | 'pollen_to_websocket' | 'internal'
   readonly timestamp: string
   readonly latency: number // milliseconds
 }
@@ -90,10 +81,10 @@ export interface HiveCommunicationImpact {
 }
 
 /**
- * SacredConnector - Neural Network Communication Engine
+ * SacredConnector - Real-time Communication Engine
  * 
- * Implements synaptic transmission for real-time communication between
- * Sacred components using electromagnetic field theory and quantum entanglement.
+ * Implements WebSocket-based communication for real-time messaging between
+ * Sacred components with protocol translation and connection management.
  */
 export class SacredConnector implements ConnectorComponent {
   readonly type = 'connector' as const
@@ -105,28 +96,27 @@ export class SacredConnector implements ConnectorComponent {
   private static readonly RATE_LIMIT_MESSAGES = 100 // per minute
   private static readonly RATE_LIMIT_WINDOW = 60000 // 1 minute in ms
 
-  // Sacred Constants - Electromagnetic Communication Physics
-  private static readonly SYNAPTIC_CONSTANTS = {
-    // Neural transmission parameters
-    ACTION_POTENTIAL_THRESHOLD: 0.7, // Minimum voltage for transmission
-    REFRACTORY_PERIOD: 50, // ms - minimum time between transmissions
-    SYNAPTIC_DELAY: 1, // ms - transmission latency
+  // Communication Constants - Engineering-based values
+  private static readonly COMMUNICATION_CONSTANTS = {
+    // Message processing parameters
+    MIN_PRIORITY_THRESHOLD: 0.7, // Minimum priority for high-priority processing (0-1 scale)
+    THROTTLE_DELAY: 50, // ms - minimum time between rapid message sends (anti-spam)
+    PROCESSING_DELAY: 1, // ms - base processing latency for message handling
     
-    // Electromagnetic field parameters
-    RESONANCE_FREQUENCY: 40, // Hz - optimal transmission frequency
-    SIGNAL_DECAY_RATE: 0.95, // Signal strength decay per hop
-    INTERFERENCE_THRESHOLD: 0.3, // Maximum acceptable noise level
+    // Connection quality parameters  
+    TARGET_MESSAGE_RATE: 40, // messages/second - optimal throughput target
+    QUALITY_DECAY_RATE: 0.95, // Connection quality decay per failed attempt
+    MAX_ERROR_THRESHOLD: 0.3, // Maximum acceptable error rate before degradation
     
-    // Quantum entanglement parameters
-    COHERENCE_THRESHOLD: 0.8, // Minimum coherence for reliable transmission
-    DECOHERENCE_TIME: 1000, // ms - quantum state lifetime
-    ENTANGLEMENT_RANGE: 10000, // Maximum distance for quantum correlation
+    // Reliability parameters
+    MIN_RELIABILITY_THRESHOLD: 0.8, // Minimum connection reliability for stable operation
+    CONNECTION_TIMEOUT: 1000, // ms - connection attempt timeout
+    MAX_RETRY_DISTANCE: 10000, // Maximum retry attempts before giving up
   } as const
 
-  // Synaptic Network State
-  private synapticChannels: Map<string, SynapticChannel> = new Map()
-  private electromagneticFields: Map<string, ElectromagneticField> = new Map()
-  private quantumEntanglements: Map<string, QuantumEntanglement> = new Map()
+  // Connection State
+  private messageChannels: Map<string, MessageChannel> = new Map()
+  private connectionMetrics: Map<string, ConnectionMetrics> = new Map()
   private webSocketConnections: Map<string, WebSocket> = new Map()
   
   // Performance Metrics
@@ -155,7 +145,7 @@ export class SacredConnector implements ConnectorComponent {
   }
 
   /**
-   * Establish synaptic connections to the neural network
+   * Establish WebSocket connections to the communication network
    */
   async connect(): Promise<void> {
     try {
@@ -166,39 +156,34 @@ export class SacredConnector implements ConnectorComponent {
 
       // Establish primary WebSocket connection
       if (this.config.webSocketUrl) {
-        await this.establishWebSocketSynapse(this.config.webSocketUrl)
+        await this.establishWebSocketConnection(this.config.webSocketUrl)
       }
 
-      // Initialize electromagnetic field resonance
-      await this.initializeElectromagneticField()
-
-      // Establish quantum entanglement if enabled
-      if (this.config.enableQuantumEntanglement) {
-        await this.establishQuantumEntanglement()
-      }
+      // Initialize connection metrics tracking
+      await this.initializeConnectionMetrics()
 
       this.isConnected = true
       this.reconnectAttempts = 0
 
       // Emit connection established event
-      await this.transmitSynapticMessage({
-        id: this.generateSynapticId(),
-        neurotransmitter: 'connection_established',
+      await this.transmitMessage({
+        id: this.generateMessageId(),
+        messageType: 'connection_established',
         payload: { connectorId: this.config.id },
-        voltage: 8.0,
+        priority: 8.0,
         timestamp: new Date().toISOString(),
-        sourceNeuron: this.config.id,
-        targetNeuron: 'hive_network'
+        sourceId: this.config.id,
+        targetId: 'hive_network'
       })
 
     } catch (error) {
       this.errorCount++
-      throw new Error(`Synaptic connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      throw new Error(`Connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 
   /**
-   * Disconnect from the neural network
+   * Disconnect from the communication network
    */
   async disconnect(): Promise<void> {
     try {
@@ -210,39 +195,39 @@ export class SacredConnector implements ConnectorComponent {
         this.webSocketConnections.delete(channelId)
       }
 
-      // Deactivate synaptic channels
-      for (const [channelId, channel] of this.synapticChannels) {
-        this.synapticChannels.set(channelId, {
+      // Deactivate message channels
+      for (const [channelId, channel] of this.messageChannels) {
+        this.messageChannels.set(channelId, {
           ...channel,
           isOpen: false,
-          conductance: 0
+          efficiency: 0
         })
       }
 
-      // Collapse quantum entanglements
-      this.quantumEntanglements.clear()
+      // Clear connection metrics
+      this.connectionMetrics.clear()
 
       this.isConnected = false
 
       // Emit disconnection event
-      await this.transmitSynapticMessage({
-        id: this.generateSynapticId(),
-        neurotransmitter: 'connection_terminated',
+      await this.transmitMessage({
+        id: this.generateMessageId(),
+        messageType: 'connection_terminated',
         payload: { connectorId: this.config.id },
-        voltage: 6.0,
+        priority: 6.0,
         timestamp: new Date().toISOString(),
-        sourceNeuron: this.config.id,
-        targetNeuron: 'hive_network'
+        sourceId: this.config.id,
+        targetId: 'hive_network'
       })
 
     } catch (error) {
       this.errorCount++
-      throw new Error(`Synaptic disconnection failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      throw new Error(`Disconnection failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 
   /**
-   * Send data through synaptic transmission
+   * Send data through WebSocket connection
    */
   async send(data: unknown): Promise<unknown> {
     try {
