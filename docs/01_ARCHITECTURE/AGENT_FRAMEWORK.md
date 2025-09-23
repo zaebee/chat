@@ -40,7 +40,7 @@ profile = TeammateProfile(
 ```
 
 ### HiveTeammate Interface
-All agents implement the sacred interface:
+All agents implement the sacred interface, which includes the `StatusMixin` for standardized status reporting (see [StatusMixin: Standardizing Component Status](./STATUS_MIXIN.md)).
 
 ```python
 from hive.teammate import HiveTeammate, TaskRequest, TaskResult

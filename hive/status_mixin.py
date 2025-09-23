@@ -34,7 +34,7 @@ class StatusMixin:
             - metadata: Component-specific metadata
         """
         base_status = {
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": datetime.utcnow().isoformat(),
         }
 
         # Add id if available
