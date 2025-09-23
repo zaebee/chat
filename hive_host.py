@@ -432,15 +432,15 @@ async def main():
     host = HiveHost("example-host")
     
     async with host.lifespan():
-        print("HiveHost is running...")
+        # HiveHost is running
         
         # Get status
         status = host.get_status()
-        print(f"Host Status: {json.dumps(status.__dict__, indent=2)}")
+        # Status retrieved successfully
         
         # Health check
         health = await host.health_check()
-        print(f"Health Check: {json.dumps(health, indent=2)}")
+        # Health check completed
         
         # Simulate some work
         await asyncio.sleep(2)

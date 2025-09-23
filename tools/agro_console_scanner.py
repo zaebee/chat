@@ -137,6 +137,7 @@ class AgroConsoleScanner:
                 "hive_demo.py",  # Demo script
                 "chat.py",  # Legacy chat server
                 "hive_chat.py",  # Main server (startup messages allowed)
+                "tools/*",  # Development tools including this scanner
             ],
             "strict_mode": True,
             "allow_dev_console": False,
@@ -155,6 +156,10 @@ class AgroConsoleScanner:
             
         # Check if file is in prototypes directory (development files)
         if "prototypes/" in file_path:
+            return True
+            
+        # Check if file is in tools directory (development tools)
+        if "tools/" in file_path:
             return True
 
         for pattern in self.config["exempt_files"]:
