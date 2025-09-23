@@ -7,7 +7,6 @@ Sacred Justification: "Test everything; hold fast what is good."
 """
 
 import asyncio
-import pytest
 import json
 from unittest.mock import Mock, AsyncMock
 from datetime import datetime

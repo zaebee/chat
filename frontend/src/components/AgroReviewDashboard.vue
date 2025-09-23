@@ -224,7 +224,27 @@ const initiateReview = async () => {
     codeInput.value = ''
     
   } catch (error) {
-    console.error('AGRO review failed:', error)
+    // Production-safe error handling - no console.log
+    // TODO: Integrate with proper logging service in production
+    // For now, store error in component state for user feedback
+    currentReview.value = {
+      review_id: `error_${Date.now()}`,
+      review_type: selectedReviewType.value,
+      agro_score: 0,
+      pain_score: 0,
+      severity: 'critical',
+      violations: [{
+        type: 'system_error',
+        line: 0,
+        severity: 'critical',
+        message: 'AGRO review system temporarily unavailable'
+      }],
+      recommendations: ['Please try again later', 'Check system status'],
+      divine_blessing: false,
+      peer_reviewers: [],
+      timestamp: new Date().toISOString(),
+      sacred_insights: ['System resilience through graceful error handling']
+    }
   } finally {
     isLoading.value = false
   }
@@ -279,8 +299,9 @@ const formatTimestamp = (timestamp) => {
 }
 
 onMounted(() => {
-  // Initialize component
-  console.log('AGRO Review Dashboard mounted')
+  // Initialize AGRO Review Dashboard
+  // Production-ready initialization without console.log
+  // Component successfully mounted and ready for reviews
 })
 </script>
 
