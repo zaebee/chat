@@ -23,6 +23,8 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useUserStore } from '@/stores/user';
 import { useMessagesStore } from '@/stores/messages';
 import { useSacredReactionManager, type SacredMessageReactions } from '@/utils/SacredReactionManager';
+import { useSacredEventCleanup } from '@/utils/SacredEventManager';
+import { useSacredErrorBoundary } from '@/utils/SacredErrorBoundary';
 import type { Message } from '@/stores/messages';
 
 const props = defineProps<{
@@ -32,8 +34,10 @@ const props = defineProps<{
 const userStore = useUserStore();
 const messagesStore = useMessagesStore();
 
-// Sacred Reaction Manager Integration
+// Sacred Protection Integration
 const sacredReactionManager = useSacredReactionManager();
+const { addSacredListener, cleanupAllListeners } = useSacredEventCleanup('MessageReactions');
+const { wrapSacredOperation, isHealthy: isErrorBoundaryHealthy } = useSacredErrorBoundary('MessageReactions');
 
 const showReactionPicker = ref(false);
 const reactionPickerRef = ref<HTMLElement | null>(null);
@@ -65,63 +69,71 @@ const reactions = computed(() => {
 
 // Sacred metrics for monitoring
 const sacredMetrics = computed(() => sacredReactionManager.getMetrics());
-const isSystemHealthy = computed(() => sacredReactionManager.isHealthy.value);
+const isSystemHealthy = computed(() => 
+  sacredReactionManager.isHealthy.value && isErrorBoundaryHealthy.value
+);
 const statusMessage = computed(() => sacredReactionManager.statusMessage.value);
 
 // Sacred toggle reaction with divine protection
 const toggleReaction = async (emoji: string) => {
-  if (!userStore.currentUser) {
-    errorMessage.value = 'Please log in to react to messages';
-    return;
-  }
-  
-  if (isLoading.value) return; // Prevent double-clicks
-  
-  isLoading.value = true;
-  errorMessage.value = null;
-  
-  try {
-    const success = await sacredReactionManager.toggleReaction(
-      props.message.id,
-      emoji,
-      userStore.currentUser.id,
-      userStore.currentUser.username
-    );
-    
-    if (success) {
-      // Reload reactions to reflect changes
-      await loadSacredReactions();
-      showReactionPicker.value = false;
-    } else {
-      errorMessage.value = 'Unable to add reaction - limit reached';
-    }
-  } catch (error: any) {
-    console.error('Sacred Reaction Error:', error);
-    
-    if (error.code === 'CIRCUIT_BREAKER_OPEN') {
-      errorMessage.value = 'System protection active - please try again in a moment';
-    } else if (error.code === 'MEMORY_QUOTA_EXCEEDED') {
-      errorMessage.value = 'Storage limit reached - cleaning up old reactions';
-    } else {
-      errorMessage.value = 'Unable to process reaction - please try again';
+  const result = await wrapSacredOperation(async () => {
+    if (!userStore.currentUser) {
+      errorMessage.value = 'Please log in to react to messages';
+      return false;
     }
     
-    // Auto-clear error message after 5 seconds
-    setTimeout(() => {
-      errorMessage.value = null;
-    }, 5000);
-  } finally {
-    isLoading.value = false;
-  }
+    if (isLoading.value) return false; // Prevent double-clicks
+    
+    isLoading.value = true;
+    errorMessage.value = null;
+    
+    try {
+      const success = await sacredReactionManager.toggleReaction(
+        props.message.id,
+        emoji,
+        userStore.currentUser.id,
+        userStore.currentUser.username
+      );
+      
+      if (success) {
+        // Reload reactions to reflect changes
+        await loadSacredReactions();
+        showReactionPicker.value = false;
+        return true;
+      } else {
+        errorMessage.value = 'Unable to add reaction - limit reached';
+        return false;
+      }
+    } catch (error: any) {
+      console.error('Sacred Reaction Error:', error);
+      
+      if (error.code === 'CIRCUIT_BREAKER_OPEN') {
+        errorMessage.value = 'System protection active - please try again in a moment';
+      } else if (error.code === 'MEMORY_QUOTA_EXCEEDED') {
+        errorMessage.value = 'Storage limit reached - cleaning up old reactions';
+      } else {
+        errorMessage.value = 'Unable to process reaction - please try again';
+      }
+      
+      // Auto-clear error message after 5 seconds
+      setTimeout(() => {
+        errorMessage.value = null;
+      }, 5000);
+      
+      throw error; // Re-throw for error boundary
+    } finally {
+      isLoading.value = false;
+    }
+  }, 'toggle-reaction');
+  
+  return result;
 };
 
 // Load sacred reactions for this message
 const loadSacredReactions = async () => {
-  try {
+  await wrapSacredOperation(async () => {
     sacredReactions.value = await sacredReactionManager.getReactionsForMessage(props.message.id);
-  } catch (error) {
-    console.error('Failed to load sacred reactions:', error);
-  }
+  }, 'load-reactions');
 };
 
 const openReactionPicker = () => {
@@ -137,20 +149,19 @@ const handleClickOutside = (event: Event) => {
 
 // Sacred lifecycle management with divine protection
 onMounted(async () => {
-  // Load initial reactions
-  await loadSacredReactions();
-  
-  // Sacred event listener management
-  document.addEventListener('click', handleClickOutside);
-  
-  // Listen for sacred memory cleanup events
-  window.addEventListener('sacred-memory-cleanup', handleSacredCleanup);
+  await wrapSacredOperation(async () => {
+    // Load initial reactions
+    await loadSacredReactions();
+    
+    // Sacred event listener management - automatic cleanup on unmount
+    addSacredListener(document, 'click', handleClickOutside);
+    addSacredListener(window, 'sacred-memory-cleanup', handleSacredCleanup);
+  }, 'component-initialization');
 });
 
 onUnmounted(() => {
-  // Sacred cleanup - prevent memory leaks
-  document.removeEventListener('click', handleClickOutside);
-  window.removeEventListener('sacred-memory-cleanup', handleSacredCleanup);
+  // Sacred cleanup happens automatically via useSacredEventCleanup
+  // No manual cleanup needed - prevents memory leaks
 });
 
 // Sacred cleanup event handler
