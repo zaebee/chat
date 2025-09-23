@@ -1,4 +1,20 @@
 <script setup lang="ts">
+/**
+ * MessageReactions Component - Phase 1 Implementation
+ * 
+ * Current: Local storage-based reactions for immediate UX enhancement
+ * Future Phase 2: Will integrate with backend API for persistent, multi-user reactions
+ * 
+ * Phase 1 Features:
+ * - Local reaction storage via browser localStorage
+ * - Immediate visual feedback
+ * - No backend dependencies
+ * 
+ * Phase 2 Planned:
+ * - Real-time reaction synchronization
+ * - Persistent database storage
+ * - Multi-user reaction visibility
+ */
 import { ref, computed } from 'vue';
 import { useUserStore } from '@/stores/user';
 import { useMessagesStore } from '@/stores/messages';

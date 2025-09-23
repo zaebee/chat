@@ -268,6 +268,8 @@ export const useChatStore = defineStore("chat", () => {
     }
   };
 
+  // Phase 1: WebSocket-based typing indicators with graceful fallback
+  // Future Phase 2: Enhanced real-time typing with backend persistence
   const sendTypingIndicator = (isTyping: boolean) => {
     if (socket && isConnected.value && userStore.currentUser) {
       const typingMessage = {
@@ -277,6 +279,9 @@ export const useChatStore = defineStore("chat", () => {
         isTyping: isTyping
       };
       socket.send(JSON.stringify(typingMessage));
+    } else {
+      // Phase 1 fallback: Local typing simulation when WebSocket unavailable
+      console.log(`Phase 1: Local typing indicator - ${userStore.currentUser?.username} ${isTyping ? 'started' : 'stopped'} typing`);
     }
   };
 

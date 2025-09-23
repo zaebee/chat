@@ -2,14 +2,35 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useChatStore } from '@/stores/chat';
 
+// Phase 1: Local-only typing indicator
+// Future Phase 2: Will integrate with WebSocket for real-time multi-user typing
 const props = defineProps<{
-  typingUsers: string[];
+  typingUsers?: string[];
+  showLocalTyping?: boolean;
 }>();
 
 const chatStore = useChatStore();
 
+// Local typing simulation for Phase 1 demo
+const localTypingUsers = ref<string[]>([]);
+
+// Simulate typing activity based on local input
+const simulateTyping = () => {
+  if (props.showLocalTyping) {
+    localTypingUsers.value = ['You'];
+    setTimeout(() => {
+      localTypingUsers.value = [];
+    }, 2000);
+  }
+};
+
+// Use provided typing users or local simulation
+const activeTypingUsers = computed(() => {
+  return props.typingUsers || localTypingUsers.value;
+});
+
 const typingText = computed(() => {
-  const users = props.typingUsers;
+  const users = activeTypingUsers.value;
   if (users.length === 0) return '';
   
   if (users.length === 1) {
@@ -21,7 +42,12 @@ const typingText = computed(() => {
   }
 });
 
-const isVisible = computed(() => props.typingUsers.length > 0);
+const isVisible = computed(() => activeTypingUsers.value.length > 0);
+
+// Expose simulation function for parent components
+defineExpose({
+  simulateTyping
+});
 </script>
 
 <template>
