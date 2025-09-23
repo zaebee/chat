@@ -141,6 +141,9 @@ class AgroConsoleScanner:
                 "src/*",  # Source services directory
                 "hive/agents/*",  # AI agent implementations
                 "hive/*",  # Hive ecosystem components
+                "sacred_*.py",  # Sacred analysis scripts
+                "*_analysis.py",  # Analysis scripts
+                "*_demo.py",  # Demo scripts
             ],
             "strict_mode": True,
             "allow_dev_console": False,
