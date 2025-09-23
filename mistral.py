@@ -298,7 +298,7 @@ class HiveGardenerAgent:
                     # Action executed with metrics
 
             except KeyboardInterrupt:
-                print("\n🌿 Завершение работы...")
+                # Session terminated by user
                 break
             except Exception as e:
                 # Error handled
