@@ -6,6 +6,7 @@ import InteractiveCodeBlock from "@/components/InteractiveCodeBlock.vue";
 import BeeOrganella from "@/components/BeeOrganella.vue";
 import ChroniclerOrganella from "@/components/ChroniclerOrganella.vue";
 import HeroMessage from "@/components/HeroMessage.vue";
+import MessageReactions from "@/components/MessageReactions.vue";
 
 const props = defineProps<{
   message: Message & { children?: Message[] }
@@ -74,6 +75,10 @@ function handleReply(senderName: string, messageId: string) {
     <div class="message-timestamp">
       {{ new Date(message.timestamp).toLocaleTimeString() }}
     </div>
+    
+    <!-- Message Reactions -->
+    <MessageReactions :message="message" />
+    
     <button class="reply-btn" @click="handleReply(message.sender_name, message.id)">
       <svg
         xmlns="http://www.w3.org/2000/svg"

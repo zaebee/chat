@@ -4,6 +4,12 @@ import hljs from 'highlight.js';
 
 export function useMarkdownRenderer() {
   const renderMarkdown = (text: string) => {
+    // Pre-process text for mentions
+    let processedText = text;
+    
+    // Convert @mentions to markdown links
+    processedText = processedText.replace(/@(\w+)/g, '<span class="mention">@$1</span>');
+    
     const renderer = new marked.Renderer();
 
     renderer.link = (token) => {
@@ -46,7 +52,7 @@ export function useMarkdownRenderer() {
       `;
     };
 
-    const rawHtml = marked.parse(text, {
+    const rawHtml = marked.parse(processedText, {
       gfm: true,
       breaks: true,
       renderer: renderer,

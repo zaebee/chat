@@ -63,14 +63,25 @@ const getEnvironmentConfig = (): EnvironmentConfig => {
   const isDevMode = isDevelopment();
   
   if (isDevMode) {
-    // Development: Use current host for local development
+    // Development: Use backend port (8000) for API calls
     const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:';
     const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const host = window.location.host;
+    const hostname = window.location.hostname;
     
+    // In Gitpod, use the backend port URL pattern
+    if (hostname.includes('gitpod.dev') || hostname.includes('gitpod.io')) {
+      const backendHost = hostname.replace('5173--', '8000--');
+      return {
+        API_BASE_URL: `${protocol}//${backendHost}`,
+        WS_BASE_URL: `${wsProtocol}//${backendHost}`,
+        ENVIRONMENT: 'development'
+      };
+    }
+    
+    // For localhost, use port 8000
     return {
-      API_BASE_URL: `${protocol}//${host}`,
-      WS_BASE_URL: `${wsProtocol}//${host}`,
+      API_BASE_URL: `${protocol}//${hostname}:8000`,
+      WS_BASE_URL: `${wsProtocol}//${hostname}:8000`,
       ENVIRONMENT: 'development'
     };
   } else {
