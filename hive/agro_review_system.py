@@ -22,6 +22,8 @@ from enum import Enum
 from .teammate import HiveTeammate, TeammateProfile, TeammateCapability
 from .events import PollenEvent, HiveEventBus, EventSubscription
 from .dashboard import SacredMetricType, SacredMetricReading
+from .primitives import ScoreTransformation, ReviewAggregate, AgroEventConnector
+from .primitives.review_aggregate import AgroReviewType, AgroReviewResult, BeeToPeerSession
 
 
 # AGRO Scoring Constants - Eliminates magic numbers
@@ -412,14 +414,22 @@ class AgroReviewSystem:
     """
     AGRO Bee-to-Peer Review System
     
-    Implements aggressive collaborative evaluation protocols for
-    intensive code quality assessment and peer review.
+    Implements aggressive collaborative evaluation protocols using ATCG primitives:
+    - A (Aggregate): ReviewAggregate for state management
+    - T (Transformation): ScoreTransformation for pure scoring functions
+    - C (Connector): AgroEventConnector for event coordination
+    - G (Genesis): Event-driven review initiation
     """
     
     def __init__(self, event_bus: HiveEventBus):
         self.event_bus = event_bus
-        self.active_sessions: Dict[str, BeeToPeerSession] = {}
-        self.review_history: List[AgroReviewResult] = []
+        
+        # ATCG Primitives
+        self.aggregate = ReviewAggregate(max_history_size=1000)
+        self.connector = AgroEventConnector(event_bus)
+        # ScoreTransformation is stateless, used directly
+        
+        # Legacy components (to be phased out)
         self.ast_circuit_breaker = AstParsingCircuitBreaker()
         self.physics_monitor = PhysicsLevelResourceMonitor()
         
@@ -433,123 +443,153 @@ class AgroReviewSystem:
                                  code_context: str,
                                  review_type: AgroReviewType = AgroReviewType.PAIN_ANALYSIS,
                                  peer_reviewers: List[str] = None) -> AgroReviewResult:
-        """Initiate aggressive collaborative review"""
+        """Initiate aggressive collaborative review using ATCG primitives"""
         
         review_id = f"agro_{uuid.uuid4().hex[:8]}"
         peer_reviewers = peer_reviewers or ["bee.jules", "bee.sage", "bee.chronicler"]
         
-        # Physics Level resource constraint checking
-        code_size = len(code_context.encode('utf-8'))
-        resource_constraints = self.physics_monitor.check_resource_constraints(code_size)
-        
-        if not resource_constraints["can_proceed"]:
-            # Return resource constraint violation result
-            return AgroReviewResult(
-                review_id=review_id,
-                review_type=review_type,
-                agro_score=0,
-                pain_score=0,
-                severity=AgroSeverity.CRITICAL,
-                violations=resource_constraints["violations"],
-                recommendations=resource_constraints["recommendations"],
-                divine_blessing=False,
-                peer_reviewers=peer_reviewers,
-                timestamp=datetime.now().isoformat(),
-                sacred_insights=[
-                    "Resource constraints protect the sacred hive from overload",
-                    "Physics Level wisdom guides sustainable computing practices"
-                ]
-            )
-        
-        # Record review start for resource tracking
-        self.physics_monitor.start_review(code_size)
-        
-        # Perform PAIN analysis
-        pain_result = await self._perform_pain_analysis(code_context)
-        
-        # Calculate AGRO score
-        agro_score = self._calculate_agro_score(pain_result)
-        
-        # Determine severity
-        severity = self._determine_severity(agro_score)
-        
-        # Generate recommendations
-        recommendations = await self._generate_agro_recommendations(pain_result, severity)
-        
-        # Extract sacred insights
-        sacred_insights = await self._extract_sacred_insights(pain_result, review_type)
-        
-        # Create review result
-        review_result = AgroReviewResult(
+        # C (Connector): Publish review initiation event
+        await self.connector.publish_review_initiated(
             review_id=review_id,
-            review_type=review_type,
-            agro_score=agro_score,
-            pain_score=pain_result.get('pain_score', 0),
-            severity=severity,
-            violations=pain_result.get('violations', []),
-            recommendations=recommendations,
-            divine_blessing=agro_score >= 90,
-            peer_reviewers=peer_reviewers,
-            timestamp=datetime.now().isoformat(),
-            sacred_insights=sacred_insights
+            review_type=review_type.value,
+            target=f"code_context_{len(code_context)}_bytes",
+            initiator="agro_review_system"
         )
         
-        self.review_history.append(review_result)
-        
-        # Manage memory bounds for review history
-        self._manage_review_history_bounds()
-        
-        # Emit AGRO review completed event
-        await self.event_bus.publish(PollenEvent(
-            event_type="agro_review_completed",
-            source_component="agro_review_system",
-            payload={
-                "review_id": review_id,
-                "agro_score": agro_score,
-                "severity": severity.value,
-                "divine_blessing": review_result.divine_blessing,
-                "peer_reviewers": peer_reviewers
-            }
-        ))
-        
-        # Record review completion for resource tracking
-        self.physics_monitor.end_review()
-        
-        return review_result
+        try:
+            # Physics Level resource constraint checking (legacy)
+            code_size = len(code_context.encode('utf-8'))
+            resource_constraints = self.physics_monitor.check_resource_constraints(code_size)
+            
+            if not resource_constraints["can_proceed"]:
+                # Create failure result and publish failure event
+                await self.connector.publish_review_failed(
+                    review_id=review_id,
+                    error_message="Resource constraints exceeded",
+                    error_type="physics_constraint"
+                )
+                
+                return AgroReviewResult.create(
+                    review_type=review_type,
+                    agro_score=0,
+                    pain_score=0,
+                    severity="critical",
+                    violations=resource_constraints["violations"],
+                    recommendations=resource_constraints["recommendations"],
+                    divine_blessing=False,
+                    peer_reviewers=peer_reviewers,
+                    sacred_insights=[
+                        "Resource constraints protect the sacred hive from overload",
+                        "Physics Level wisdom guides sustainable computing practices"
+                    ]
+                )
+            
+            # Record review start for resource tracking
+            self.physics_monitor.start_review(code_size)
+            
+            # Perform PAIN analysis (legacy method)
+            pain_result = await self._perform_pain_analysis(code_context)
+            
+            # T (Transformation): Use pure transformation functions
+            agro_score = ScoreTransformation.calculate_agro_score(pain_result)
+            severity = ScoreTransformation.determine_severity(agro_score)
+            divine_blessing = ScoreTransformation.calculate_divine_blessing_eligibility(
+                agro_score, pain_result.get('violations', [])
+            )
+            
+            # Generate recommendations (legacy method)
+            recommendations = await self._generate_agro_recommendations(pain_result, severity)
+            
+            # Extract sacred insights (legacy method)
+            sacred_insights = await self._extract_sacred_insights(pain_result, review_type)
+            
+            # Create review result
+            review_result = AgroReviewResult(
+                review_id=review_id,
+                review_type=review_type,
+                agro_score=agro_score,
+                pain_score=pain_result.get('pain_score', 0),
+                severity=severity.value,
+                violations=pain_result.get('violations', []),
+                recommendations=recommendations,
+                divine_blessing=divine_blessing,
+                peer_reviewers=peer_reviewers,
+                timestamp=datetime.now().isoformat(),
+                sacred_insights=sacred_insights
+            )
+            
+            # A (Aggregate): Store result in aggregate
+            self.aggregate.add_review_result(review_result)
+            
+            # C (Connector): Publish completion event
+            await self.connector.publish_review_completed(review_result)
+            
+            # Record review completion for resource tracking
+            self.physics_monitor.end_review()
+            
+            return review_result
+            
+        except Exception as e:
+            # C (Connector): Publish failure event
+            await self.connector.publish_review_failed(
+                review_id=review_id,
+                error_message=str(e),
+                error_type="review_execution_error"
+            )
+            raise
     
     async def start_bee_to_peer_session(self,
                                       participants: List[str],
                                       review_target: str,
                                       session_type: str = "collaborative_review") -> BeeToPeerSession:
-        """Start bee-to-peer collaborative session"""
+        """Start bee-to-peer collaborative session using ATCG primitives"""
         
-        session_id = f"peer_{uuid.uuid4().hex[:8]}"
-        
-        session = BeeToPeerSession(
-            session_id=session_id,
+        # A (Aggregate): Start session through aggregate
+        session = self.aggregate.start_collaborative_session(
             participants=participants,
             review_target=review_target,
-            session_type=session_type,
-            start_time=datetime.now().isoformat(),
-            end_time=None,
-            collaboration_score=0.0,
-            sacred_alignment=0.0,
-            divine_guidance=[]
+            session_type=session_type
         )
         
-        self.active_sessions[session_id] = session
+        # C (Connector): Publish session started event
+        await self.connector.publish_session_started(session)
         
-        # Emit session started event
-        await self.event_bus.publish(PollenEvent(
-            event_type="bee_to_peer_session_started",
-            source_component="agro_review_system",
-            payload={
-                "session_id": session_id,
-                "participants": participants,
-                "session_type": session_type,
-                "review_target": review_target
-            }
-        ))
+        return session
+    
+    # ATCG Primitive Access Methods
+    
+    def get_review_history(self, limit: Optional[int] = None) -> List[AgroReviewResult]:
+        """Get review history from aggregate"""
+        return self.aggregate.get_review_history(limit)
+    
+    def get_active_sessions(self) -> List[BeeToPeerSession]:
+        """Get active sessions from aggregate"""
+        return self.aggregate.get_active_sessions()
+    
+    def get_aggregate_metrics(self) -> Dict[str, Any]:
+        """Get aggregate metrics"""
+        return self.aggregate.get_aggregate_metrics()
+    
+    def get_event_statistics(self) -> Dict[str, Any]:
+        """Get event connector statistics"""
+        return self.connector.get_statistics()
+    
+    async def end_collaborative_session(self, 
+                                      session_id: str,
+                                      collaboration_score: float = 0.0,
+                                      sacred_alignment: float = 0.0) -> Optional[BeeToPeerSession]:
+        """End collaborative session using ATCG primitives"""
+        
+        # A (Aggregate): End session through aggregate
+        session = self.aggregate.end_collaborative_session(
+            session_id=session_id,
+            collaboration_score=collaboration_score,
+            sacred_alignment=sacred_alignment
+        )
+        
+        if session:
+            # C (Connector): Publish session ended event
+            await self.connector.publish_session_ended(session)
         
         return session
     
@@ -756,73 +796,42 @@ class AgroReviewSystem:
                 payload=asdict(result)
             ))
     
-    def _manage_review_history_bounds(self):
-        """
-        Manage memory bounds for review history to prevent memory leaks
-        
-        Implements bounded collection pattern with automatic cleanup
-        """
-        current_count = len(self.review_history)
-        max_allowed = AgroScoringConstants.MAX_REVIEW_HISTORY
-        cleanup_threshold = int(max_allowed * AgroScoringConstants.CLEANUP_THRESHOLD)
-        
-        if current_count >= cleanup_threshold:
-            # Calculate how many to remove
-            excess_count = current_count - max_allowed + AgroScoringConstants.CLEANUP_BATCH_SIZE
-            remove_count = min(excess_count, AgroScoringConstants.CLEANUP_BATCH_SIZE)
-            
-            if remove_count > 0:
-                # Remove oldest reviews (FIFO cleanup)
-                self.review_history = self.review_history[remove_count:]
-                
-                # Log cleanup for monitoring (production-safe)
-                cleanup_info = {
-                    "removed_count": remove_count,
-                    "remaining_count": len(self.review_history),
-                    "cleanup_reason": "memory_bounds_exceeded"
-                }
-                
-                # Emit cleanup event for monitoring
-                asyncio.create_task(self.event_bus.publish(PollenEvent(
-                    event_type="agro_review_history_cleanup",
-                    source_component="agro_review_system",
-                    payload=cleanup_info
-                )))
+    # Memory management is now handled by the ReviewAggregate primitive
     
     def get_status(self) -> Dict[str, Any]:
-        """Get AGRO review system status"""
+        """Get AGRO review system status using ATCG primitives"""
+        
+        # A (Aggregate): Get status from aggregate
+        aggregate_status = self.aggregate.get_status()
+        aggregate_metrics = self.aggregate.get_aggregate_metrics()
+        
+        # C (Connector): Get event statistics
+        connector_stats = self.connector.get_statistics()
         
         return {
             "component": "agro_review_system",
-            "active_sessions": len(self.active_sessions),
-            "total_reviews": len(self.review_history),
-            "recent_reviews": [
-                {
-                    "review_id": r.review_id,
-                    "agro_score": r.agro_score,
-                    "severity": r.severity.value,
-                    "divine_blessing": r.divine_blessing
-                }
-                for r in self.review_history[-5:]
-            ],
+            "architecture": "ATCG_primitives",
+            "primitives": {
+                "aggregate": aggregate_status,
+                "connector": connector_stats,
+                "transformation": "stateless_functions"
+            },
             "capabilities": [
                 "pain_analysis",
                 "peer_collaboration",
                 "aggressive_scrutiny",
                 "divine_blessing_assessment"
             ],
-            "sacred_metrics": {
-                "average_agro_score": sum(r.agro_score for r in self.review_history) / len(self.review_history) if self.review_history else 0,
-                "divine_blessing_rate": sum(1 for r in self.review_history if r.divine_blessing) / len(self.review_history) if self.review_history else 0,
-                "total_violations_found": sum(len(r.violations) for r in self.review_history)
-            },
-            "memory_management": {
-                "review_history_count": len(self.review_history),
-                "max_review_history": AgroScoringConstants.MAX_REVIEW_HISTORY,
-                "memory_usage_percentage": (len(self.review_history) / AgroScoringConstants.MAX_REVIEW_HISTORY) * 100,
-                "cleanup_threshold": int(AgroScoringConstants.MAX_REVIEW_HISTORY * AgroScoringConstants.CLEANUP_THRESHOLD),
-                "memory_bounded": True
-            },
+            "sacred_metrics": aggregate_metrics,
+            "recent_reviews": [
+                {
+                    "review_id": r.review_id,
+                    "agro_score": r.agro_score,
+                    "severity": r.severity,
+                    "divine_blessing": r.divine_blessing
+                }
+                for r in self.aggregate.get_review_history(5)
+            ],
             "circuit_breaker": self.ast_circuit_breaker.get_status(),
             "physics_level": self.physics_monitor.get_physics_metrics()
         }

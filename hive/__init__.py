@@ -10,7 +10,7 @@ __author__ = "Hive Collective"
 
 from .intent import HiveIntent
 from .physics import HivePhysics
-from .primitives import Aggregate, Transformation, Connector, GenesisEvent
+from .primitives import ScoreTransformation, ReviewAggregate, AgroEventConnector
 from .registry import HiveRegistry
 from .teammate import HiveTeammate
 from .events import PollenEvent, HiveEventBus
@@ -22,10 +22,9 @@ from .sage_coordination import SacredSageCoordinator
 __all__ = [
     "HiveIntent",
     "HivePhysics",
-    "Aggregate",
-    "Transformation",
-    "Connector",
-    "GenesisEvent",
+    "ScoreTransformation",
+    "ReviewAggregate",
+    "AgroEventConnector",
     "HiveRegistry",
     "HiveTeammate",
     "PollenEvent",
