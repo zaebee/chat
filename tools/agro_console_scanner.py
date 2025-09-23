@@ -131,6 +131,12 @@ class AgroConsoleScanner:
                 "*.min.js",
                 "*-*.js",  # Minified files with hash patterns like index-BbDa_177.js
                 "static/assets/*",  # All static assets (built files)
+                "prototypes/*",  # Development prototype files
+                "sacred_validation.py",  # CLI tool with intentional output
+                "p2p_daemon.py",  # Daemon script with status output
+                "hive_demo.py",  # Demo script
+                "chat.py",  # Legacy chat server
+                "hive_chat.py",  # Main server (startup messages allowed)
             ],
             "strict_mode": True,
             "allow_dev_console": False,
@@ -146,10 +152,20 @@ class AgroConsoleScanner:
         # Check if file is in static/assets directory (built files)
         if "static/assets/" in file_path:
             return True
+            
+        # Check if file is in prototypes directory (development files)
+        if "prototypes/" in file_path:
+            return True
 
         for pattern in self.config["exempt_files"]:
-            if re.match(pattern.replace("*", ".*"), file_name):
-                return True
+            # Handle path patterns with wildcards
+            if "/" in pattern:
+                if re.match(pattern.replace("*", ".*"), file_path):
+                    return True
+            else:
+                # Handle filename patterns
+                if re.match(pattern.replace("*", ".*"), file_name):
+                    return True
 
         return False
 
