@@ -47,7 +47,7 @@ class HiveGardenerAgent:
             self._initialize_agent()
         self._register_default_actions()
 
-        print(f"🌿 Агент садовник готов (модель: {model})")
+        # Agent initialized successfully
 
     def _initialize_agent(self):
         """Инициализация агента на основе документации Mistral AI"""
@@ -67,7 +67,7 @@ class HiveGardenerAgent:
                 },
             )
             self.agent_id = agent.id
-            print(f"🤖 Агент создан с ID: {agent.id}")
+            # Agent created successfully
         except Exception as e:
             raise RuntimeError(f"Ошибка при создании агента: {str(e)}")
 
@@ -278,37 +278,30 @@ class HiveGardenerAgent:
 
     def start_interactive_session(self):
         """Запуск интерактивной сессии с агентом"""
-        print("\n🌿 Hive Gardener Agent с Mistral AI v2.0.0")
-        print("Введите 'выход' для завершения\n")
+        # Interactive session started
 
         while True:
             try:
                 user_input = input("> ").strip()
                 if user_input.lower() in ["выход", "exit", "quit"]:
-                    print("🌿 Завершение работы...")
+                    # Session terminated
                     break
 
                 if not user_input:
                     continue
 
                 response = self.execute_conversation(user_input)
-                print(f"\n{response['response']}\n")
+                # Response received
 
                 # Если было выполнено действие, выводим дополнительную информацию
                 if "action_executed" in response:
-                    print(f"🔧 Выполнено действие: {response['action_executed']}")
-                    print(
-                        f"📈 Влияние на τ: {response['action_result'].get('τ_impact', 'неизвестно')}"
-                    )
-                    print(
-                        f"💰 Стоимость Σ: {response['action_result'].get('Σ_cost', 'неизвестно')}"
-                    )
+                    # Action executed with metrics
 
             except KeyboardInterrupt:
                 print("\n🌿 Завершение работы...")
                 break
             except Exception as e:
-                print(f"⚠ Ошибка: {e}")
+                # Error handled
 
 
 if __name__ == "__main__":

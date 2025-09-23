@@ -179,13 +179,41 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 
+// TypeScript interfaces
+interface AgroReview {
+  review_id: string
+  review_type: string
+  agro_score: number
+  pain_score: number
+  severity: string
+  violations: Array<{
+    type: string
+    line: number
+    severity: string
+    message: string
+  }>
+  recommendations: string[]
+  divine_blessing: boolean
+  peer_reviewers: string[]
+  timestamp: string
+  sacred_insights: string[]
+}
+
+interface CollabSession {
+  session_id: string
+  session_type: string
+  participants: string[]
+  collaboration_score: number
+  sacred_alignment: number
+}
+
 // Reactive state
 const codeInput = ref('')
 const selectedReviewType = ref('pain_analysis')
 const selectedReviewers = ref(['bee.jules', 'bee.sage'])
-const currentReview = ref(null)
-const reviewHistory = ref([])
-const activeSessions = ref([])
+const currentReview = ref<AgroReview | null>(null)
+const reviewHistory = ref<AgroReview[]>([])
+const activeSessions = ref<CollabSession[]>([])
 const isLoading = ref(false)
 
 // Mock AGRO review function (would connect to backend)
@@ -267,11 +295,11 @@ const generateMockViolations = () => {
   return violations
 }
 
-const selectReview = (review) => {
+const selectReview = (review: AgroReview) => {
   currentReview.value = review
 }
 
-const getScoreClass = (score) => {
+const getScoreClass = (score: number) => {
   if (score >= 90) return 'divine'
   if (score >= 80) return 'blessed'
   if (score >= 60) return 'acceptable'
@@ -279,12 +307,12 @@ const getScoreClass = (score) => {
   return 'critical'
 }
 
-const getSeverityClass = (severity) => {
+const getSeverityClass = (severity: string) => {
   return `severity-${severity}`
 }
 
-const getSeverityIcon = (severity) => {
-  const icons = {
+const getSeverityIcon = (severity: string) => {
+  const icons: Record<string, string> = {
     divine: '✨',
     blessed: '🙏',
     acceptable: '✅',
@@ -294,7 +322,7 @@ const getSeverityIcon = (severity) => {
   return icons[severity] || '❓'
 }
 
-const formatTimestamp = (timestamp) => {
+const formatTimestamp = (timestamp: string) => {
   return new Date(timestamp).toLocaleString()
 }
 
