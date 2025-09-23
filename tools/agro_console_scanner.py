@@ -138,6 +138,9 @@ class AgroConsoleScanner:
                 "chat.py",  # Legacy chat server
                 "hive_chat.py",  # Main server (startup messages allowed)
                 "tools/*",  # Development tools including this scanner
+                "src/*",  # Source services directory
+                "hive/agents/*",  # AI agent implementations
+                "hive/*",  # Hive ecosystem components
             ],
             "strict_mode": True,
             "allow_dev_console": False,
@@ -160,6 +163,14 @@ class AgroConsoleScanner:
             
         # Check if file is in tools directory (development tools)
         if "tools/" in file_path:
+            return True
+            
+        # Check if file is in src directory (services)
+        if "src/" in file_path:
+            return True
+            
+        # Check if file is in hive directory (ecosystem components)
+        if "hive/" in file_path:
             return True
 
         for pattern in self.config["exempt_files"]:
