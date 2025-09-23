@@ -22,7 +22,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useUserStore } from '@/stores/user';
 import { useMessagesStore } from '@/stores/messages';
-import { useSacredReactionManager, type SacredMessageReactions } from '@/utils/SacredReactionManager';
+import { useBoundedReactionManager, type BoundedMessageReactions } from '@/utils/BoundedReactionManager';
 import { useSacredEventCleanup } from '@/utils/SacredEventManager';
 import { useSacredErrorBoundary } from '@/utils/SacredErrorBoundary';
 import type { Message } from '@/stores/messages';
@@ -35,7 +35,7 @@ const userStore = useUserStore();
 const messagesStore = useMessagesStore();
 
 // Sacred Protection Integration
-const sacredReactionManager = useSacredReactionManager();
+const boundedReactionManager = useBoundedReactionManager();
 const { addSacredListener, cleanupAllListeners } = useSacredEventCleanup('MessageReactions');
 const { wrapSacredOperation, isHealthy: isErrorBoundaryHealthy } = useSacredErrorBoundary('MessageReactions');
 
@@ -45,7 +45,7 @@ const isLoading = ref(false);
 const errorMessage = ref<string | null>(null);
 
 // Sacred reaction state
-const sacredReactions = ref<SacredMessageReactions | null>(null);
+const sacredReactions = ref<BoundedMessageReactions | null>(null);
 
 // Common emoji reactions
 const commonEmojis = ['👍', '❤️', '😄', '😮', '😢', '😡', '🎉', '🚀'];
@@ -68,11 +68,11 @@ const reactions = computed(() => {
 });
 
 // Sacred metrics for monitoring
-const sacredMetrics = computed(() => sacredReactionManager.getMetrics());
+const sacredMetrics = computed(() => boundedReactionManager.getMetrics());
 const isSystemHealthy = computed(() => 
-  sacredReactionManager.isHealthy.value && isErrorBoundaryHealthy.value
+  boundedReactionManager.isHealthy.value && isErrorBoundaryHealthy.value
 );
-const statusMessage = computed(() => sacredReactionManager.statusMessage.value);
+const statusMessage = computed(() => boundedReactionManager.statusMessage.value);
 
 // Sacred toggle reaction with divine protection
 const toggleReaction = async (emoji: string) => {
@@ -88,7 +88,7 @@ const toggleReaction = async (emoji: string) => {
     errorMessage.value = null;
     
     try {
-      const success = await sacredReactionManager.toggleReaction(
+      const success = await boundedReactionManager.toggleReaction(
         props.message.id,
         emoji,
         userStore.currentUser.id,
@@ -132,7 +132,7 @@ const toggleReaction = async (emoji: string) => {
 // Load sacred reactions for this message
 const loadSacredReactions = async () => {
   await wrapSacredOperation(async () => {
-    sacredReactions.value = await sacredReactionManager.getReactionsForMessage(props.message.id);
+    sacredReactions.value = await boundedReactionManager.getReactionsForMessage(props.message.id);
   }, 'load-reactions');
 };
 

@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { SacredReactionManager, SACRED_LIMITS, SacredCircuitBreakerError, SacredMemoryQuotaError } from '../SacredReactionManager';
+import { BoundedReactionManager, PROTECTION_LIMITS, ReactionManagerError } from '../BoundedReactionManager';
 
 // Mock localStorage for testing
 const localStorageMock = (() => {
@@ -26,14 +26,14 @@ Object.defineProperty(window, 'localStorage', {
 });
 
 describe('Sacred Reaction Manager', () => {
-  let manager: SacredReactionManager;
+  let manager: BoundedReactionManager;
   
   beforeEach(() => {
     // Clear localStorage before each test
     localStorage.clear();
     
     // Create fresh manager instance
-    manager = new SacredReactionManager();
+    manager = new BoundedReactionManager();
   });
   
   afterEach(() => {
@@ -91,7 +91,7 @@ describe('Sacred Reaction Manager', () => {
       const emoji = '🎉';
 
       // Add reactions up to the limit
-      for (let i = 0; i < SACRED_LIMITS.MAX_USERS_PER_REACTION; i++) {
+      for (let i = 0; i < PROTECTION_LIMITS.MAX_USERS_PER_REACTION; i++) {
         const result = await manager.toggleReaction(messageId, emoji, `user-${i}`, `User${i}`);
         expect(result).toBe(true);
       }
@@ -100,21 +100,21 @@ describe('Sacred Reaction Manager', () => {
       const result = await manager.toggleReaction(
         messageId, 
         emoji, 
-        `user-${SACRED_LIMITS.MAX_USERS_PER_REACTION}`, 
-        `User${SACRED_LIMITS.MAX_USERS_PER_REACTION}`
+        `user-${PROTECTION_LIMITS.MAX_USERS_PER_REACTION}`, 
+        `User${PROTECTION_LIMITS.MAX_USERS_PER_REACTION}`
       );
       expect(result).toBe(false);
 
       // Verify count is still at limit
       const reactions = await manager.getReactionsForMessage(messageId);
-      expect(reactions![emoji].count).toBe(SACRED_LIMITS.MAX_USERS_PER_REACTION);
+      expect(reactions![emoji].count).toBe(PROTECTION_LIMITS.MAX_USERS_PER_REACTION);
     });
 
     it('should perform sacred cleanup when reaction limit exceeded', async () => {
       const messageId = 'test-message-cleanup';
 
       // Add reactions beyond cleanup threshold
-      const reactionCount = Math.floor(SACRED_LIMITS.MAX_REACTIONS_PER_MESSAGE * SACRED_LIMITS.CLEANUP_THRESHOLD) + 5;
+      const reactionCount = Math.floor(PROTECTION_LIMITS.MAX_REACTIONS_PER_MESSAGE * PROTECTION_LIMITS.CLEANUP_THRESHOLD) + 5;
       
       for (let i = 0; i < reactionCount; i++) {
         const emoji = String.fromCodePoint(0x1F600 + i); // Different emojis
@@ -129,7 +129,7 @@ describe('Sacred Reaction Manager', () => {
       
       // Should have fewer reactions after cleanup
       expect(finalCount).toBeLessThan(reactionCount);
-      expect(finalCount).toBeLessThanOrEqual(Math.floor(SACRED_LIMITS.MAX_REACTIONS_PER_MESSAGE * 0.4));
+      expect(finalCount).toBeLessThanOrEqual(Math.floor(PROTECTION_LIMITS.MAX_REACTIONS_PER_MESSAGE * 0.4));
     });
   });
 
@@ -219,7 +219,7 @@ describe('Sacred Reaction Manager', () => {
 
 describe('Sacred Protection Integration', () => {
   it('should integrate with Vue reactivity', async () => {
-    const manager = new SacredReactionManager();
+    const manager = new BoundedReactionManager();
     
     // Allow initialization to complete
     await new Promise(resolve => setTimeout(resolve, 10));
@@ -231,7 +231,7 @@ describe('Sacred Protection Integration', () => {
   });
 
   it('should provide comprehensive metrics', () => {
-    const manager = new SacredReactionManager();
+    const manager = new BoundedReactionManager();
     const metrics = manager.getMetrics();
     
     expect(metrics).toHaveProperty('totalReactions');

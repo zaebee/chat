@@ -1,21 +1,25 @@
 /**
- * 🐝✨ Sacred Reaction Manager - Phase 1.1 Emergency Fix ✨🐝
+ * 🐝✨ Bounded Reaction Manager - Phase 1.1 Emergency Fix ✨🐝
  * 
  * IMMEDIATE IMPLEMENTATION - Addresses bee.Sage critical vulnerability:
  * "Unbounded Reaction Storage - Memory exhaustion through infinite reaction accumulation"
  * 
- * Sacred Protection Mechanisms:
+ * Engineering Truth: Implements bounded collection patterns with circuit breaker protection
+ * Protection Mechanisms:
  * - Bounded collections with automatic cleanup
  * - Circuit breaker patterns for failure isolation
  * - Memory monitoring and quota enforcement
  * - Graceful degradation under stress
+ * 
+ * Sacred Narrative: "For everything there is a season, and a time for every matter under heaven"
+ * - Ecclesiastes 3:1 (ESV)
  */
 
 import { ref, computed } from 'vue';
 import type { Message } from '@/stores/messages';
 
-// Sacred Configuration Constants
-const SACRED_LIMITS = {
+// Protection Configuration Constants
+const PROTECTION_LIMITS = {
   MAX_REACTIONS_PER_MESSAGE: 50,
   MAX_USERS_PER_REACTION: 100,
   CLEANUP_THRESHOLD: 0.8,
@@ -25,8 +29,8 @@ const SACRED_LIMITS = {
   GLOBAL_CLEANUP_THRESHOLD: 0.9
 } as const;
 
-// Sacred Error Types
-export class SacredReactionError extends Error {
+// Reaction Management Error Types
+export class ReactionManagerError extends Error {
   constructor(message: string, public code: string) {
     super(message);
     this.name = 'SacredReactionError';
@@ -53,8 +57,8 @@ class SacredCircuitBreaker {
   private successCount = 0;
 
   constructor(
-    private failureThreshold: number = SACRED_LIMITS.CIRCUIT_BREAKER_THRESHOLD,
-    private recoveryTimeout: number = SACRED_LIMITS.RECOVERY_TIMEOUT_MS,
+    private failureThreshold: number = PROTECTION_LIMITS.CIRCUIT_BREAKER_THRESHOLD,
+    private recoveryTimeout: number = PROTECTION_LIMITS.RECOVERY_TIMEOUT_MS,
     private successThreshold: number = 3
   ) {}
 
@@ -117,7 +121,7 @@ class SacredMemoryMonitor {
   private readonly maxStorageSize: number;
   private readonly warningThreshold: number;
 
-  constructor(maxStorageMB: number = SACRED_LIMITS.STORAGE_QUOTA_MB) {
+  constructor(maxStorageMB: number = PROTECTION_LIMITS.STORAGE_QUOTA_MB) {
     this.maxStorageSize = maxStorageMB * 1024 * 1024;
     this.warningThreshold = this.maxStorageSize * 0.8;
   }
@@ -170,7 +174,7 @@ export interface SacredReaction {
   popularity: number; // For cleanup prioritization
 }
 
-export interface SacredMessageReactions {
+export interface BoundedMessageReactions {
   [emoji: string]: SacredReaction;
 }
 
@@ -183,7 +187,7 @@ export interface SacredReactionMetrics {
 }
 
 // Main Sacred Reaction Manager Class
-export class SacredReactionManager {
+export class BoundedReactionManager {
   private circuitBreaker: SacredCircuitBreaker;
   private memoryMonitor: SacredMemoryMonitor;
   private lastGlobalCleanup = 0;
@@ -245,7 +249,7 @@ export class SacredReactionManager {
     if (!reactions) return false;
 
     const reactionCount = Object.keys(reactions).length;
-    return reactionCount > SACRED_LIMITS.MAX_REACTIONS_PER_MESSAGE * SACRED_LIMITS.CLEANUP_THRESHOLD;
+    return reactionCount > PROTECTION_LIMITS.MAX_REACTIONS_PER_MESSAGE * PROTECTION_LIMITS.CLEANUP_THRESHOLD;
   }
 
   /**
@@ -267,8 +271,8 @@ export class SacredReactionManager {
       reactionEntries.sort((a, b) => b.popularity - a.popularity);
 
       // Keep only the most sacred (popular) reactions
-      const keepCount = Math.floor(SACRED_LIMITS.MAX_REACTIONS_PER_MESSAGE * 0.4); // More aggressive cleanup
-      const preservedReactions: SacredMessageReactions = {};
+      const keepCount = Math.floor(PROTECTION_LIMITS.MAX_REACTIONS_PER_MESSAGE * 0.4); // More aggressive cleanup
+      const preservedReactions: BoundedMessageReactions = {};
 
       for (let i = 0; i < Math.min(keepCount, reactionEntries.length); i++) {
         const { emoji, reaction } = reactionEntries[i];
@@ -351,11 +355,11 @@ export class SacredReactionManager {
         
         if (userIndex === -1) {
           // Add user reaction (with sacred bounds checking)
-          if (reaction.users.length < SACRED_LIMITS.MAX_USERS_PER_REACTION) {
+          if (reaction.users.length < PROTECTION_LIMITS.MAX_USERS_PER_REACTION) {
             reaction.users.push(userName);
             reaction.count++;
           } else {
-            console.warn(`Sacred Limit: Maximum users per reaction (${SACRED_LIMITS.MAX_USERS_PER_REACTION}) reached for ${emoji}`);
+            console.warn(`Protection Limit: Maximum users per reaction (${PROTECTION_LIMITS.MAX_USERS_PER_REACTION}) reached for ${emoji}`);
             return false;
           }
         } else {
@@ -403,7 +407,7 @@ export class SacredReactionManager {
   /**
    * Sacred Storage Operations
    */
-  private async getMessageReactions(messageId: string): Promise<SacredMessageReactions | null> {
+  private async getMessageReactions(messageId: string): Promise<BoundedMessageReactions | null> {
     try {
       const stored = localStorage.getItem(`sacred_reactions_${messageId}`);
       return stored ? JSON.parse(stored) : null;
@@ -413,7 +417,7 @@ export class SacredReactionManager {
     }
   }
 
-  private async setMessageReactions(messageId: string, reactions: SacredMessageReactions): Promise<void> {
+  private async setMessageReactions(messageId: string, reactions: BoundedMessageReactions): Promise<void> {
     try {
       if (Object.keys(reactions).length === 0) {
         localStorage.removeItem(`sacred_reactions_${messageId}`);
@@ -513,7 +517,7 @@ export class SacredReactionManager {
   /**
    * Public API for component integration
    */
-  public getReactionsForMessage(messageId: string): Promise<SacredMessageReactions | null> {
+  public getReactionsForMessage(messageId: string): Promise<BoundedMessageReactions | null> {
     return this.getMessageReactions(messageId);
   }
 
@@ -551,7 +555,7 @@ export class SacredReactionManager {
 // Sacred Singleton Instance
 let sacredReactionManagerInstance: SacredReactionManager | null = null;
 
-export function useSacredReactionManager(): SacredReactionManager {
+export function useBoundedReactionManager(): SacredReactionManager {
   if (!sacredReactionManagerInstance) {
     sacredReactionManagerInstance = new SacredReactionManager();
   }
@@ -559,4 +563,4 @@ export function useSacredReactionManager(): SacredReactionManager {
 }
 
 // Export for testing and debugging
-export { SACRED_LIMITS };
+export { PROTECTION_LIMITS };

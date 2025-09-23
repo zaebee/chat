@@ -1,21 +1,25 @@
 /**
- * 🐝✨ Sacred Event Manager - Phase 1.1 Emergency Fix ✨🐝
+ * 🐝✨ Component Event Manager - Phase 1.1 Emergency Fix ✨🐝
  * 
  * IMMEDIATE IMPLEMENTATION - Addresses bee.Sage critical vulnerability:
  * "Event Listener Persistence - Memory leaks from improper cleanup"
  * 
- * Sacred Protection Mechanisms:
+ * Engineering Truth: Implements automatic event listener lifecycle management with memory leak prevention
+ * Protection Mechanisms:
  * - Automatic event listener cleanup on component unmount
  * - Memory leak prevention through weak references
  * - Event listener lifecycle tracking
  * - Graceful error handling for event operations
  * - Resource bounds and cleanup scheduling
+ * 
+ * Sacred Narrative: "To every thing there is a season, and a time to every purpose under the heaven"
+ * - Ecclesiastes 3:1 (KJV)
  */
 
 import { ref, onUnmounted, getCurrentInstance } from 'vue';
 
-// Sacred Configuration
-const SACRED_EVENT_LIMITS = {
+// Event Management Configuration
+const EVENT_MANAGER_LIMITS = {
   MAX_LISTENERS_PER_COMPONENT: 50,
   MAX_GLOBAL_LISTENERS: 1000,
   CLEANUP_INTERVAL_MS: 30000, // 30 seconds
@@ -51,7 +55,7 @@ interface SacredEventListener {
 }
 
 // Sacred Event Manager Class
-export class SacredEventManager {
+export class ComponentEventManager {
   private listeners: Map<string, SacredEventListener> = new Map();
   private componentListeners: Map<string, Set<string>> = new Map();
   private globalListenerCount = 0;
@@ -80,13 +84,13 @@ export class SacredEventManager {
     componentId?: string
   ): string {
     // Sacred bounds checking
-    if (this.globalListenerCount >= SACRED_EVENT_LIMITS.MAX_GLOBAL_LISTENERS) {
+    if (this.globalListenerCount >= EVENT_MANAGER_LIMITS.MAX_GLOBAL_LISTENERS) {
       throw new SacredEventLimitError();
     }
 
     if (componentId) {
       const componentListenerCount = this.componentListeners.get(componentId)?.size || 0;
-      if (componentListenerCount >= SACRED_EVENT_LIMITS.MAX_LISTENERS_PER_COMPONENT) {
+      if (componentListenerCount >= EVENT_MANAGER_LIMITS.MAX_LISTENERS_PER_COMPONENT) {
         throw new SacredEventLimitError();
       }
     }
@@ -204,7 +208,7 @@ export class SacredEventManager {
   private startPeriodicCleanup(): void {
     this.cleanupInterval = window.setInterval(() => {
       this.performPeriodicCleanup();
-    }, SACRED_EVENT_LIMITS.CLEANUP_INTERVAL_MS);
+    }, EVENT_MANAGER_LIMITS.CLEANUP_INTERVAL_MS);
   }
 
   private performPeriodicCleanup(): void {
@@ -223,7 +227,7 @@ export class SacredEventManager {
 
     // Clean up event queue
     this.eventQueue = this.eventQueue.filter(event => 
-      now - event.timestamp < SACRED_EVENT_LIMITS.CLEANUP_INTERVAL_MS
+      now - event.timestamp < EVENT_MANAGER_LIMITS.CLEANUP_INTERVAL_MS
     );
 
     if (cleanedCount > 0) {
@@ -254,14 +258,14 @@ export class SacredEventManager {
         });
 
         // Trim event queue if too large
-        if (this.eventQueue.length > SACRED_EVENT_LIMITS.MAX_EVENT_QUEUE_SIZE) {
-          this.eventQueue = this.eventQueue.slice(-SACRED_EVENT_LIMITS.MAX_EVENT_QUEUE_SIZE);
+        if (this.eventQueue.length > EVENT_MANAGER_LIMITS.MAX_EVENT_QUEUE_SIZE) {
+          this.eventQueue = this.eventQueue.slice(-EVENT_MANAGER_LIMITS.MAX_EVENT_QUEUE_SIZE);
         }
 
         // Call original handler with timeout protection
         const timeoutId = setTimeout(() => {
           console.warn(`Sacred event handler timeout: ${listenerId}`);
-        }, SACRED_EVENT_LIMITS.LISTENER_TIMEOUT_MS);
+        }, EVENT_MANAGER_LIMITS.LISTENER_TIMEOUT_MS);
 
         try {
           originalHandler(event);
@@ -314,8 +318,8 @@ export class SacredEventManager {
    */
   isHealthy(): boolean {
     return (
-      this.globalListenerCount < SACRED_EVENT_LIMITS.MAX_GLOBAL_LISTENERS * 0.9 &&
-      this.eventQueue.length < SACRED_EVENT_LIMITS.MAX_EVENT_QUEUE_SIZE * 0.9
+      this.globalListenerCount < EVENT_MANAGER_LIMITS.MAX_GLOBAL_LISTENERS * 0.9 &&
+      this.eventQueue.length < EVENT_MANAGER_LIMITS.MAX_EVENT_QUEUE_SIZE * 0.9
     );
   }
 
@@ -338,18 +342,18 @@ export class SacredEventManager {
 }
 
 // Sacred Singleton Instance
-let sacredEventManagerInstance: SacredEventManager | null = null;
+let sacredEventManagerInstance: ComponentEventManager | null = null;
 
-export function useSacredEventManager(): SacredEventManager {
+export function useComponentEventManager(): ComponentEventManager {
   if (!sacredEventManagerInstance) {
-    sacredEventManagerInstance = new SacredEventManager();
+    sacredEventManagerInstance = new ComponentEventManager();
   }
   return sacredEventManagerInstance;
 }
 
 // Sacred Vue Composable
 export function useSacredEventCleanup(componentName?: string) {
-  const eventManager = useSacredEventManager();
+  const eventManager = useComponentEventManager();
   const instance = getCurrentInstance();
   const componentId = componentName || instance?.uid.toString() || 'unknown';
   
@@ -433,4 +437,4 @@ export function withSacredErrorBoundary<T extends (...args: any[]) => any>(
 }
 
 // Export sacred components
-export { SACRED_EVENT_LIMITS };
+export { EVENT_MANAGER_LIMITS };

@@ -1,21 +1,25 @@
 /**
- * 🐝✨ Sacred Error Boundary - Phase 1.1 Emergency Fix ✨🐝
+ * 🐝✨ Vue Error Boundary - Phase 1.1 Emergency Fix ✨🐝
  * 
  * IMMEDIATE IMPLEMENTATION - Addresses bee.Sage critical vulnerability:
  * "Missing Circuit Breakers - No protection against cascade failures"
  * 
- * Sacred Protection Mechanisms:
+ * Engineering Truth: Implements Vue 3 error boundary patterns with circuit breaker protection
+ * Protection Mechanisms:
  * - Comprehensive error boundaries for all operations
  * - Cascade failure prevention through error isolation
  * - Graceful degradation under error conditions
  * - Error recovery and retry mechanisms
- * - Sacred error reporting and monitoring
+ * - Error reporting and monitoring
+ * 
+ * Sacred Narrative: "He will not let your foot slip—he who watches over you will not slumber"
+ * - Psalm 121:3 (NIV)
  */
 
 import { ref, computed, onErrorCaptured, getCurrentInstance } from 'vue';
 
-// Sacred Error Configuration
-const SACRED_ERROR_LIMITS = {
+// Error Boundary Configuration
+const ERROR_BOUNDARY_LIMITS = {
   MAX_ERRORS_PER_COMPONENT: 10,
   MAX_ERRORS_PER_MINUTE: 50,
   ERROR_RECOVERY_DELAY_MS: 1000,
@@ -129,7 +133,7 @@ class SacredErrorManager {
     state.lastErrorTime = now;
 
     // Check for cascade failure
-    if (state.errorCount >= SACRED_ERROR_LIMITS.CIRCUIT_BREAKER_THRESHOLD) {
+    if (state.errorCount >= ERROR_BOUNDARY_LIMITS.CIRCUIT_BREAKER_THRESHOLD) {
       state.circuitBreakerOpen = true;
       console.warn(`Sacred circuit breaker opened for component: ${component}`);
     }
@@ -157,7 +161,7 @@ class SacredErrorManager {
     try {
       // Sacred recovery delay
       await new Promise(resolve => 
-        setTimeout(resolve, SACRED_ERROR_LIMITS.ERROR_RECOVERY_DELAY_MS)
+        setTimeout(resolve, ERROR_BOUNDARY_LIMITS.ERROR_RECOVERY_DELAY_MS)
       );
 
       // Reset error state
@@ -166,7 +170,7 @@ class SacredErrorManager {
       
       // Check if circuit breaker should be closed
       const recentErrors = this.getRecentErrors(component, 60000); // Last minute
-      if (recentErrors.length < SACRED_ERROR_LIMITS.CIRCUIT_BREAKER_THRESHOLD) {
+      if (recentErrors.length < ERROR_BOUNDARY_LIMITS.CIRCUIT_BREAKER_THRESHOLD) {
         state.circuitBreakerOpen = false;
         console.info(`Sacred circuit breaker closed for component: ${component}`);
       }
@@ -194,7 +198,7 @@ class SacredErrorManager {
     // Check circuit breaker
     if (state.circuitBreakerOpen) {
       const timeSinceLastError = Date.now() - state.lastErrorTime;
-      if (timeSinceLastError < SACRED_ERROR_LIMITS.CIRCUIT_BREAKER_TIMEOUT_MS) {
+      if (timeSinceLastError < ERROR_BOUNDARY_LIMITS.CIRCUIT_BREAKER_TIMEOUT_MS) {
         throw new SacredCascadeError(component);
       } else {
         // Try to close circuit breaker
@@ -216,7 +220,7 @@ class SacredErrorManager {
       this.recordError(error as Error, component, context);
       
       // Check if we should retry
-      if (state.retryCount < SACRED_ERROR_LIMITS.MAX_RETRY_ATTEMPTS) {
+      if (state.retryCount < ERROR_BOUNDARY_LIMITS.MAX_RETRY_ATTEMPTS) {
         console.warn(`Sacred retry attempt ${state.retryCount + 1} for ${component}`);
         await new Promise(resolve => setTimeout(resolve, 500 * state.retryCount));
         return this.wrapSacredOperation(operation, component, context);
@@ -307,7 +311,7 @@ class SacredErrorManager {
 
   isHealthy(): boolean {
     return (
-      this.metrics.errorsPerMinute < SACRED_ERROR_LIMITS.MAX_ERRORS_PER_MINUTE &&
+      this.metrics.errorsPerMinute < ERROR_BOUNDARY_LIMITS.MAX_ERRORS_PER_MINUTE &&
       Array.from(this.componentStates.values())
         .filter(state => state.circuitBreakerOpen).length === 0
     );
@@ -325,7 +329,7 @@ export function useSacredErrorManager(): SacredErrorManager {
 }
 
 // Sacred Vue Error Boundary Composable
-export function useSacredErrorBoundary(componentName?: string) {
+export function useVueErrorBoundary(componentName?: string) {
   const errorManager = useSacredErrorManager();
   const instance = getCurrentInstance();
   const component = componentName || instance?.type.name || 'UnknownComponent';
@@ -435,4 +439,4 @@ export function setupSacredGlobalErrorHandler(): void {
 }
 
 // Export sacred components
-export { SACRED_ERROR_LIMITS, SacredErrorManager };
+export { ERROR_BOUNDARY_LIMITS, SacredErrorManager };
