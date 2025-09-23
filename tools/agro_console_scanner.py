@@ -146,6 +146,8 @@ class AgroConsoleScanner:
                 "*_demo.py",  # Demo scripts
                 "*_example.py",  # Example scripts
                 "*_integration*.py",  # Integration examples
+                "status_api.py",  # Status API utility
+                "run_*.py",  # Runner scripts
             ],
             "strict_mode": True,
             "allow_dev_console": False,
