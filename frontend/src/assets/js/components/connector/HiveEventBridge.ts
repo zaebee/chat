@@ -5,8 +5,8 @@
  * Implements bidirectional Pollen Protocol communication over WebSocket
  */
 
-import { SacredConnector } from './SacredConnector'
-import type { PollenEvent, SynapticMessage } from './SacredConnector'
+import { DataConnector } from './DataConnector'
+import type { PollenEvent } from './DataConnector'
 
 // Backend HiveEventBus API types
 export interface HiveEventBusAPI {
@@ -39,17 +39,17 @@ export interface HiveBridgeConfig {
  * and Pollen Protocol for seamless frontend-backend communication.
  */
 export class HiveEventBridge {
-  private connector: SacredConnector
+  private connector: DataConnector
   private subscriptions: Map<string, EventSubscription> = new Map()
   private isConnected = false
   private reconnectAttempts = 0
   private reconnectTimer: number | null = null
 
   constructor(private readonly config: HiveBridgeConfig) {
-    this.connector = new SacredConnector({
+    this.connector = new DataConnector({
       id: config.connectorId,
       webSocketUrl: config.websocketUrl,
-      enableQuantumEntanglement: true
+      enableAdvancedFeatures: true
     })
   }
 

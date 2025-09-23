@@ -1,0 +1,30 @@
+version: v1
+plugins:
+  # Python generation for backend
+  - plugin: buf.build/protocolbuffers/python
+    out: ../generated/python
+    opt: 
+      - pyi_out=../generated/python
+  
+  # TypeScript generation for frontend
+  - plugin: buf.build/bufbuild/es
+    out: ../generated/typescript
+    opt:
+      - target=ts
+      - import_extension=none
+  
+  # Go generation (optional)
+  - plugin: buf.build/protocolbuffers/go
+    out: ../generated/go
+    opt:
+      - paths=source_relative
+  
+  # gRPC services
+  - plugin: buf.build/grpc/python
+    out: ../generated/python
+  
+  - plugin: buf.build/connectrpc/es
+    out: ../generated/typescript
+    opt:
+      - target=ts
+      - import_extension=none

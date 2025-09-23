@@ -17,6 +17,7 @@ import json
 
 from .hub import HiveCoordinationHub
 from .events import HiveEventBus, PollenEvent
+# from .metrics_collector import HiveMetricsCollector, ATCGMetrics  # Temporarily disabled
 
 
 class SacredMetricType(str, Enum):
@@ -94,9 +95,58 @@ class HiveMetricsDashboard:
         self.dashboard_history: List[Dict[str, Any]] = []
         self.max_history_size = 200
 
+        # ATCG Metrics Integration (temporarily disabled)
+        # self.atcg_collector = HiveMetricsCollector(".")
+        self.last_atcg_scan = None
+        self.atcg_scan_interval = 60  # seconds - scan every minute
+        # self.current_atcg_metrics: Optional[ATCGMetrics] = None
+
         # Default alert conditions
         self._setup_default_alerts()
+        self._setup_atcg_alerts()
         self._setup_event_subscriptions()
+
+    def _setup_atcg_alerts(self):
+        """Set up ATCG-specific monitoring alerts."""
+        
+        # ATCG Composite Score alerts
+        self.active_alerts["atcg_low"] = AlertCondition(
+            alert_id="atcg_low",
+            metric_name="atcg_composite",
+            condition="less_than",
+            threshold=0.6,
+            severity="warning",
+            message="ATCG composite score is below healthy threshold - code architecture needs attention"
+        )
+        
+        self.active_alerts["atcg_critical"] = AlertCondition(
+            alert_id="atcg_critical",
+            metric_name="atcg_composite",
+            condition="less_than",
+            threshold=0.4,
+            severity="critical",
+            message="ATCG composite score is critically low - immediate refactoring required"
+        )
+        
+        # Singularity Risk alerts
+        self.active_alerts["singularity_risk"] = AlertCondition(
+            alert_id="singularity_risk",
+            metric_name="singularity_risk",
+            condition="greater_than",
+            threshold=1.0,
+            severity="warning",
+            message="Code singularity risk detected - hub concentration too high"
+        )
+        
+        # Chaos Resistance alerts
+        self.active_alerts["chaos_resistance_low"] = AlertCondition(
+            alert_id="chaos_resistance_low",
+            metric_name="chaos_resistance",
+            condition="less_than",
+            threshold=0.8,
+            severity="warning",
+            message="Chaos resistance is low - system approaching dimensional collapse"
+        )
 
     def _setup_default_alerts(self):
         """Set up default monitoring alerts."""
@@ -242,10 +292,13 @@ class HiveMetricsDashboard:
             # Get current system overview
             overview = await self.hub.get_hive_overview()
 
+            # Update ATCG metrics if needed (temporarily disabled)
+            # await self._update_atcg_metrics()
+
             # Calculate trends
             await self._update_metric_trends(overview)
 
-            # Check alerts
+            # Check alerts (including ATCG)
             triggered_alerts = await self._check_alerts(overview)
 
             # Build dashboard data
@@ -272,6 +325,9 @@ class HiveMetricsDashboard:
                         "description": "Collaborative efficiency between teammates"
                     }
                 },
+
+                # ATCG Code Architecture Metrics (temporarily disabled)
+                # "atcg_metrics": self._get_atcg_dashboard_data(),
 
                 # System resources
                 "resources": {
@@ -716,6 +772,111 @@ class HiveMetricsDashboard:
             # Teammate changes affecting collaboration metrics
             pass
 
+    async def _update_atcg_metrics(self):
+        """Update ATCG metrics if scan interval has passed."""
+        now = datetime.now()
+        
+        if (self.last_atcg_scan is None or 
+            (now - self.last_atcg_scan).total_seconds() >= self.atcg_scan_interval):
+            
+            try:
+                # Run ATCG collection in background
+                self.current_atcg_metrics = self.atcg_collector.collect_metrics()
+                self.last_atcg_scan = now
+                
+                # Publish ATCG update event
+                await self.event_bus.publish_system_event(
+                    "atcg_metrics_updated",
+                    {
+                        "composite_score": self.current_atcg_metrics.composite_score,
+                        "weighted_score": self.current_atcg_metrics.weighted_score,
+                        "timestamp": now.isoformat()
+                    }
+                )
+                
+            except Exception as e:
+                print(f"Error updating ATCG metrics: {e}")
+
+    def _get_atcg_dashboard_data(self) -> Dict[str, Any]:
+        """Get ATCG metrics formatted for dashboard display."""
+        if not self.current_atcg_metrics:
+            return {
+                "status": "not_available",
+                "message": "ATCG metrics not yet collected"
+            }
+        
+        def get_grade(score: float) -> str:
+            if score >= 0.9: return "A+"
+            elif score >= 0.8: return "A"
+            elif score >= 0.7: return "B+"
+            elif score >= 0.6: return "B"
+            elif score >= 0.5: return "C"
+            else: return "D"
+        
+        metrics = self.current_atcg_metrics
+        
+        return {
+            "status": "available",
+            "last_scan": self.last_atcg_scan.isoformat() if self.last_atcg_scan else None,
+            "scan_interval_seconds": self.atcg_scan_interval,
+            
+            "core_scores": {
+                "aggregate": {
+                    "value": metrics.aggregate_purity,
+                    "grade": get_grade(metrics.aggregate_purity),
+                    "description": "Component organization and state management"
+                },
+                "transformation": {
+                    "value": metrics.transformation_purity,
+                    "grade": get_grade(metrics.transformation_purity),
+                    "description": "Function purity and side-effect management"
+                },
+                "connector": {
+                    "value": metrics.connector_purity,
+                    "grade": get_grade(metrics.connector_purity),
+                    "description": "Protocol consistency and interface stability"
+                },
+                "genesis": {
+                    "value": metrics.genesis_purity,
+                    "grade": get_grade(metrics.genesis_purity),
+                    "description": "Configuration quality and event generation"
+                }
+            },
+            
+            "composite_scores": {
+                "atcg_composite": {
+                    "value": metrics.composite_score,
+                    "grade": get_grade(metrics.composite_score),
+                    "description": "Overall ATCG architecture quality"
+                },
+                "weighted_score": {
+                    "value": metrics.weighted_score,
+                    "grade": get_grade(metrics.weighted_score),
+                    "description": "Application-specific weighted ATCG score"
+                }
+            },
+            
+            "dimensional_health": {
+                "chaos_resistance": {
+                    "value": metrics.chaos_resistance,
+                    "grade": get_grade(metrics.chaos_resistance),
+                    "description": "Resistance to architectural degradation"
+                },
+                "singularity_risk": {
+                    "value": metrics.singularity_risk,
+                    "status": "safe" if metrics.singularity_risk < 1.0 else "monitor",
+                    "description": "Risk of hub concentration and coupling"
+                },
+                "dimensional_integrity": {
+                    "value": metrics.dimensional_integrity,
+                    "grade": get_grade(min(1.0, metrics.dimensional_integrity / 6.0)),
+                    "description": "3D→2D projection information retention"
+                }
+            },
+            
+            "overall_health": get_grade(metrics.weighted_score)
+        }
+
     def get_status(self) -> Dict[str, Any]:
         """Return structured status following the Legibility principle."""
         return {
@@ -726,6 +887,8 @@ class HiveMetricsDashboard:
             "active_alerts": len([a for a in self.active_alerts.values() if a.is_active]),
             "metrics_history_size": len(self.dashboard_history),
             "metric_trends_count": len(self.metric_trends),
+            # "atcg_metrics_available": self.current_atcg_metrics is not None,
+            "last_atcg_scan": self.last_atcg_scan.isoformat() if self.last_atcg_scan else None,
             "timestamp": datetime.now().isoformat(),
             "health": "active" if self.is_active else "inactive"
         }

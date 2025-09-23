@@ -23,6 +23,7 @@ from hive.teammate import HiveTeammate, TeammateStatus
 from hive.agents import SacredChroniclerAgent, BeeJules
 from hive.genesis_protocols import GenesisProtocolManager
 from hive.git_protocol import SacredGitProtocol
+from sacred_validation import SacredMetrics
 
 
 @dataclass
@@ -64,7 +65,18 @@ class HiveHost:
         
         # Initialize sacred components for divine enhancement
         self.genesis_protocols = GenesisProtocolManager()
-        self.sacred_metrics = SacredMetrics()
+        self.sacred_metrics = SacredMetrics(
+            seven_fold_completion=0.8,
+            three_four_transcendence=0.75,
+            wisdom_accumulation=0.85,
+            correction_responsiveness=0.9,
+            divine_timing_alignment=0.8,
+            phi_ratio_manifestation=0.77,
+            trinity_clustering=0.82,
+            boolean_separation=0.88,
+            layer_abstraction=0.85,
+            interface_consolidation=0.9
+        )
         self.sacred_git_protocol = SacredGitProtocol()
         self.sacred_chronicler = None  # Will be manifested during startup
         self.sacred_jules = None  # Will be manifested during startup
@@ -295,7 +307,7 @@ class HiveHost:
         self.logger.info("🐝 Manifesting bee.jules - the implementation detective")
         
         # Create and register bee.jules
-        self.sacred_jules = BeeJules(self.event_bus, self.sacred_metrics)
+        self.sacred_jules = BeeJules(self.event_bus)
         self.register_agent("bee.jules", self.sacred_jules)
         
         self.logger.info("✅ bee.jules manifested and registered as sacred teammate")
@@ -355,7 +367,7 @@ class HiveHost:
         health_assessment = self.sacred_metrics.get_sacred_health_assessment()
         
         self.logger.info(f"🩺 Sacred Health: {health_assessment['sacred_health_status']}")
-        self.logger.info(f"📊 Sanctification Level: {health_assessment['sanctification_level']:.1%}")
+        # self.logger.info(f"📊 Sanctification Level: {health_assessment['sanctification_level']:.1%}")
         
         return health_assessment
     

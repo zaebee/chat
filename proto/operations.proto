@@ -1,0 +1,367 @@
+syntax = "proto3";
+
+package atcg.operations;
+
+// Pure operational definitions for ATCG system communication
+// No metaphors - only functional specifications
+
+import "atcg_system.proto";
+import "component_types.proto";
+
+// Service definitions for ATCG component operations
+service ATCGSystemService {
+  // Component lifecycle operations
+  rpc RegisterComponent(atcg.system.SystemComponent) returns (RegistrationResult);
+  rpc UnregisterComponent(UnregistrationRequest) returns (UnregistrationResult);
+  rpc GetComponent(ComponentRequest) returns (atcg.system.SystemComponent);
+  rpc ListComponents(ListComponentsRequest) returns (ComponentList);
+  
+  // Health and status operations
+  rpc HealthCheck(atcg.system.HealthCheckRequest) returns (atcg.system.HealthCheckResponse);
+  rpc GetStatus(StatusRequest) returns (StatusResponse);
+  rpc GetMetrics(MetricsRequest) returns (MetricsResponse);
+  
+  // Component operations
+  rpc ExecuteOperation(atcg.system.ComponentOperation) returns (atcg.system.OperationResult);
+  rpc ExecuteBatch(atcg.system.BatchOperation) returns (atcg.system.BatchResult);
+  
+  // Event operations
+  rpc PublishEvent(atcg.system.SystemEvent) returns (EventPublishResult);
+  rpc SubscribeEvents(EventSubscriptionRequest) returns (stream atcg.system.SystemEvent);
+  
+  // Configuration operations
+  rpc UpdateConfig(atcg.system.ComponentConfig) returns (atcg.system.ConfigUpdateResult);
+  rpc GetConfig(ConfigRequest) returns (ConfigResponse);
+}
+
+// Aggregate-specific service operations
+service AggregateService {
+  rpc ExecuteAggregateOperation(atcg.component.AggregateOperation) returns (AggregateOperationResult);
+  rpc GetAggregateState(AggregateStateRequest) returns (AggregateStateResponse);
+  rpc ValidateInvariants(InvariantValidationRequest) returns (InvariantValidationResult);
+  rpc AddElements(AddElementsRequest) returns (AddElementsResult);
+  rpc RemoveElements(RemoveElementsRequest) returns (RemoveElementsResult);
+}
+
+// Transform-specific service operations
+service TransformService {
+  rpc ExecuteTransform(atcg.component.TransformOperation) returns (atcg.component.TransformResult);
+  rpc ValidateTransform(TransformValidationRequest) returns (TransformValidationResult);
+  rpc GetTransformMetrics(TransformMetricsRequest) returns (TransformMetricsResponse);
+  rpc ResetMetrics(ResetMetricsRequest) returns (ResetMetricsResult);
+}
+
+// Connect-specific service operations
+service ConnectService {
+  rpc ExecuteConnect(atcg.component.ConnectOperation) returns (atcg.component.ConnectResult);
+  rpc TranslateMessage(MessageTranslationRequest) returns (MessageTranslationResult);
+  rpc EstablishConnection(ConnectionRequest) returns (ConnectionResult);
+  rpc CloseConnection(CloseConnectionRequest) returns (CloseConnectionResult);
+  rpc GetConnectionStatus(ConnectionStatusRequest) returns (ConnectionStatusResponse);
+}
+
+// Generate-specific service operations
+service GenerateService {
+  rpc ExecuteGenerate(atcg.component.GenerateOperation) returns (atcg.component.GenerateResult);
+  rpc CreateEvent(EventCreationRequest) returns (EventCreationResult);
+  rpc BroadcastEvent(EventBroadcastRequest) returns (EventBroadcastResult);
+  rpc ReplicateComponent(ReplicationRequest) returns (ReplicationResult);
+}
+
+// Request/Response message definitions
+
+// Component registration
+message RegistrationResult {
+  bool success = 1;
+  string error_message = 2;
+  string assigned_id = 3;
+  int64 registration_timestamp = 4;
+}
+
+message UnregistrationRequest {
+  string component_id = 1;
+  bool force = 2;
+}
+
+message UnregistrationResult {
+  bool success = 1;
+  string error_message = 2;
+  int64 unregistration_timestamp = 3;
+}
+
+// Component queries
+message ComponentRequest {
+  string component_id = 1;
+  bool include_status = 2;
+  bool include_metrics = 3;
+}
+
+message ListComponentsRequest {
+  atcg.system.ComponentType type_filter = 1;
+  bool include_status = 2;
+  int32 page_size = 3;
+  string page_token = 4;
+}
+
+message ComponentList {
+  repeated atcg.system.SystemComponent components = 1;
+  string next_page_token = 2;
+  int32 total_count = 3;
+}
+
+// Status and metrics
+message StatusRequest {
+  string component_id = 1;
+  bool include_dependencies = 2;
+}
+
+message StatusResponse {
+  atcg.system.ComponentStatus status = 1;
+  repeated atcg.component.ComponentDependency dependencies = 2;
+  map<string, string> system_info = 3;
+}
+
+message MetricsRequest {
+  string component_id = 1;
+  int64 start_timestamp = 2;
+  int64 end_timestamp = 3;
+  repeated string metric_names = 4;
+}
+
+message MetricsResponse {
+  atcg.component.ExecutionMetrics metrics = 1;
+  map<string, double> custom_metrics = 2;
+  int64 collection_timestamp = 3;
+}
+
+// Event operations
+message EventPublishResult {
+  bool success = 1;
+  string error_message = 2;
+  int32 subscriber_count = 3;
+  int64 publish_timestamp = 4;
+}
+
+message EventSubscriptionRequest {
+  repeated string event_types = 1;
+  string subscriber_id = 2;
+  atcg.system.EventPriority min_priority = 3;
+  map<string, string> filters = 4;
+}
+
+// Configuration operations
+message ConfigRequest {
+  string component_id = 1;
+  repeated string config_keys = 2;
+}
+
+message ConfigResponse {
+  map<string, string> config_values = 1;
+  int64 version = 2;
+  int64 last_updated = 3;
+}
+
+// Aggregate operation results
+message AggregateOperationResult {
+  bool success = 1;
+  string error_message = 2;
+  atcg.component.AggregateData result_data = 3;
+  int32 affected_elements = 4;
+  double execution_time_ms = 5;
+}
+
+message AggregateStateRequest {
+  string aggregate_id = 1;
+  bool include_elements = 2;
+  bool include_history = 3;
+}
+
+message AggregateStateResponse {
+  atcg.component.AggregateData current_state = 1;
+  repeated StateHistoryEntry history = 2;
+  int64 last_modified = 3;
+}
+
+message StateHistoryEntry {
+  int32 version = 1;
+  string operation = 2;
+  int64 timestamp = 3;
+  map<string, string> changes = 4;
+}
+
+// Invariant validation
+message InvariantValidationRequest {
+  string aggregate_id = 1;
+  repeated string invariant_names = 2;
+  atcg.component.AggregateData proposed_state = 3;
+}
+
+message InvariantValidationResult {
+  bool valid = 1;
+  repeated InvariantViolation violations = 2;
+  string validation_summary = 3;
+}
+
+message InvariantViolation {
+  string invariant_name = 1;
+  string violation_description = 2;
+  string suggested_fix = 3;
+}
+
+// Element operations
+message AddElementsRequest {
+  string aggregate_id = 1;
+  repeated atcg.component.DataElement elements = 2;
+  bool validate_invariants = 3;
+}
+
+message AddElementsResult {
+  bool success = 1;
+  string error_message = 2;
+  int32 added_count = 3;
+  repeated string added_element_ids = 4;
+}
+
+message RemoveElementsRequest {
+  string aggregate_id = 1;
+  repeated string element_ids = 2;
+  bool validate_invariants = 3;
+}
+
+message RemoveElementsResult {
+  bool success = 1;
+  string error_message = 2;
+  int32 removed_count = 3;
+  repeated string removed_element_ids = 4;
+}
+
+// Transform operations
+message TransformValidationRequest {
+  string transform_id = 1;
+  atcg.component.TransformData test_data = 2;
+  bool dry_run = 3;
+}
+
+message TransformValidationResult {
+  bool valid = 1;
+  string error_message = 2;
+  atcg.component.TransformResult test_result = 3;
+  repeated string warnings = 4;
+}
+
+message TransformMetricsRequest {
+  string transform_id = 1;
+  int64 start_timestamp = 2;
+  int64 end_timestamp = 3;
+}
+
+message TransformMetricsResponse {
+  atcg.component.ExecutionMetrics metrics = 1;
+  map<string, double> transform_specific_metrics = 2;
+}
+
+message ResetMetricsRequest {
+  string component_id = 1;
+  repeated string metric_names = 2;
+}
+
+message ResetMetricsResult {
+  bool success = 1;
+  string error_message = 2;
+  repeated string reset_metrics = 3;
+}
+
+// Connection operations
+message MessageTranslationRequest {
+  string connector_id = 1;
+  atcg.component.ConnectData message_data = 2;
+  bool validate_only = 3;
+}
+
+message MessageTranslationResult {
+  bool success = 1;
+  string error_message = 2;
+  bytes translated_data = 3;
+  map<string, string> translation_metadata = 4;
+}
+
+message ConnectionRequest {
+  string connector_id = 1;
+  string target_endpoint = 2;
+  map<string, string> connection_parameters = 3;
+  int32 timeout_seconds = 4;
+}
+
+message ConnectionResult {
+  bool success = 1;
+  string error_message = 2;
+  string connection_id = 3;
+  atcg.component.ConnectionStatus status = 4;
+}
+
+message CloseConnectionRequest {
+  string connector_id = 1;
+  string connection_id = 2;
+  bool force_close = 3;
+}
+
+message CloseConnectionResult {
+  bool success = 1;
+  string error_message = 2;
+  int64 close_timestamp = 3;
+}
+
+message ConnectionStatusRequest {
+  string connector_id = 1;
+  string connection_id = 2;
+}
+
+message ConnectionStatusResponse {
+  atcg.component.ConnectionStatus status = 1;
+  map<string, string> status_details = 2;
+  int64 last_activity = 3;
+}
+
+// Generation operations
+message EventCreationRequest {
+  string generator_id = 1;
+  atcg.component.GenerateData event_data = 2;
+  bool auto_broadcast = 3;
+}
+
+message EventCreationResult {
+  bool success = 1;
+  string error_message = 2;
+  string event_id = 3;
+  atcg.system.SystemEvent created_event = 4;
+}
+
+message EventBroadcastRequest {
+  string generator_id = 1;
+  string event_id = 2;
+  repeated string target_components = 3;
+  atcg.system.EventPriority priority = 4;
+}
+
+message EventBroadcastResult {
+  bool success = 1;
+  string error_message = 2;
+  int32 successful_broadcasts = 3;
+  int32 failed_broadcasts = 4;
+  repeated string failed_targets = 5;
+}
+
+message ReplicationRequest {
+  string generator_id = 1;
+  string target_environment = 2;
+  atcg.component.GenerateData template_data = 3;
+  map<string, string> replication_parameters = 4;
+}
+
+message ReplicationResult {
+  bool success = 1;
+  string error_message = 2;
+  string replicated_component_id = 3;
+  string target_endpoint = 4;
+  int64 replication_timestamp = 5;
+}

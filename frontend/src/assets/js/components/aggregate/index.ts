@@ -10,24 +10,24 @@
 
 import type { ATCGComponent } from '../index'
 
-// Export the sacred aggregator engine
-export * from './SacredAggregator'
-import type { SacredAggregationOutput } from './SacredAggregator'
+// Export the pure data aggregator
+export * from './DataAggregator'
+import type { AggregationOutput } from './DataAggregator'
 
 // Minimal aggregate component interface
 export interface AggregateComponent extends ATCGComponent {
   readonly type: 'aggregate'
   readonly purpose: string
   readonly id: string
-  aggregate(input: unknown): Promise<SacredAggregationOutput>
-  process(data: unknown): Promise<SacredAggregationOutput>
+  aggregate(input: any[]): AggregationOutput
+  process(data: any): any
   initialize(): Promise<void>
   destroy(): Promise<void>
-  getStatus(): Record<string, unknown>
+  getStatus(): Record<string, any>
 }
 
 // Aggregate component type registry for extensibility
-export type AggregateComponentType = 'sacred_aggregator_engine'
+export type AggregateComponentType = 'data_aggregator'
 
 // Extensible aggregate component factory
 export async function createAggregateComponent(
@@ -35,8 +35,9 @@ export async function createAggregateComponent(
   config: { id: string }
 ): Promise<AggregateComponent> {
   switch (type) {
-    case 'sacred_aggregator_engine':
-      return new (await import('./SacredAggregator')).SacredAggregator(config.id)
+    case 'data_aggregator':
+      const { DataAggregator } = await import('./DataAggregator')
+      return new DataAggregator(config.id)
     default:
       // Exhaustive check ensures all types are handled
       const _exhaustiveCheck: never = type

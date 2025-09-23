@@ -5,7 +5,7 @@
  * and Pollen Protocol formats, enabling Sacred Aggregator integration
  */
 
-import type { PollenEvent, WebSocketMessage, SynapticMessage } from './SacredConnector'
+import type { PollenEvent, WebSocketMessage } from './DataConnector'
 import { validatePollenEventType } from '../../../utils/linguisticValidator'
 
 // Chat-specific message types

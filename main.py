@@ -59,6 +59,7 @@ app.add_middleware(
         "https://chat.zae.life",    # Production domain
         "https://zae.life",         # Root domain
         # Add specific domains only - never use wildcard "*" in production
+	"https://5173--01996650-5be4-7cf0-a882-a28cca500054.eu-central-1-01.gitpod.dev",
     ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE"],  # Removed OPTIONS for security
@@ -91,8 +92,8 @@ async def websocket_endpoint(websocket: WebSocket, username: str, user_id: str):
             if message_data.get("type") == "message":
                 conn = get_db_connection()
                 message_id, timestamp = str(uuid.uuid4()), datetime.now().isoformat()
-                conn.execute("INSERT INTO messages (id, user_id, username, content, timestamp, room_id) VALUES (?, ?, ?, ?, ?, ?)",
-                           (message_id, user_id, username, message_data.get("content", ""), timestamp, "general"))
+                conn.execute("INSERT INTO messages (id, text, sender_id, sender_name, timestamp, user_id, username, content, room_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                           (message_id, message_data.get("content", ""), user_id, username, timestamp, user_id, username, message_data.get("content", ""), "general"))
                 conn.commit()
                 conn.close()
 
@@ -111,6 +112,23 @@ async def websocket_endpoint(websocket: WebSocket, username: str, user_id: str):
 
                     if HIVE_AVAILABLE and manager.event_bus:
                         await manager.event_bus.publish_message_event("sent", message_id, message.dict())
+
+            elif message_data.get("type") == "reaction":
+                # Handle message reactions
+                reaction_data = {
+                    "type": "reaction",
+                    "messageId": message_data.get("messageId"),
+                    "emoji": message_data.get("emoji"),
+                    "userId": message_data.get("userId"),
+                    "userName": message_data.get("userName"),
+                    "action": message_data.get("action")
+                }
+                
+                # Broadcast reaction to all connected users
+                await manager.broadcast(json.dumps(reaction_data))
+                
+                # TODO: Store reactions in database for persistence
+                # For now, reactions are only stored in memory/frontend
 
     except WebSocketDisconnect:
         manager.disconnect(websocket, user_id)

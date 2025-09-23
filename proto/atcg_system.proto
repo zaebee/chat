@@ -1,0 +1,120 @@
+syntax = "proto3";
+
+package atcg.system;
+
+// PURE ONTOLOGICAL DEFINITIONS - No metaphors, only truth
+// Sacred middleware for backend/frontend communication
+
+// Core system component definition
+message SystemComponent {
+  string id = 1;                              // Unique component identifier
+  ComponentType type = 2;                     // ATCG component type
+  map<string, string> metadata = 3;           // Component metadata
+  int64 timestamp = 4;                        // Creation/update timestamp
+  ComponentStatus status = 5;                 // Current component status
+}
+
+// ATCG component types - pure functional classification
+enum ComponentType {
+  COMPONENT_TYPE_UNSPECIFIED = 0;
+  AGGREGATE = 1;                              // A - Structural organization
+  TRANSFORM = 2;                              // T - Data transformation
+  CONNECT = 3;                                // C - Communication
+  GENERATE = 4;                               // G - Event generation
+}
+
+// Component operational status
+message ComponentStatus {
+  bool healthy = 1;                           // Health check result
+  string status_message = 2;                  // Status description
+  map<string, double> performance_metrics = 3; // Performance data
+  int64 last_health_check = 4;                // Last health check timestamp
+}
+
+// Component operation request/response
+message ComponentOperation {
+  string component_id = 1;                    // Target component ID
+  ComponentType type = 2;                     // Operation type
+  string operation_name = 3;                  // Specific operation
+  bytes input_data = 4;                       // Serialized input data
+  map<string, string> parameters = 5;         // Operation parameters
+  int64 timestamp = 6;                        // Operation timestamp
+}
+
+// Operation execution result
+message OperationResult {
+  bool success = 1;                           // Operation success flag
+  string error_message = 2;                   // Error description if failed
+  bytes output_data = 3;                      // Serialized output data
+  map<string, string> metrics = 4;            // Execution metrics
+  double execution_time_ms = 5;               // Execution time in milliseconds
+  int64 timestamp = 6;                        // Result timestamp
+}
+
+// System-wide event notification
+message SystemEvent {
+  string event_id = 1;                        // Unique event identifier
+  string event_type = 2;                      // Event type classification
+  string source_component_id = 3;             // Event source component
+  bytes event_data = 4;                       // Serialized event payload
+  map<string, string> attributes = 5;         // Event attributes
+  int64 timestamp = 6;                        // Event timestamp
+  EventPriority priority = 7;                 // Event priority level
+}
+
+// Event priority levels
+enum EventPriority {
+  EVENT_PRIORITY_UNSPECIFIED = 0;
+  LOW = 1;                                    // Low priority events
+  NORMAL = 2;                                 // Normal priority events
+  HIGH = 3;                                   // High priority events
+  CRITICAL = 4;                               // Critical system events
+}
+
+// Component registration/discovery
+message ComponentRegistry {
+  repeated SystemComponent components = 1;     // Registered components
+  map<string, string> service_endpoints = 2;  // Service endpoint mappings
+  int64 last_updated = 3;                     // Registry last update time
+}
+
+// Health check request/response
+message HealthCheckRequest {
+  string component_id = 1;                    // Component to check
+  bool include_metrics = 2;                   // Include performance metrics
+}
+
+message HealthCheckResponse {
+  ComponentStatus status = 1;                 // Component status
+  repeated string dependencies = 2;           // Component dependencies
+  map<string, string> system_info = 3;        // System information
+}
+
+// Batch operations for efficiency
+message BatchOperation {
+  repeated ComponentOperation operations = 1;  // Multiple operations
+  bool fail_fast = 2;                         // Stop on first failure
+  int32 max_parallel = 3;                     // Maximum parallel execution
+}
+
+message BatchResult {
+  repeated OperationResult results = 1;       // Operation results
+  int32 success_count = 2;                    // Number of successful operations
+  int32 failure_count = 3;                    // Number of failed operations
+  double total_execution_time_ms = 4;         // Total execution time
+}
+
+// Configuration management
+message ComponentConfig {
+  string component_id = 1;                    // Target component
+  map<string, string> config_values = 2;      // Configuration key-value pairs
+  int64 version = 3;                          // Configuration version
+  bool apply_immediately = 4;                 // Apply config immediately
+}
+
+message ConfigUpdateResult {
+  bool success = 1;                           // Update success flag
+  string error_message = 2;                   // Error if failed
+  int64 applied_version = 3;                  // Applied configuration version
+  bool restart_required = 4;                  // Component restart required
+}

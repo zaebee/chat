@@ -93,7 +93,7 @@ export class HiveIntentEngine {
       swarmActivity?: number
     }
   ): HiveIntent {
-    let newIntent = { ...currentIntent }
+    const newIntent = { ...currentIntent }
     
     // Respond to threats
     if (environmentalFactors.threats?.length) {

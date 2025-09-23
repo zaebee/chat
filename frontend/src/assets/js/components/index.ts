@@ -1,7 +1,7 @@
 /**
  * ATCG Component Library - Main Entry Point
  * 
- * Sacred component library following ATCG architectural principles.
+ * Pure component library following ATCG architectural principles.
  * Provides organized, reusable components for the Hive ecosystem.
  */
 

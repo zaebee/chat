@@ -1,0 +1,313 @@
+syntax = "proto3";
+
+package atcg.translation;
+
+// Pure translation layer interfaces
+// Bridge between implementation domains and protobuf schemas
+// Enables ontological purity at boundaries while preserving internal metaphors
+
+import "atcg_system.proto";
+import "component_types.proto";
+import "operations.proto";
+import "monitoring.proto";
+
+// Translation service for converting between implementation and protocol formats
+service TranslationService {
+  // Component translation
+  rpc TranslateToProtobuf(ImplementationComponent) returns (atcg.system.SystemComponent);
+  rpc TranslateFromProtobuf(atcg.system.SystemComponent) returns (ImplementationComponent);
+  
+  // Operation translation
+  rpc TranslateOperationToProtobuf(ImplementationOperation) returns (atcg.system.ComponentOperation);
+  rpc TranslateOperationFromProtobuf(atcg.system.ComponentOperation) returns (ImplementationOperation);
+  
+  // Batch translation for efficiency
+  rpc BatchTranslateToProtobuf(BatchImplementationComponents) returns (BatchProtobufComponents);
+  rpc BatchTranslateFromProtobuf(BatchProtobufComponents) returns (BatchImplementationComponents);
+  
+  // Schema validation
+  rpc ValidateTranslation(TranslationValidationRequest) returns (TranslationValidationResponse);
+  rpc GetTranslationSchema(SchemaRequest) returns (SchemaResponse);
+}
+
+// Implementation component wrapper
+// Allows any implementation format to be translated to pure protobuf
+message ImplementationComponent {
+  string implementation_type = 1;             // Implementation domain identifier
+  bytes serialized_data = 2;                  // Serialized implementation data
+  map<string, string> metadata = 3;           // Implementation metadata
+  string schema_version = 4;                  // Implementation schema version
+  TranslationHints hints = 5;                 // Translation hints
+}
+
+// Implementation operation wrapper
+message ImplementationOperation {
+  string implementation_type = 1;             // Implementation domain identifier
+  bytes serialized_operation = 2;             // Serialized operation data
+  map<string, string> parameters = 3;         // Operation parameters
+  string schema_version = 4;                  // Implementation schema version
+  TranslationHints hints = 5;                 // Translation hints
+}
+
+// Translation hints for improved conversion
+message TranslationHints {
+  map<string, string> field_mappings = 1;     // Field name mappings
+  map<string, string> type_mappings = 2;      // Type mappings
+  repeated string ignored_fields = 3;         // Fields to ignore
+  map<string, string> default_values = 4;     // Default values for missing fields
+  bool strict_validation = 5;                 // Strict validation flag
+}
+
+// Batch translation messages
+message BatchImplementationComponents {
+  repeated ImplementationComponent components = 1; // Components to translate
+  string batch_id = 2;                        // Batch identifier
+  bool fail_fast = 3;                         // Stop on first failure
+}
+
+message BatchProtobufComponents {
+  repeated atcg.system.SystemComponent components = 1; // Translated components
+  string batch_id = 2;                        // Batch identifier
+  repeated TranslationError errors = 3;       // Translation errors
+}
+
+// Translation validation
+message TranslationValidationRequest {
+  ImplementationComponent source = 1;          // Source component
+  atcg.system.SystemComponent target = 2;     // Target component
+  ValidationLevel level = 3;                  // Validation level
+  bool bidirectional = 4;                     // Test both directions
+}
+
+enum ValidationLevel {
+  VALIDATION_LEVEL_UNSPECIFIED = 0;
+  BASIC = 1;                                  // Basic field validation
+  STRUCTURAL = 2;                             // Structural validation
+  SEMANTIC = 3;                               // Semantic validation
+  COMPREHENSIVE = 4;                          // Full validation
+}
+
+message TranslationValidationResponse {
+  bool valid = 1;                             // Validation result
+  repeated ValidationError errors = 2;        // Validation errors
+  repeated ValidationWarning warnings = 3;    // Validation warnings
+  TranslationMetrics metrics = 4;             // Translation metrics
+}
+
+message ValidationError {
+  string field_path = 1;                      // Field path with error
+  string error_message = 2;                   // Error description
+  ErrorSeverity severity = 3;                 // Error severity
+  string suggested_fix = 4;                   // Suggested fix
+}
+
+enum ErrorSeverity {
+  ERROR_SEVERITY_UNSPECIFIED = 0;
+  INFO = 1;                                   // Informational
+  WARNING = 2;                                // Warning
+  ERROR = 3;                                  // Error
+  CRITICAL = 4;                               // Critical error
+}
+
+message ValidationWarning {
+  string field_path = 1;                      // Field path with warning
+  string warning_message = 2;                 // Warning description
+  string recommendation = 3;                  // Recommendation
+}
+
+// Translation metrics
+message TranslationMetrics {
+  double translation_time_ms = 1;             // Translation time
+  int32 fields_translated = 2;                // Number of fields translated
+  int32 fields_skipped = 3;                   // Number of fields skipped
+  int32 fields_defaulted = 4;                 // Number of fields defaulted
+  double fidelity_score = 5;                  // Translation fidelity (0.0-1.0)
+  map<string, double> custom_metrics = 6;     // Custom translation metrics
+}
+
+// Translation errors
+message TranslationError {
+  string component_id = 1;                    // Component with error
+  string error_message = 2;                   // Error description
+  ErrorType error_type = 3;                   // Error type
+  string field_path = 4;                      // Field path with error
+  bytes problematic_data = 5;                 // Data causing error
+}
+
+enum ErrorType {
+  ERROR_TYPE_UNSPECIFIED = 0;
+  SERIALIZATION_ERROR = 1;                    // Serialization failure
+  DESERIALIZATION_ERROR = 2;                  // Deserialization failure
+  TYPE_MISMATCH = 3;                          // Type mismatch
+  MISSING_REQUIRED_FIELD = 4;                 // Required field missing
+  INVALID_VALUE = 5;                          // Invalid field value
+  SCHEMA_VIOLATION = 6;                       // Schema violation
+  UNSUPPORTED_FEATURE = 7;                    // Unsupported feature
+}
+
+// Schema management
+message SchemaRequest {
+  string implementation_type = 1;             // Implementation domain
+  string schema_version = 2;                  // Schema version
+  bool include_examples = 3;                  // Include examples
+}
+
+message SchemaResponse {
+  string implementation_type = 1;             // Implementation domain
+  string schema_version = 2;                  // Schema version
+  bytes schema_definition = 3;                // Schema definition
+  repeated SchemaExample examples = 4;        // Schema examples
+  map<string, string> documentation = 5;      // Schema documentation
+}
+
+message SchemaExample {
+  string example_name = 1;                    // Example identifier
+  ImplementationComponent implementation = 2;  // Implementation example
+  atcg.system.SystemComponent protobuf = 3;   // Protobuf equivalent
+  string description = 4;                     // Example description
+}
+
+// Domain-specific translation interfaces
+
+// Backend translation (implementation metaphors → pure protobuf)
+message BackendTranslationRequest {
+  string component_data = 1;                  // Serialized component
+  string component_type = 2;                  // Component type
+  map<string, string> implementation_metadata = 3; // Implementation metaphor metadata
+}
+
+message BackendTranslationResponse {
+  atcg.system.SystemComponent pure_component = 1; // Pure protobuf component
+  repeated string metaphor_mappings = 2;      // Metaphor to pure mappings
+  TranslationMetrics metrics = 3;             // Translation metrics
+}
+
+// Frontend translation (implementation metaphors → pure protobuf)
+message FrontendTranslationRequest {
+  string component_data = 1;                  // Serialized component
+  string component_type = 2;                  // Component type
+  map<string, string> implementation_metadata = 3; // Implementation metaphor metadata
+  map<string, double> implementation_constants = 4; // Implementation constants
+}
+
+message FrontendTranslationResponse {
+  atcg.system.SystemComponent pure_component = 1; // Pure protobuf component
+  repeated string metaphor_mappings = 2;      // Metaphor to pure mappings
+  TranslationMetrics metrics = 3;             // Translation metrics
+}
+
+// Translation registry for managing domain mappings
+message TranslationRegistry {
+  repeated DomainMapping domain_mappings = 1; // Domain translation mappings
+  repeated SchemaMapping schema_mappings = 2; // Schema mappings
+  int64 last_updated = 3;                     // Registry last update
+}
+
+message DomainMapping {
+  string domain_name = 1;                     // Implementation domain name
+  string domain_version = 2;                  // Domain version
+  repeated FieldMapping field_mappings = 3;   // Field mappings
+  repeated TypeMapping type_mappings = 4;     // Type mappings
+  map<string, string> constant_mappings = 5;  // Constant mappings
+}
+
+message FieldMapping {
+  string implementation_field = 1;            // Implementation field name
+  string protobuf_field = 2;                  // Protobuf field name
+  FieldTransformationType transform = 3;      // Transformation type
+  string transform_expression = 4;            // Transform expression
+}
+
+enum FieldTransformationType {
+  FIELD_TRANSFORMATION_UNSPECIFIED = 0;
+  DIRECT_MAPPING = 1;                         // Direct field mapping
+  VALUE_TRANSFORMATION = 2;                   // Value transformation
+  TYPE_CONVERSION = 3;                        // Type conversion
+  AGGREGATION = 4;                            // Field aggregation
+  DECOMPOSITION = 5;                          // Field decomposition
+  COMPUTED = 6;                               // Computed field
+}
+
+message TypeMapping {
+  string implementation_type = 1;             // Implementation type name
+  string protobuf_type = 2;                   // Protobuf type name
+  TypeConversionRule conversion_rule = 3;     // Conversion rule
+  map<string, string> conversion_parameters = 4; // Conversion parameters
+}
+
+message TypeConversionRule {
+  ConversionType type = 1;                    // Conversion type
+  string conversion_function = 2;             // Conversion function
+  bool lossy_conversion = 3;                  // Lossy conversion flag
+  string validation_rule = 4;                 // Validation rule
+}
+
+enum ConversionType {
+  CONVERSION_TYPE_UNSPECIFIED = 0;
+  IDENTITY = 1;                               // Identity conversion
+  CAST = 2;                                   // Type cast
+  SERIALIZE = 3;                              // Serialization
+  DESERIALIZE = 4;                            // Deserialization
+  TRANSFORM = 5;                              // Custom transformation
+}
+
+message SchemaMapping {
+  string source_schema = 1;                   // Source schema identifier
+  string target_schema = 2;                   // Target schema identifier
+  string mapping_version = 3;                 // Mapping version
+  repeated MappingRule rules = 4;             // Mapping rules
+  bool bidirectional = 5;                     // Bidirectional mapping
+}
+
+message MappingRule {
+  string rule_name = 1;                       // Rule identifier
+  string source_pattern = 2;                  // Source pattern
+  string target_pattern = 3;                  // Target pattern
+  RuleType rule_type = 4;                     // Rule type
+  map<string, string> parameters = 5;         // Rule parameters
+}
+
+enum RuleType {
+  RULE_TYPE_UNSPECIFIED = 0;
+  FIELD_RENAME = 1;                           // Field renaming
+  FIELD_MERGE = 2;                            // Field merging
+  FIELD_SPLIT = 3;                            // Field splitting
+  VALUE_MAP = 4;                              // Value mapping
+  CONDITIONAL = 5;                            // Conditional mapping
+  CUSTOM = 6;                                 // Custom rule
+}
+
+// Translation quality metrics
+message TranslationQualityMetrics {
+  double overall_fidelity = 1;                // Overall translation fidelity
+  double semantic_preservation = 2;           // Semantic preservation score
+  double structural_integrity = 3;            // Structural integrity score
+  int32 information_loss_count = 4;           // Information loss incidents
+  repeated QualityIssue quality_issues = 5;   // Quality issues detected
+  TranslationPerformance performance = 6;     // Performance metrics
+}
+
+message QualityIssue {
+  string issue_type = 1;                      // Issue type
+  string description = 2;                     // Issue description
+  QualityImpact impact = 3;                   // Impact assessment
+  string suggested_improvement = 4;           // Suggested improvement
+}
+
+enum QualityImpact {
+  QUALITY_IMPACT_UNSPECIFIED = 0;
+  NEGLIGIBLE = 1;                             // Negligible impact
+  MINOR = 2;                                  // Minor impact
+  MODERATE = 3;                               // Moderate impact
+  SIGNIFICANT = 4;                            // Significant impact
+  CRITICAL = 5;                               // Critical impact
+}
+
+message TranslationPerformance {
+  double average_translation_time_ms = 1;     // Average translation time
+  double throughput_operations_per_second = 2; // Translation throughput
+  int64 total_translations = 3;               // Total translations performed
+  int64 successful_translations = 4;          // Successful translations
+  double success_rate = 5;                    // Translation success rate
+  map<string, double> domain_performance = 6; // Per-domain performance
+}

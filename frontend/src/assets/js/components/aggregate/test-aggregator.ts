@@ -6,7 +6,7 @@
  */
 
 import { createAggregateComponent } from './index'
-import type { AggregateComponent, SacredAggregationOutput } from './index'
+import type { AggregateComponent, AggregationOutput } from './index'
 
 /**
  * Assert function for testing without console pollution
@@ -22,7 +22,7 @@ function assert(condition: boolean, message: string): void {
  */
 export async function testSacredAggregatorEngine(): Promise<void> {
   // Test 1: Component Creation
-  const aggregatorEngine: AggregateComponent = await createAggregateComponent('sacred_aggregator_engine', {
+  const aggregatorEngine: AggregateComponent = await createAggregateComponent('data_aggregator', {
     id: 'test_aggregator_engine'
   })
   

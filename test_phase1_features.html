@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phase 1 Features Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .feature-test {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .feature-title {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .demo-area {
+            margin: 15px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #3498db;
+        }
+        .reaction-demo {
+            display: flex;
+            gap: 8px;
+            margin: 10px 0;
+        }
+        .reaction-btn {
+            padding: 4px 8px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            background: #f8f9fa;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .reaction-btn:hover {
+            background: #e9ecef;
+        }
+        .reaction-btn.active {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+        .typing-demo {
+            padding: 8px 16px;
+            background: #e3f2fd;
+            border-radius: 8px;
+            border-left: 3px solid #2196f3;
+            font-style: italic;
+            color: #1976d2;
+        }
+        .typing-dots {
+            display: inline-flex;
+            gap: 2px;
+            margin-right: 8px;
+        }
+        .dot {
+            width: 4px;
+            height: 4px;
+            background: #2196f3;
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+        .dot:nth-child(1) { animation-delay: 0s; }
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typing {
+            0%, 60%, 100% { transform: scale(1); opacity: 0.5; }
+            30% { transform: scale(1.2); opacity: 1; }
+        }
+        .markdown-demo {
+            background: white;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        .markdown-demo strong { font-weight: 600; }
+        .markdown-demo em { font-style: italic; color: #666; }
+        .markdown-demo code {
+            background: #f1f3f4;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            color: #d73a49;
+        }
+        .markdown-demo pre {
+            background: #f6f8fa;
+            padding: 12px;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+        .markdown-demo blockquote {
+            border-left: 4px solid #dfe2e5;
+            padding-left: 12px;
+            margin: 8px 0;
+            color: #6a737d;
+        }
+        .mention {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: 500;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-left: 10px;
+        }
+        .status.implemented { background: #d4edda; color: #155724; }
+        .status.partial { background: #fff3cd; color: #856404; }
+    </style>
+</head>
+<body>
+    <h1>🚀 Phase 1 Features Test</h1>
+    <p>Testing the three core features implemented in Phase 1 of the chat enhancement roadmap.</p>
+
+    <div class="feature-test">
+        <h2 class="feature-title">1. Message Reactions <span class="status implemented">✅ Implemented</span></h2>
+        <p>Quick emoji responses to messages with real-time updates via WebSocket.</p>
+        
+        <div class="demo-area">
+            <div style="background: white; padding: 12px; border-radius: 6px; margin-bottom: 10px;">
+                <strong>Alice:</strong> Great work on the new features! 🎉
+            </div>
+            
+            <div class="reaction-demo">
+                <button class="reaction-btn active" onclick="toggleReaction(this)">👍 3</button>
+                <button class="reaction-btn" onclick="toggleReaction(this)">❤️ 1</button>
+                <button class="reaction-btn" onclick="toggleReaction(this)">🎉 2</button>
+                <button class="reaction-btn" onclick="addReaction()">😊 +</button>
+            </div>
+            
+            <p><strong>Features:</strong></p>
+            <ul>
+                <li>✅ Emoji reaction buttons</li>
+                <li>✅ Real-time reaction updates</li>
+                <li>✅ Reaction counts and user lists</li>
+                <li>✅ Add/remove reactions</li>
+                <li>✅ WebSocket broadcasting</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="feature-test">
+        <h2 class="feature-title">2. Typing Indicators <span class="status implemented">✅ Implemented</span></h2>
+        <p>Show "X is typing..." in real-time with automatic timeout after 3 seconds of inactivity.</p>
+        
+        <div class="demo-area">
+            <div class="typing-demo">
+                <div class="typing-dots">
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                </div>
+                Bob is typing...
+            </div>
+            
+            <p><strong>Features:</strong></p>
+            <ul>
+                <li>✅ Real-time typing indicators</li>
+                <li>✅ Multiple users typing support</li>
+                <li>✅ Auto-timeout after 3 seconds</li>
+                <li>✅ WebSocket integration</li>
+                <li>✅ Visual animation</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="feature-test">
+        <h2 class="feature-title">3. Markdown Formatting <span class="status implemented">✅ Implemented</span></h2>
+        <p>Rich text formatting with markdown support including bold, italic, code, mentions, and more.</p>
+        
+        <div class="demo-area">
+            <div class="markdown-demo">
+                <p>This is <strong>bold text</strong> and this is <em>italic text</em>.</p>
+                <p>Here's some <code>inline code</code> and a <span class="mention">@username</span> mention.</p>
+                <blockquote>This is a quoted message</blockquote>
+                <pre><code>// This is a code block
+function hello() {
+    console.log("Hello, world!");
+}</code></pre>
+                <ul>
+                    <li>Bullet point 1</li>
+                    <li>Bullet point 2</li>
+                </ul>
+            </div>
+            
+            <p><strong>Features:</strong></p>
+            <ul>
+                <li>✅ **Bold** and *italic* text</li>
+                <li>✅ `Inline code` formatting</li>
+                <li>✅ ```Code blocks``` with syntax highlighting</li>
+                <li>✅ @mention support</li>
+                <li>✅ > Blockquotes</li>
+                <li>✅ Lists and links</li>
+                <li>✅ Formatting toolbar</li>
+                <li>✅ Formatting help guide</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="feature-test">
+        <h2 class="feature-title">🎯 Phase 1 Summary</h2>
+        <div class="demo-area">
+            <h3>✅ Completed Features:</h3>
+            <ul>
+                <li><strong>Message Reactions:</strong> Emoji responses with real-time updates</li>
+                <li><strong>Typing Indicators:</strong> Live typing status with animations</li>
+                <li><strong>Markdown Formatting:</strong> Rich text with toolbar and help</li>
+            </ul>
+            
+            <h3>🚀 Impact:</h3>
+            <ul>
+                <li><strong>User Experience:</strong> More engaging and expressive communication</li>
+                <li><strong>Real-time Feel:</strong> Chat feels alive with typing indicators</li>
+                <li><strong>Rich Communication:</strong> Markdown enables better information sharing</li>
+            </ul>
+            
+            <h3>📊 Technical Implementation:</h3>
+            <ul>
+                <li><strong>Frontend:</strong> Vue 3 components with TypeScript</li>
+                <li><strong>Backend:</strong> FastAPI with WebSocket support</li>
+                <li><strong>Real-time:</strong> WebSocket events for reactions and typing</li>
+                <li><strong>Rendering:</strong> Marked.js for markdown with DOMPurify sanitization</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function toggleReaction(button) {
+            button.classList.toggle('active');
+            const count = button.textContent.match(/\d+/);
+            if (count) {
+                const num = parseInt(count[0]);
+                const emoji = button.textContent.split(' ')[0];
+                button.textContent = button.classList.contains('active') 
+                    ? `${emoji} ${num + 1}` 
+                    : `${emoji} ${Math.max(0, num - 1)}`;
+            }
+        }
+        
+        function addReaction() {
+            alert('In the real app, this would open an emoji picker!');
+        }
+        
+        // Simulate typing indicator
+        setInterval(() => {
+            const typingDemo = document.querySelector('.typing-demo');
+            const users = ['Bob', 'Alice', 'Charlie'];
+            const randomUser = users[Math.floor(Math.random() * users.length)];
+            typingDemo.innerHTML = `
+                <div class="typing-dots">
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                </div>
+                ${randomUser} is typing...
+            `;
+        }, 5000);
+    </script>
+</body>
+</html>

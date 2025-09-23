@@ -10,31 +10,43 @@
 
 import type { ATCGComponent } from '../index'
 
-// Export the sacred lambda engine
-export * from './SacredLambdaEngine'
-import type { SacredTransformationOutput } from './SacredLambdaEngine'
+// Export the data transformer
+export { 
+  DataTransformer, 
+  createDataTransformer, 
+  isDataTransformer,
+  type TransformationResult,
+  type ValidationRules as TransformationValidationRules,
+  type SystemMetrics as TransformationSystemMetrics
+} from './DataTransformer'
 
 // Minimal transformation component interface
 export interface TransformationComponent extends ATCGComponent {
   readonly type: 'transformation'
   readonly purpose: string
   readonly id: string
-  transform(input: unknown): Promise<SacredTransformationOutput>
-  process(data: unknown): Promise<SacredTransformationOutput>
+  transform(input: any): TransformationResult
+  process(data: any): any
   initialize(): Promise<void>
   destroy(): Promise<void>
-  getStatus(): Record<string, unknown>
+  getStatus(): Record<string, any>
 }
 
-// Minimal transformation component factory
+// Transformation component types
+export type TransformationComponentType = 'data_transformer'
+
+// Transformation component factory
 export async function createTransformationComponent(
-  type: 'sacred_lambda_engine', 
+  type: TransformationComponentType, 
   config: { id: string }
 ): Promise<TransformationComponent> {
   switch (type) {
-    case 'sacred_lambda_engine':
-      return new (await import('./SacredLambdaEngine')).SacredLambdaEngine(config.id)
+    case 'data_transformer':
+      const { createDataTransformer } = await import('./DataTransformer')
+      return createDataTransformer(config.id)
     default:
-      throw new Error(`Unknown transformation component type: ${type}`)
+      // Exhaustive checking pattern for type safety
+      const _exhaustiveCheck: never = type
+      throw new Error(`Unknown transformation component type: ${_exhaustiveCheck}`)
   }
 }

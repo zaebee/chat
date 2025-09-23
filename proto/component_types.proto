@@ -1,0 +1,168 @@
+syntax = "proto3";
+
+package atcg.component;
+
+// Extended component type definitions for specific ATCG operations
+
+// Aggregate-specific operations and data structures
+message AggregateData {
+  repeated DataItem items = 1;                 // Data items to aggregate
+  repeated string invariants = 2;             // Structural invariants
+  int32 version = 3;                          // Aggregate version
+  map<string, string> state = 4;              // Current aggregate state
+}
+
+message DataItem {
+  string id = 1;                              // Item identifier
+  bytes payload = 2;                          // Item data payload
+  map<string, string> attributes = 3;         // Item attributes
+  int64 timestamp = 4;                        // Item timestamp
+}
+
+message AggregateOperation {
+  string aggregate_id = 1;                    // Target aggregate
+  AggregateAction action = 2;                 // Action to perform
+  repeated DataItem items = 3;                // Items for operation
+  map<string, string> parameters = 4;         // Operation parameters
+}
+
+enum AggregateAction {
+  AGGREGATE_ACTION_UNSPECIFIED = 0;
+  ADD_ELEMENTS = 1;                           // Add elements to aggregate
+  REMOVE_ELEMENTS = 2;                        // Remove elements from aggregate
+  UPDATE_ELEMENTS = 3;                        // Update existing elements
+  VALIDATE_INVARIANTS = 4;                    // Validate structural invariants
+  GET_STATE = 5;                              // Retrieve current state
+}
+
+// Transform-specific operations and data structures
+message TransformData {
+  bytes input_data = 1;                       // Input data for transformation
+  string transform_function = 2;              // Transform function identifier
+  map<string, string> parameters = 3;         // Transform parameters
+  bool idempotent = 4;                        // Idempotent operation flag
+}
+
+message TransformOperation {
+  string transform_id = 1;                    // Transform component ID
+  TransformAction action = 2;                 // Transform action
+  TransformData data = 3;                     // Transform data
+  bool async_execution = 4;                   // Asynchronous execution
+}
+
+enum TransformAction {
+  TRANSFORM_ACTION_UNSPECIFIED = 0;
+  EXECUTE = 1;                                // Execute transformation
+  VALIDATE = 2;                               // Validate transformation
+  GET_METRICS = 3;                            // Get execution metrics
+  RESET_METRICS = 4;                          // Reset execution metrics
+}
+
+message TransformResult {
+  bool success = 1;                           // Transformation success
+  bytes output_data = 2;                      // Transformed output data
+  string error_message = 3;                   // Error message if failed
+  double execution_time_ms = 4;               // Execution time
+  map<string, double> metrics = 5;            // Performance metrics
+}
+
+// Connect-specific operations and data structures
+message ConnectData {
+  string source_protocol = 1;                 // Source protocol type
+  string target_protocol = 2;                 // Target protocol type
+  bytes message_data = 3;                     // Message data to translate
+  map<string, string> headers = 4;            // Message headers
+}
+
+message ConnectOperation {
+  string connector_id = 1;                    // Connector component ID
+  ConnectAction action = 2;                   // Connection action
+  ConnectData data = 3;                       // Connection data
+  string target_endpoint = 4;                 // Target endpoint
+}
+
+enum ConnectAction {
+  CONNECT_ACTION_UNSPECIFIED = 0;
+  TRANSLATE = 1;                              // Translate message protocol
+  SEND_MESSAGE = 2;                           // Send message
+  RECEIVE_MESSAGE = 3;                        // Receive message
+  GET_STATUS = 4;                             // Get connection status
+  ESTABLISH_CONNECTION = 5;                   // Establish new connection
+  CLOSE_CONNECTION = 6;                       // Close existing connection
+}
+
+message ConnectResult {
+  bool success = 1;                           // Connection operation success
+  bytes translated_data = 2;                  // Translated message data
+  string error_message = 3;                   // Error message if failed
+  map<string, string> response_headers = 4;   // Response headers
+  ConnectionStatus status = 5;                // Connection status
+}
+
+enum ConnectionStatus {
+  CONNECTION_STATUS_UNSPECIFIED = 0;
+  CONNECTED = 1;                              // Connection established
+  DISCONNECTED = 2;                           // Connection closed
+  CONNECTING = 3;                             // Connection in progress
+  ERROR = 4;                                  // Connection error
+}
+
+// Generate-specific operations and data structures
+message GenerateData {
+  string event_type = 1;                      // Type of event to generate
+  bytes template_data = 2;                    // Template data for generation
+  map<string, string> parameters = 3;         // Generation parameters
+  bool broadcast = 4;                         // Broadcast generated event
+}
+
+message GenerateOperation {
+  string generator_id = 1;                    // Generator component ID
+  GenerateAction action = 2;                  // Generation action
+  GenerateData data = 3;                      // Generation data
+  repeated string target_components = 4;      // Target components for broadcast
+}
+
+enum GenerateAction {
+  GENERATE_ACTION_UNSPECIFIED = 0;
+  CREATE_EVENT = 1;                           // Create new event
+  BROADCAST_EVENT = 2;                        // Broadcast existing event
+  REPLICATE = 3;                              // Replicate component
+  GET_GENERATION_METRICS = 4;                 // Get generation metrics
+}
+
+message GenerateResult {
+  bool success = 1;                           // Generation success
+  string generated_id = 2;                    // Generated event/component ID
+  bytes generated_data = 3;                   // Generated data
+  string error_message = 4;                   // Error message if failed
+  int32 broadcast_count = 5;                  // Number of successful broadcasts
+  map<string, string> generation_metrics = 6; // Generation metrics
+}
+
+// Common data structures
+message ExecutionMetrics {
+  int64 total_operations = 1;                 // Total operations executed
+  double average_execution_time_ms = 2;       // Average execution time
+  int64 success_count = 3;                    // Successful operations
+  int64 error_count = 4;                      // Failed operations
+  double error_rate = 5;                      // Error rate percentage
+  int64 last_operation_timestamp = 6;         // Last operation timestamp
+}
+
+message ComponentDependency {
+  string component_id = 1;                    // Dependent component ID
+  ComponentType component_type = 2;           // Dependent component type
+  DependencyType dependency_type = 3;         // Type of dependency
+  bool required = 4;                          // Required dependency flag
+}
+
+enum DependencyType {
+  DEPENDENCY_TYPE_UNSPECIFIED = 0;
+  DATA_FLOW = 1;                              // Data flow dependency
+  CONTROL_FLOW = 2;                           // Control flow dependency
+  CONFIGURATION = 3;                          // Configuration dependency
+  RESOURCE = 4;                               // Resource dependency
+}
+
+// Import the main system types
+import "atcg_system.proto";

@@ -1,0 +1,452 @@
+syntax = "proto3";
+
+package atcg.monitoring;
+
+// Pure monitoring and observability definitions
+// System health, metrics, and diagnostic information
+
+import "atcg_system.proto";
+import "component_types.proto";
+
+// Comprehensive system monitoring service
+service MonitoringService {
+  // Health monitoring
+  rpc GetSystemHealth(SystemHealthRequest) returns (SystemHealthResponse);
+  rpc GetComponentHealth(ComponentHealthRequest) returns (ComponentHealthResponse);
+  rpc StreamHealthUpdates(HealthStreamRequest) returns (stream HealthUpdate);
+  
+  // Performance metrics
+  rpc GetPerformanceMetrics(PerformanceMetricsRequest) returns (PerformanceMetricsResponse);
+  rpc GetHistoricalMetrics(HistoricalMetricsRequest) returns (HistoricalMetricsResponse);
+  rpc StreamMetrics(MetricsStreamRequest) returns (stream MetricsUpdate);
+  
+  // System diagnostics
+  rpc RunDiagnostics(DiagnosticsRequest) returns (DiagnosticsResponse);
+  rpc GetSystemInfo(SystemInfoRequest) returns (SystemInfoResponse);
+  rpc GetDependencyGraph(DependencyGraphRequest) returns (DependencyGraphResponse);
+  
+  // Alerting and notifications
+  rpc CreateAlert(AlertCreationRequest) returns (AlertCreationResponse);
+  rpc GetAlerts(AlertsRequest) returns (AlertsResponse);
+  rpc AcknowledgeAlert(AlertAcknowledgmentRequest) returns (AlertAcknowledgmentResponse);
+}
+
+// System health monitoring
+message SystemHealthRequest {
+  bool include_components = 1;                // Include individual component health
+  bool include_dependencies = 2;             // Include dependency health
+  int32 max_components = 3;                   // Maximum components to return
+}
+
+message SystemHealthResponse {
+  SystemHealthStatus overall_status = 1;     // Overall system health
+  repeated ComponentHealthSummary components = 2; // Component health summaries
+  repeated DependencyHealth dependencies = 3; // Dependency health status
+  int64 timestamp = 4;                        // Health check timestamp
+  string health_summary = 5;                  // Human-readable summary
+}
+
+enum SystemHealthStatus {
+  SYSTEM_HEALTH_UNSPECIFIED = 0;
+  HEALTHY = 1;                                // All systems operational
+  DEGRADED = 2;                               // Some issues but functional
+  UNHEALTHY = 3;                              // Significant issues
+  CRITICAL = 4;                               // System failure imminent
+  DOWN = 5;                                   // System not operational
+}
+
+message ComponentHealthSummary {
+  string component_id = 1;                    // Component identifier
+  atcg.system.ComponentType type = 2;         // Component type
+  ComponentHealthStatus status = 3;           // Health status
+  string status_message = 4;                  // Status description
+  double health_score = 5;                    // Health score (0.0-1.0)
+  int64 last_health_check = 6;                // Last health check time
+}
+
+enum ComponentHealthStatus {
+  COMPONENT_HEALTH_UNSPECIFIED = 0;
+  OPERATIONAL = 1;                            // Component fully operational
+  WARNING = 2;                                // Minor issues detected
+  ERROR = 3;                                  // Significant issues
+  FAILED = 4;                                 // Component failed
+  UNKNOWN = 5;                                // Health status unknown
+}
+
+// Individual component health details
+message ComponentHealthRequest {
+  string component_id = 1;                    // Target component
+  bool include_metrics = 2;                   // Include performance metrics
+  bool include_dependencies = 3;              // Include dependency status
+  bool run_deep_check = 4;                    // Run comprehensive health check
+}
+
+message ComponentHealthResponse {
+  ComponentHealthSummary summary = 1;         // Health summary
+  atcg.component.ExecutionMetrics metrics = 2; // Performance metrics
+  repeated DependencyHealth dependencies = 3; // Dependency health
+  repeated HealthCheckResult checks = 4;      // Individual check results
+  map<string, string> diagnostic_info = 5;    // Diagnostic information
+}
+
+message HealthCheckResult {
+  string check_name = 1;                      // Health check identifier
+  bool passed = 2;                            // Check result
+  string message = 3;                         // Check message
+  double execution_time_ms = 4;               // Check execution time
+  HealthCheckSeverity severity = 5;           // Issue severity
+}
+
+enum HealthCheckSeverity {
+  HEALTH_CHECK_SEVERITY_UNSPECIFIED = 0;
+  INFO = 1;                                   // Informational
+  WARNING = 2;                                // Warning level
+  ERROR = 3;                                  // Error level
+  CRITICAL = 4;                               // Critical issue
+}
+
+// Dependency health monitoring
+message DependencyHealth {
+  string dependency_id = 1;                   // Dependency identifier
+  atcg.component.DependencyType type = 2;     // Dependency type
+  DependencyStatus status = 3;                // Dependency status
+  string status_message = 4;                  // Status description
+  double response_time_ms = 5;                // Response time
+  int64 last_check = 6;                       // Last check timestamp
+}
+
+enum DependencyStatus {
+  DEPENDENCY_STATUS_UNSPECIFIED = 0;
+  AVAILABLE = 1;                              // Dependency available
+  SLOW = 2;                                   // Dependency responding slowly
+  INTERMITTENT = 3;                           // Intermittent availability
+  UNAVAILABLE = 4;                            // Dependency unavailable
+  TIMEOUT = 5;                                // Dependency timeout
+}
+
+// Health streaming
+message HealthStreamRequest {
+  repeated string component_ids = 1;          // Components to monitor
+  int32 update_interval_seconds = 2;          // Update frequency
+  bool include_metrics = 3;                   // Include performance metrics
+}
+
+message HealthUpdate {
+  string component_id = 1;                    // Updated component
+  ComponentHealthSummary health = 2;          // Current health status
+  atcg.component.ExecutionMetrics metrics = 3; // Current metrics
+  int64 timestamp = 4;                        // Update timestamp
+}
+
+// Performance metrics
+message PerformanceMetricsRequest {
+  repeated string component_ids = 1;          // Target components
+  repeated string metric_names = 2;           // Specific metrics
+  int64 start_timestamp = 3;                  // Time range start
+  int64 end_timestamp = 4;                    // Time range end
+  MetricsAggregation aggregation = 5;         // Aggregation method
+}
+
+enum MetricsAggregation {
+  METRICS_AGGREGATION_UNSPECIFIED = 0;
+  RAW = 1;                                    // Raw metric values
+  AVERAGE = 2;                                // Average values
+  SUM = 3;                                    // Sum of values
+  MIN = 4;                                    // Minimum values
+  MAX = 5;                                    // Maximum values
+  PERCENTILE_95 = 6;                          // 95th percentile
+  PERCENTILE_99 = 7;                          // 99th percentile
+}
+
+message PerformanceMetricsResponse {
+  repeated ComponentMetrics component_metrics = 1; // Per-component metrics
+  SystemMetrics system_metrics = 2;           // System-wide metrics
+  int64 collection_timestamp = 3;             // Metrics collection time
+}
+
+message ComponentMetrics {
+  string component_id = 1;                    // Component identifier
+  atcg.component.ExecutionMetrics execution = 2; // Execution metrics
+  map<string, double> custom_metrics = 3;     // Custom component metrics
+  ResourceUsage resource_usage = 4;           // Resource utilization
+}
+
+message SystemMetrics {
+  int32 total_components = 1;                 // Total system components
+  int32 healthy_components = 2;               // Healthy components count
+  double system_load = 3;                     // Overall system load
+  ResourceUsage total_resource_usage = 4;     // Total resource usage
+  map<string, double> system_counters = 5;    // System-wide counters
+}
+
+message ResourceUsage {
+  double cpu_usage_percent = 1;               // CPU utilization percentage
+  int64 memory_usage_bytes = 2;               // Memory usage in bytes
+  int64 disk_usage_bytes = 3;                 // Disk usage in bytes
+  int64 network_bytes_sent = 4;               // Network bytes sent
+  int64 network_bytes_received = 5;           // Network bytes received
+  int32 open_connections = 6;                 // Open network connections
+}
+
+// Historical metrics
+message HistoricalMetricsRequest {
+  repeated string component_ids = 1;          // Target components
+  repeated string metric_names = 2;           // Specific metrics
+  int64 start_timestamp = 3;                  // Historical range start
+  int64 end_timestamp = 4;                    // Historical range end
+  int32 data_points = 5;                      // Number of data points
+  MetricsAggregation aggregation = 6;         // Aggregation method
+}
+
+message HistoricalMetricsResponse {
+  repeated HistoricalComponentMetrics components = 1; // Historical data
+  repeated MetricsDataPoint system_history = 2; // System metrics history
+  int64 query_timestamp = 3;                  // Query execution time
+}
+
+message HistoricalComponentMetrics {
+  string component_id = 1;                    // Component identifier
+  repeated MetricsDataPoint data_points = 2;  // Historical data points
+  MetricsSummary summary = 3;                 // Summary statistics
+}
+
+message MetricsDataPoint {
+  int64 timestamp = 1;                        // Data point timestamp
+  map<string, double> values = 2;             // Metric values
+}
+
+message MetricsSummary {
+  map<string, double> averages = 1;           // Average values
+  map<string, double> minimums = 2;           // Minimum values
+  map<string, double> maximums = 3;           // Maximum values
+  map<string, double> standard_deviations = 4; // Standard deviations
+}
+
+// Metrics streaming
+message MetricsStreamRequest {
+  repeated string component_ids = 1;          // Components to monitor
+  repeated string metric_names = 2;           // Metrics to stream
+  int32 update_interval_seconds = 3;          // Update frequency
+  MetricsAggregation aggregation = 4;         // Real-time aggregation
+}
+
+message MetricsUpdate {
+  string component_id = 1;                    // Updated component
+  map<string, double> metric_values = 2;      // Current metric values
+  ResourceUsage resource_usage = 3;           // Current resource usage
+  int64 timestamp = 4;                        // Update timestamp
+}
+
+// System diagnostics
+message DiagnosticsRequest {
+  repeated string component_ids = 1;          // Components to diagnose
+  repeated DiagnosticType diagnostic_types = 2; // Types of diagnostics
+  bool include_recommendations = 3;           // Include recommendations
+}
+
+enum DiagnosticType {
+  DIAGNOSTIC_TYPE_UNSPECIFIED = 0;
+  CONNECTIVITY = 1;                           // Network connectivity
+  PERFORMANCE = 2;                            // Performance analysis
+  CONFIGURATION = 3;                          // Configuration validation
+  DEPENDENCIES = 4;                           // Dependency analysis
+  SECURITY = 5;                               // Security assessment
+}
+
+message DiagnosticsResponse {
+  repeated ComponentDiagnostics components = 1; // Component diagnostics
+  SystemDiagnostics system = 2;               // System-wide diagnostics
+  repeated Recommendation recommendations = 3; // Improvement recommendations
+  int64 diagnostic_timestamp = 4;             // Diagnostic execution time
+}
+
+message ComponentDiagnostics {
+  string component_id = 1;                    // Component identifier
+  repeated DiagnosticResult results = 2;      // Diagnostic results
+  ComponentHealthSummary health = 3;          // Current health status
+}
+
+message DiagnosticResult {
+  DiagnosticType type = 1;                    // Diagnostic type
+  DiagnosticStatus status = 2;                // Diagnostic status
+  string message = 3;                         // Diagnostic message
+  repeated string details = 4;                // Detailed information
+  double execution_time_ms = 5;               // Diagnostic execution time
+}
+
+enum DiagnosticStatus {
+  DIAGNOSTIC_STATUS_UNSPECIFIED = 0;
+  PASSED = 1;                                 // Diagnostic passed
+  WARNING = 2;                                // Warning detected
+  FAILED = 3;                                 // Diagnostic failed
+  ERROR = 4;                                  // Diagnostic error
+  SKIPPED = 5;                                // Diagnostic skipped
+}
+
+message SystemDiagnostics {
+  SystemHealthStatus overall_health = 1;      // Overall system health
+  repeated DiagnosticResult system_checks = 2; // System-level checks
+  DependencyGraphHealth dependency_health = 3; // Dependency graph health
+}
+
+message DependencyGraphHealth {
+  int32 total_dependencies = 1;               // Total dependencies
+  int32 healthy_dependencies = 2;             // Healthy dependencies
+  repeated string critical_path_components = 3; // Critical path components
+  repeated string bottleneck_components = 4;  // Bottleneck components
+}
+
+// System information
+message SystemInfoRequest {
+  bool include_environment = 1;               // Include environment info
+  bool include_configuration = 2;             // Include configuration
+  bool include_versions = 3;                  // Include version information
+}
+
+message SystemInfoResponse {
+  SystemEnvironment environment = 1;          // Environment information
+  map<string, string> configuration = 2;      // System configuration
+  map<string, string> versions = 3;           // Component versions
+  SystemCapabilities capabilities = 4;        // System capabilities
+  int64 system_start_time = 5;                // System start timestamp
+}
+
+message SystemEnvironment {
+  string operating_system = 1;                // Operating system
+  string architecture = 2;                    // System architecture
+  int32 cpu_cores = 3;                        // Number of CPU cores
+  int64 total_memory_bytes = 4;               // Total system memory
+  string runtime_version = 5;                 // Runtime version
+  map<string, string> environment_variables = 6; // Environment variables
+}
+
+message SystemCapabilities {
+  repeated string supported_protocols = 1;    // Supported protocols
+  repeated string available_features = 2;     // Available features
+  map<string, int32> resource_limits = 3;     // Resource limits
+  repeated string enabled_services = 4;       // Enabled services
+}
+
+// Dependency graph
+message DependencyGraphRequest {
+  string root_component_id = 1;               // Root component for graph
+  int32 max_depth = 2;                        // Maximum graph depth
+  bool include_health = 3;                    // Include health status
+}
+
+message DependencyGraphResponse {
+  repeated DependencyNode nodes = 1;          // Graph nodes
+  repeated DependencyEdge edges = 2;          // Graph edges
+  DependencyGraphMetrics metrics = 3;         // Graph metrics
+}
+
+message DependencyNode {
+  string component_id = 1;                    // Component identifier
+  atcg.system.ComponentType type = 2;         // Component type
+  ComponentHealthSummary health = 3;          // Component health
+  int32 depth = 4;                            // Depth in graph
+}
+
+message DependencyEdge {
+  string source_component_id = 1;             // Source component
+  string target_component_id = 2;             // Target component
+  atcg.component.DependencyType type = 3;     // Dependency type
+  bool required = 4;                          // Required dependency
+  DependencyHealth health = 5;                // Dependency health
+}
+
+message DependencyGraphMetrics {
+  int32 total_nodes = 1;                      // Total nodes in graph
+  int32 total_edges = 2;                      // Total edges in graph
+  int32 max_depth = 3;                        // Maximum graph depth
+  repeated string critical_components = 4;    // Critical path components
+  double graph_complexity = 5;                // Graph complexity score
+}
+
+// Alerting system
+message AlertCreationRequest {
+  string component_id = 1;                    // Target component
+  AlertType alert_type = 2;                   // Type of alert
+  AlertSeverity severity = 3;                 // Alert severity
+  string condition = 4;                       // Alert condition
+  map<string, string> parameters = 5;         // Alert parameters
+  repeated string notification_targets = 6;   // Notification targets
+}
+
+enum AlertType {
+  ALERT_TYPE_UNSPECIFIED = 0;
+  HEALTH_CHECK_FAILED = 1;                    // Health check failure
+  PERFORMANCE_DEGRADED = 2;                   // Performance degradation
+  RESOURCE_EXHAUSTED = 3;                     // Resource exhaustion
+  DEPENDENCY_FAILED = 4;                      // Dependency failure
+  CUSTOM_METRIC = 5;                          // Custom metric alert
+}
+
+enum AlertSeverity {
+  ALERT_SEVERITY_UNSPECIFIED = 0;
+  LOW = 1;                                    // Low severity
+  MEDIUM = 2;                                 // Medium severity
+  HIGH = 3;                                   // High severity
+  CRITICAL = 4;                               // Critical severity
+}
+
+message AlertCreationResponse {
+  bool success = 1;                           // Creation success
+  string error_message = 2;                   // Error message
+  string alert_id = 3;                        // Created alert ID
+  int64 creation_timestamp = 4;               // Creation timestamp
+}
+
+message AlertsRequest {
+  repeated AlertSeverity severities = 1;      // Filter by severity
+  repeated AlertStatus statuses = 2;          // Filter by status
+  string component_id = 3;                    // Filter by component
+  int64 start_timestamp = 4;                  // Time range start
+  int64 end_timestamp = 5;                    // Time range end
+  int32 max_alerts = 6;                       // Maximum alerts to return
+}
+
+enum AlertStatus {
+  ALERT_STATUS_UNSPECIFIED = 0;
+  ACTIVE = 1;                                 // Alert is active
+  ACKNOWLEDGED = 2;                           // Alert acknowledged
+  RESOLVED = 3;                               // Alert resolved
+  SUPPRESSED = 4;                             // Alert suppressed
+}
+
+message AlertsResponse {
+  repeated Alert alerts = 1;                  // Matching alerts
+  int32 total_count = 2;                      // Total alert count
+  AlertsSummary summary = 3;                  // Alerts summary
+}
+
+message Alert {
+  string alert_id = 1;                        // Alert identifier
+  string component_id = 2;                    // Associated component
+  AlertType type = 3;                         // Alert type
+  AlertSeverity severity = 4;                 // Alert severity
+  AlertStatus status = 5;                     // Alert status
+  string message = 6;                         // Alert message
+  int64 created_timestamp = 7;                // Creation timestamp
+  int64 acknowledged_timestamp = 8;           // Acknowledgment timestamp
+  string acknowledged_by = 9;                 // Acknowledged by user
+}
+
+message AlertsSummary {
+  int32 active_count = 1;                     // Active alerts count
+  int32 critical_count = 2;                   // Critical alerts count
+  int32 acknowledged_count = 3;               // Acknowledged alerts count
+  int32 resolved_count = 4;                   // Resolved alerts count
+}
+
+message AlertAcknowledgmentRequest {
+  string alert_id = 1;                        // Alert to acknowledge
+  string acknowledged_by = 2;                 // User acknowledging
+  string acknowledgment_note = 3;             // Acknowledgment note
+}
+
+message AlertAcknowledgmentResponse {
+  bool success = 1;                           // Acknowledgment success
+  string error_message = 2;                   // Error message
+  int64 acknowledgment_timestamp = 3;         // Acknowledgment timestamp
+}

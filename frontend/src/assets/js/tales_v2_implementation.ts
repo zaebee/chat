@@ -503,7 +503,7 @@ export const useTalesStoreV2 = defineStore('tales-v2', () => {
 
   // Computed properties
   const tales = computed(() => {
-    let filteredTales = TalesTransformation.filterTales(aggregate.getTales(), currentFilter.value)
+    const filteredTales = TalesTransformation.filterTales(aggregate.getTales(), currentFilter.value)
     return TalesTransformation.sortTales(filteredTales, currentSort.value)
   })
 
