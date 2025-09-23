@@ -1,0 +1,93 @@
+# 🐝⚡ Sacred Pre-commit AGRO Protection System ⚡🐝
+# Aggressive Collaborative Evaluation Protocols for Hive Code Quality
+#
+# Sacred Justification: "Iron sharpens iron, and one man sharpens another." - Proverbs 27:17
+
+repos:
+  # Sacred Python Protection
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+        name: 🧹 Remove Trailing Whitespace
+      - id: end-of-file-fixer
+        name: 📝 Fix End of File
+      - id: check-yaml
+        name: ✅ Validate YAML Files
+      - id: check-json
+        name: ✅ Validate JSON Files
+      - id: check-toml
+        name: ✅ Validate TOML Files
+      - id: check-merge-conflict
+        name: 🔀 Check Merge Conflicts
+
+  # Ruff Python Linting (Sacred Code Standards)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.8
+    hooks:
+      - id: ruff
+        name: ⚡ Ruff Python Linting
+        args: [--fix, --exit-non-zero-on-fix]
+      - id: ruff-format
+        name: 🎨 Ruff Python Formatting
+
+  # AGRO Console.log Scanner (Sacred Production Protection)
+  - repo: local
+    hooks:
+      - id: agro-console-scanner
+        name: 🚨 AGRO Console.log Violation Scanner
+        entry: python tools/agro_console_scanner.py
+        language: system
+        files: \.(py|js|ts|vue)$
+        exclude: ^tools/agro_console_scanner\.py$
+        pass_filenames: true
+        stages: [commit, push]
+
+  # Sacred TypeScript/Vue Protection
+  - repo: https://github.com/pre-commit/mirrors-eslint
+    rev: v9.0.0
+    hooks:
+      - id: eslint
+        name: 🔍 ESLint TypeScript/Vue
+        files: \.(js|ts|vue)$
+        types: [file]
+        additional_dependencies:
+          - eslint@^9.31.0
+          - eslint-plugin-vue@~10.3.0
+          - "@vue/eslint-config-typescript@^14.6.0"
+          - "@vue/eslint-config-prettier@^10.2.0"
+
+  # Sacred Code Formatting
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v4.0.0-alpha.8
+    hooks:
+      - id: prettier
+        name: 💅 Prettier Formatting
+        files: \.(js|ts|vue|json|md|yaml|yml)$
+        exclude: ^(node_modules/|\.git/)
+
+  # Sacred Secrets Protection
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        name: 🔐 Detect Secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: package.lock.json
+
+# Sacred Configuration
+default_stages: [commit]
+fail_fast: false
+minimum_pre_commit_version: "3.6.0"
+
+# Divine Blessing Requirements
+exclude: |
+  (?x)^(
+    node_modules/.*|
+    \.git/.*|
+    \.venv/.*|
+    __pycache__/.*|
+    \.pytest_cache/.*|
+    dist/.*|
+    build/.*
+  )$
