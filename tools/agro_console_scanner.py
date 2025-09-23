@@ -128,6 +128,9 @@ class AgroConsoleScanner:
                 "*.spec.ts",
                 "vitest.config.*",
                 "vite.config.*",
+                "*.min.js",
+                "*-*.js",  # Minified files with hash patterns like index-BbDa_177.js
+                "static/assets/*",  # All static assets (built files)
             ],
             "strict_mode": True,
             "allow_dev_console": False,
@@ -139,6 +142,10 @@ class AgroConsoleScanner:
     def is_file_exempt(self, file_path: str) -> bool:
         """Check if file is exempt from AGRO scanning"""
         file_name = os.path.basename(file_path)
+        
+        # Check if file is in static/assets directory (built files)
+        if "static/assets/" in file_path:
+            return True
 
         for pattern in self.config["exempt_files"]:
             if re.match(pattern.replace("*", ".*"), file_name):
