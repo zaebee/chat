@@ -144,6 +144,8 @@ class AgroConsoleScanner:
                 "sacred_*.py",  # Sacred analysis scripts
                 "*_analysis.py",  # Analysis scripts
                 "*_demo.py",  # Demo scripts
+                "*_example.py",  # Example scripts
+                "*_integration*.py",  # Integration examples
             ],
             "strict_mode": True,
             "allow_dev_console": False,
