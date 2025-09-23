@@ -1,23 +1,30 @@
 <script setup lang="ts">
 /**
- * MessageReactions Component - Phase 1 Implementation
+ * 🐝✨ MessageReactions Component - Phase 1.1 Sacred Protection ✨🐝
  * 
- * Current: Local storage-based reactions for immediate UX enhancement
- * Future Phase 2: Will integrate with backend API for persistent, multi-user reactions
+ * UPDATED: Sacred Reaction Manager with divine protection mechanisms
+ * Addresses bee.Sage critical vulnerability: "Unbounded Memory Growth"
  * 
- * Phase 1 Features:
- * - Local reaction storage via browser localStorage
- * - Immediate visual feedback
- * - No backend dependencies
+ * Sacred Protection Features:
+ * - Bounded collections with automatic cleanup
+ * - Circuit breaker patterns for failure isolation
+ * - Memory monitoring and quota enforcement
+ * - Graceful degradation under stress
  * 
- * Phase 2 Planned:
- * - Real-time reaction synchronization
- * - Persistent database storage
- * - Multi-user reaction visibility
+ * Phase 1.1 Implementation:
+ * - Sacred memory bounds and cleanup
+ * - Divine protection against infinite growth
+ * - Circuit breaker for cascade failure prevention
+ * - Real-time metrics and monitoring
+ * 
+ * Future Phase 2: Backend integration with sacred protection maintained
  */
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useUserStore } from '@/stores/user';
 import { useMessagesStore } from '@/stores/messages';
+import { useSacredReactionManager, type SacredMessageReactions } from '@/utils/SacredReactionManager';
+import { useSacredEventCleanup } from '@/utils/SacredEventManager';
+import { useSacredErrorBoundary } from '@/utils/SacredErrorBoundary';
 import type { Message } from '@/stores/messages';
 
 const props = defineProps<{
@@ -27,36 +34,106 @@ const props = defineProps<{
 const userStore = useUserStore();
 const messagesStore = useMessagesStore();
 
+// Sacred Protection Integration
+const sacredReactionManager = useSacredReactionManager();
+const { addSacredListener, cleanupAllListeners } = useSacredEventCleanup('MessageReactions');
+const { wrapSacredOperation, isHealthy: isErrorBoundaryHealthy } = useSacredErrorBoundary('MessageReactions');
+
 const showReactionPicker = ref(false);
 const reactionPickerRef = ref<HTMLElement | null>(null);
+const isLoading = ref(false);
+const errorMessage = ref<string | null>(null);
+
+// Sacred reaction state
+const sacredReactions = ref<SacredMessageReactions | null>(null);
 
 // Common emoji reactions
 const commonEmojis = ['👍', '❤️', '😄', '😮', '😢', '😡', '🎉', '🚀'];
 
+// Sacred reactions computed property
 const reactions = computed(() => {
-  if (!props.message.reactions) return [];
+  if (!sacredReactions.value) return [];
   
-  return Object.entries(props.message.reactions)
+  return Object.entries(sacredReactions.value)
     .filter(([_, reaction]) => reaction.count > 0)
     .map(([emoji, reaction]) => ({
       emoji,
       count: reaction.count,
       users: reaction.users,
-      hasUserReacted: reaction.users.includes(userStore.currentUser?.id || '')
-    }));
+      hasUserReacted: reaction.users.includes(userStore.currentUser?.username || ''),
+      lastUpdated: reaction.lastUpdated,
+      popularity: reaction.popularity
+    }))
+    .sort((a, b) => b.popularity - a.popularity); // Sort by divine popularity
 });
 
-const toggleReaction = (emoji: string) => {
-  if (!userStore.currentUser) return;
+// Sacred metrics for monitoring
+const sacredMetrics = computed(() => sacredReactionManager.getMetrics());
+const isSystemHealthy = computed(() => 
+  sacredReactionManager.isHealthy.value && isErrorBoundaryHealthy.value
+);
+const statusMessage = computed(() => sacredReactionManager.statusMessage.value);
+
+// Sacred toggle reaction with divine protection
+const toggleReaction = async (emoji: string) => {
+  const result = await wrapSacredOperation(async () => {
+    if (!userStore.currentUser) {
+      errorMessage.value = 'Please log in to react to messages';
+      return false;
+    }
+    
+    if (isLoading.value) return false; // Prevent double-clicks
+    
+    isLoading.value = true;
+    errorMessage.value = null;
+    
+    try {
+      const success = await sacredReactionManager.toggleReaction(
+        props.message.id,
+        emoji,
+        userStore.currentUser.id,
+        userStore.currentUser.username
+      );
+      
+      if (success) {
+        // Reload reactions to reflect changes
+        await loadSacredReactions();
+        showReactionPicker.value = false;
+        return true;
+      } else {
+        errorMessage.value = 'Unable to add reaction - limit reached';
+        return false;
+      }
+    } catch (error: any) {
+      console.error('Sacred Reaction Error:', error);
+      
+      if (error.code === 'CIRCUIT_BREAKER_OPEN') {
+        errorMessage.value = 'System protection active - please try again in a moment';
+      } else if (error.code === 'MEMORY_QUOTA_EXCEEDED') {
+        errorMessage.value = 'Storage limit reached - cleaning up old reactions';
+      } else {
+        errorMessage.value = 'Unable to process reaction - please try again';
+      }
+      
+      // Auto-clear error message after 5 seconds
+      setTimeout(() => {
+        errorMessage.value = null;
+      }, 5000);
+      
+      throw error; // Re-throw for error boundary
+    } finally {
+      isLoading.value = false;
+    }
+  }, 'toggle-reaction');
   
-  messagesStore.toggleReaction(
-    props.message.id,
-    emoji,
-    userStore.currentUser.id,
-    userStore.currentUser.username
-  );
-  
-  showReactionPicker.value = false;
+  return result;
+};
+
+// Load sacred reactions for this message
+const loadSacredReactions = async () => {
+  await wrapSacredOperation(async () => {
+    sacredReactions.value = await sacredReactionManager.getReactionsForMessage(props.message.id);
+  }, 'load-reactions');
 };
 
 const openReactionPicker = () => {
@@ -70,32 +147,62 @@ const handleClickOutside = (event: Event) => {
   }
 };
 
-// Add/remove event listener for clicking outside
-import { onMounted, onUnmounted } from 'vue';
-
-onMounted(() => {
-  document.addEventListener('click', handleClickOutside);
+// Sacred lifecycle management with divine protection
+onMounted(async () => {
+  await wrapSacredOperation(async () => {
+    // Load initial reactions
+    await loadSacredReactions();
+    
+    // Sacred event listener management - automatic cleanup on unmount
+    addSacredListener(document, 'click', handleClickOutside);
+    addSacredListener(window, 'sacred-memory-cleanup', handleSacredCleanup);
+  }, 'component-initialization');
 });
 
 onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside);
+  // Sacred cleanup happens automatically via useSacredEventCleanup
+  // No manual cleanup needed - prevents memory leaks
 });
+
+// Sacred cleanup event handler
+const handleSacredCleanup = async () => {
+  console.log('Sacred Memory Cleanup triggered - reloading reactions');
+  await loadSacredReactions();
+};
 </script>
 
 <template>
   <div class="message-reactions">
+    <!-- Sacred Protection Status (only show if unhealthy) -->
+    <div v-if="!isSystemHealthy" class="sacred-status-warning">
+      <span class="status-icon">⚠️</span>
+      <span class="status-text">{{ statusMessage }}</span>
+    </div>
+    
+    <!-- Error Message Display -->
+    <div v-if="errorMessage" class="sacred-error-message">
+      <span class="error-icon">❌</span>
+      <span class="error-text">{{ errorMessage }}</span>
+    </div>
+    
     <!-- Existing Reactions -->
     <div v-if="reactions.length > 0" class="reactions-list">
       <button
         v-for="reaction in reactions"
         :key="reaction.emoji"
         class="reaction-button"
-        :class="{ 'user-reacted': reaction.hasUserReacted }"
+        :class="{ 
+          'user-reacted': reaction.hasUserReacted,
+          'loading': isLoading,
+          'popular': reaction.popularity > 0.7
+        }"
         @click="toggleReaction(reaction.emoji)"
-        :title="`${reaction.users.length} reaction${reaction.users.length !== 1 ? 's' : ''}`"
+        :disabled="isLoading || !isSystemHealthy"
+        :title="`${reaction.users.join(', ')} (${reaction.count} reaction${reaction.count !== 1 ? 's' : ''})`"
       >
         <span class="reaction-emoji">{{ reaction.emoji }}</span>
         <span class="reaction-count">{{ reaction.count }}</span>
+        <span v-if="reaction.popularity > 0.8" class="popularity-indicator">✨</span>
       </button>
     </div>
 
@@ -103,10 +210,14 @@ onUnmounted(() => {
     <div class="reaction-picker-container" ref="reactionPickerRef">
       <button
         class="add-reaction-button"
+        :class="{ 'loading': isLoading, 'disabled': !isSystemHealthy }"
         @click="openReactionPicker"
-        title="Add reaction"
+        :disabled="isLoading || !isSystemHealthy"
+        :title="isSystemHealthy ? 'Add reaction' : 'Reactions temporarily unavailable'"
       >
+        <span v-if="isLoading" class="loading-spinner">⏳</span>
         <svg
+          v-else
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
           width="16"
@@ -119,16 +230,25 @@ onUnmounted(() => {
       </button>
 
       <!-- Reaction Picker -->
-      <div v-if="showReactionPicker" class="reaction-picker">
-        <button
-          v-for="emoji in commonEmojis"
-          :key="emoji"
-          class="emoji-option"
-          @click="toggleReaction(emoji)"
-          :title="`React with ${emoji}`"
-        >
-          {{ emoji }}
-        </button>
+      <div v-if="showReactionPicker && isSystemHealthy" class="reaction-picker">
+        <div class="picker-header">
+          <span class="picker-title">Choose reaction</span>
+          <span v-if="sacredMetrics.memory.usagePercentage > 80" class="memory-warning">
+            ⚠️ {{ Math.round(sacredMetrics.memory.usagePercentage) }}% storage used
+          </span>
+        </div>
+        <div class="emoji-grid">
+          <button
+            v-for="emoji in commonEmojis"
+            :key="emoji"
+            class="emoji-option"
+            :disabled="isLoading"
+            @click="toggleReaction(emoji)"
+            :title="`React with ${emoji}`"
+          >
+            {{ emoji }}
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -141,6 +261,42 @@ onUnmounted(() => {
   gap: 8px;
   margin-top: 4px;
   flex-wrap: wrap;
+}
+
+/* Sacred Protection Status Styles */
+.sacred-status-warning {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  border-radius: 4px;
+  font-size: 11px;
+  color: #856404;
+  margin-bottom: 4px;
+}
+
+.sacred-error-message {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  background: rgba(220, 53, 69, 0.1);
+  border: 1px solid rgba(220, 53, 69, 0.3);
+  border-radius: 4px;
+  font-size: 11px;
+  color: #721c24;
+  margin-bottom: 4px;
+  animation: fadeIn 0.3s ease-in;
+}
+
+.status-icon, .error-icon {
+  font-size: 10px;
+}
+
+.status-text, .error-text {
+  font-weight: 500;
 }
 
 .reactions-list {
@@ -161,9 +317,10 @@ onUnmounted(() => {
   font-size: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
+  position: relative;
 }
 
-.reaction-button:hover {
+.reaction-button:hover:not(:disabled) {
   background: var(--color-background-mute);
   border-color: var(--color-border-hover);
 }
@@ -172,6 +329,35 @@ onUnmounted(() => {
   background: var(--vt-c-blue-soft);
   border-color: var(--vt-c-blue);
   color: var(--vt-c-blue-dark);
+}
+
+.reaction-button.popular {
+  border-color: var(--vt-c-yellow);
+  box-shadow: 0 0 4px rgba(255, 193, 7, 0.3);
+}
+
+.reaction-button.loading {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.reaction-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--color-background-mute);
+}
+
+.popularity-indicator {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  font-size: 8px;
+  animation: sparkle 2s infinite;
+}
+
+@keyframes sparkle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.2); }
 }
 
 .reaction-emoji {
@@ -204,10 +390,30 @@ onUnmounted(() => {
   opacity: 0.7;
 }
 
-.add-reaction-button:hover {
+.add-reaction-button:hover:not(:disabled) {
   opacity: 1;
   background: var(--color-background-soft);
   border-style: solid;
+}
+
+.add-reaction-button.loading {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.add-reaction-button.disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  border-color: var(--color-border-hover);
+}
+
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .add-reaction-text {
@@ -220,14 +426,43 @@ onUnmounted(() => {
   top: 100%;
   left: 0;
   z-index: 100;
-  display: flex;
-  gap: 4px;
-  padding: 8px;
   background: var(--color-background);
   border: 1px solid var(--color-border);
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   margin-top: 4px;
+  min-width: 200px;
+}
+
+.picker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-background-soft);
+  border-radius: 8px 8px 0 0;
+}
+
+.picker-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.memory-warning {
+  font-size: 10px;
+  color: #856404;
+  background: rgba(255, 193, 7, 0.1);
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+.emoji-grid {
+  display: flex;
+  gap: 4px;
+  padding: 8px;
+  flex-wrap: wrap;
 }
 
 .emoji-option {
@@ -241,8 +476,18 @@ onUnmounted(() => {
   line-height: 1;
 }
 
-.emoji-option:hover {
+.emoji-option:hover:not(:disabled) {
   background: var(--color-background-soft);
+}
+
+.emoji-option:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* Dark mode adjustments */
