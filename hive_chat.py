@@ -6,27 +6,23 @@ to create a unified "Living Application" that demonstrates human-AI collaboratio
 """
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request, HTTPException
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import uvicorn
-import asyncio
-from typing import List, Dict, Optional, Any
+from typing import List, Dict, Optional
 import json
-import os
 import uuid
 from datetime import datetime
 from contextlib import asynccontextmanager
-import websockets.exceptions
 
 # Import existing database functionality
 from database import init_db, get_db_connection
 
 # Import our new HiveHost
 from hive_host import HiveHost
-from status_api import StatusAPI
 
 # Import Hive components
 from hive.events import PollenEvent
@@ -343,7 +339,7 @@ async def websocket_endpoint(websocket: WebSocket, user_id: str):
                 if hive_host:
                     event = PollenEvent(
                         event_type="message_sent",
-                        aggregate_id=f"chat_room_main",
+                        aggregate_id="chat_room_main",
                         payload={
                             "message_id": message.id,
                             "text": message.text,
@@ -360,7 +356,7 @@ async def websocket_endpoint(websocket: WebSocket, user_id: str):
                 # Broadcast message
                 broadcast_data = {
                     "type": "message",
-                    "message": message.dict(),
+                    "message": message.model_dump(),
                     "timestamp": datetime.now().isoformat()
                 }
                 await manager.broadcast(json.dumps(broadcast_data))

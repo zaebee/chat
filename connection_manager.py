@@ -63,14 +63,15 @@ class HiveConnectionManager:
         for connection in self.active_connections:
             try:
                 await connection.send_text(message)
-            except:
+            except Exception:
+                # Connection is broken, will be cleaned up on next disconnect
                 pass
 
     async def broadcast_user_update(self):
         user_list = list(self.users.values())
         update_message = {
             "type": "user_update",
-            "users": [user.dict() for user in user_list]
+            "users": [user.model_dump() for user in user_list]
         }
         await self.broadcast(json.dumps(update_message))
 
