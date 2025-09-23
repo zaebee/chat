@@ -10,6 +10,7 @@ import { storeToRefs } from "pinia";
 
 import MessageList from "@/components/MessageList.vue";
 import ChatInput from "@/components/ChatInput.vue";
+import TypingIndicator from "@/components/TypingIndicator.vue";
 
 import TeammatePresence from "@/components/TeammatePresence.vue";
 import RoomNavigation from "@/components/RoomNavigation.vue";
@@ -24,7 +25,7 @@ const gameStore = useGameStore();
 const settingsStore = useSettingsStore();
 
 const { messages, isAiThinking, replyToMessageId } = storeToRefs(messagesStore);
-const { isConnected } = storeToRefs(chatStore);
+const { isConnected, typingUsers } = storeToRefs(chatStore);
 const { currentUser } = storeToRefs(userStore);
 const { teammates } = storeToRefs(teammatesStore);
 const { rooms, currentRoom } = storeToRefs(gameStore);
@@ -144,6 +145,9 @@ onMounted(() => {
       </div>
       <div class="chat-content">
         <MessageList :messages="threadedMessages" @reply="handleReply" />
+        
+        <!-- Typing Indicator -->
+        <TypingIndicator :typing-users="typingUsers" />
 
         <div v-if="isAiThinking" class="ai-thinking-indicator message ai-message">
           <div class="message-sender">

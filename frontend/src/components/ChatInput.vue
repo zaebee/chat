@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { ref, watch, nextTick } from "vue";
+import { useChatStore } from "@/stores/chat";
+import FormattingToolbar from "@/components/FormattingToolbar.vue";
+import FormattingHelp from "@/components/FormattingHelp.vue";
 
 const props = defineProps<{ 
   modelValue: string; 
@@ -13,8 +16,10 @@ const emit = defineEmits<{
 }>();
 
 const chatInputRef = ref<HTMLTextAreaElement | null>(null);
+const chatStore = useChatStore();
 
 const localNewMessage = ref(props.modelValue);
+let isTyping = false;
 
 watch(
   () => props.modelValue,
@@ -25,11 +30,27 @@ watch(
 
 watch(localNewMessage, (newValue) => {
   emit('update:modelValue', newValue);
+  
+  // Handle typing indicators
+  if (newValue.trim() && !isTyping) {
+    isTyping = true;
+    chatStore.startTyping();
+  } else if (!newValue.trim() && isTyping) {
+    isTyping = false;
+    chatStore.stopTyping();
+  }
 });
 
 function handleKeydown(e: KeyboardEvent) {
   if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
+    
+    // Stop typing when sending message
+    if (isTyping) {
+      isTyping = false;
+      chatStore.stopTyping();
+    }
+    
     emit('sendMessage');
   }
 }
@@ -67,21 +88,25 @@ watch(
       Replying to message...
       <button @click="cancelReply" class="cancel-reply-btn">x</button>
     </div>
-    <textarea
-      v-model="localNewMessage"
-      @keydown="handleKeydown"
-      placeholder="Message #general"
-      rows="1"
-      ref="chatInputRef"
-    ></textarea>
-    <button class="send-btn" @click="emit('sendMessage')" :disabled="!localNewMessage.trim()">
+    <div class="input-row">
+      <FormattingToolbar :textarea-ref="chatInputRef" @format="() => {}" />
+      <textarea
+        v-model="localNewMessage"
+        @keydown="handleKeydown"
+        placeholder="Message #general (supports **bold**, *italic*, `code`, @mentions)"
+        rows="1"
+        ref="chatInputRef"
+      ></textarea>
+      <FormattingHelp />
+      <button class="send-btn" @click="emit('sendMessage')" :disabled="!localNewMessage.trim()">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
         <path
           fill="currentColor"
           d="M3.478 2.405c.126-.138.29-.22.468-.245l16.204 2.315c.28.04.51.238.594.512c.084.274.01.57-.184.764L13.3 12l7.387 6.26c.194.194.268.49.184.764c-.084.274-.314.472-.594.512l-16.204 2.315c-.178.025-.342-.057-.468-.245c-.126-.188-.15-.43-.063-.642l4.5-9.5l-4.5-9.5c-.087-.212-.063-.454.063-.642z"
         />
       </svg>
-    </button>
+      </button>
+    </div>
   </div>
 </template>
 
@@ -121,10 +146,13 @@ watch(
 .chat-input-area {
   padding: 1rem;
   border-top: 1px solid var(--color-border);
+  position: relative;
+}
+
+.input-row {
   display: flex;
   align-items: flex-end;
   gap: 0.5rem;
-  position: relative;
 }
 
 .chat-input-area textarea {

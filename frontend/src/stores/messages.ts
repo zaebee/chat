@@ -57,6 +57,12 @@ export interface Message {
     divine_revelation?: string;
     theological_context?: string;
   };
+  reactions?: {
+    [emoji: string]: {
+      count: number;
+      users: string[];
+    };
+  };
 }
 
 export const useMessagesStore = defineStore("messages", () => {
@@ -401,6 +407,95 @@ export const useMessagesStore = defineStore("messages", () => {
     messages.value = newMessages;
   };
 
+  /**
+   * Add or remove a reaction to a message
+   */
+  const toggleReaction = (messageId: string, emoji: string, userId: string, userName: string) => {
+    const message = messages.value.find(m => m.id === messageId);
+    if (!message) return;
+
+    // Initialize reactions if not present
+    if (!message.reactions) {
+      message.reactions = {};
+    }
+
+    // Initialize emoji reaction if not present
+    if (!message.reactions[emoji]) {
+      message.reactions[emoji] = { count: 0, users: [] };
+    }
+
+    const reaction = message.reactions[emoji];
+    const userIndex = reaction.users.indexOf(userId);
+
+    if (userIndex === -1) {
+      // Add reaction
+      reaction.users.push(userId);
+      reaction.count++;
+    } else {
+      // Remove reaction
+      reaction.users.splice(userIndex, 1);
+      reaction.count--;
+      
+      // Remove emoji if no users
+      if (reaction.count === 0) {
+        delete message.reactions[emoji];
+      }
+    }
+
+    // Send reaction update via WebSocket
+    const socket = chatStore.getSocket();
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      socket.send(JSON.stringify({
+        type: "reaction",
+        messageId,
+        emoji,
+        userId,
+        userName,
+        action: userIndex === -1 ? "add" : "remove"
+      }));
+    }
+  };
+
+  /**
+   * Handle incoming reaction updates from WebSocket
+   */
+  const handleReactionUpdate = (data: {
+    messageId: string;
+    emoji: string;
+    userId: string;
+    userName: string;
+    action: "add" | "remove";
+  }) => {
+    const message = messages.value.find(m => m.id === data.messageId);
+    if (!message) return;
+
+    // Initialize reactions if not present
+    if (!message.reactions) {
+      message.reactions = {};
+    }
+
+    // Initialize emoji reaction if not present
+    if (!message.reactions[data.emoji]) {
+      message.reactions[data.emoji] = { count: 0, users: [] };
+    }
+
+    const reaction = message.reactions[data.emoji];
+    const userIndex = reaction.users.indexOf(data.userId);
+
+    if (data.action === "add" && userIndex === -1) {
+      reaction.users.push(data.userId);
+      reaction.count++;
+    } else if (data.action === "remove" && userIndex !== -1) {
+      reaction.users.splice(userIndex, 1);
+      reaction.count--;
+      
+      // Remove emoji if no users
+      if (reaction.count === 0) {
+        delete message.reactions[data.emoji];
+      }
+    }
+  };
+
   return {
     messages,
     inputPrompt,
@@ -417,5 +512,7 @@ export const useMessagesStore = defineStore("messages", () => {
     processCommand,
     loadScene,
     getThreadedMessages,
+    toggleReaction,
+    handleReactionUpdate,
   };
 });

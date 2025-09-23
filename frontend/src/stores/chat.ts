@@ -14,6 +14,8 @@ export const useChatStore = defineStore("chat", () => {
   const users = ref<User[]>([]);
   const isConnected = ref(false);
   const solvedChallenges = ref<string[]>([]);
+  const typingUsers = ref<string[]>([]);
+  const typingTimeout = ref<number | null>(null);
 
   // Store references for delegation
   const userStore = useUserStore();
@@ -37,6 +39,8 @@ export const useChatStore = defineStore("chat", () => {
   });
 
   let socket: WebSocket | null = null;
+  
+  const getSocket = () => socket;
 
   // --- ACTIONS ---
 
@@ -152,6 +156,18 @@ export const useChatStore = defineStore("chat", () => {
 
     socket.onmessage = (event) => {
       const response = JSON.parse(event.data);
+      
+      // Handle different message structures
+      if (response.type === "reaction") {
+        messagesStore.handleReactionUpdate(response);
+        return;
+      }
+      
+      if (response.type === "typing") {
+        handleTypingUpdate(response);
+        return;
+      }
+      
       const { type, data } = response;
 
       switch (type) {
@@ -244,13 +260,61 @@ export const useChatStore = defineStore("chat", () => {
     if (socket && isConnected.value) {
       const message = {
         type: "message",
-        data: {
-          text: text,
-          room_id: gameStore.currentRoom,
-          parent_id: parentId,
-        },
+        content: text,
+        room_id: gameStore.currentRoom,
+        parent_id: parentId,
       };
       socket.send(JSON.stringify(message));
+    }
+  };
+
+  const sendTypingIndicator = (isTyping: boolean) => {
+    if (socket && isConnected.value && userStore.currentUser) {
+      const typingMessage = {
+        type: "typing",
+        userId: userStore.currentUser.id,
+        userName: userStore.currentUser.username,
+        isTyping: isTyping
+      };
+      socket.send(JSON.stringify(typingMessage));
+    }
+  };
+
+  const handleTypingUpdate = (data: { userId: string; userName: string; isTyping: boolean }) => {
+    if (data.isTyping) {
+      // Add user to typing list if not already there
+      if (!typingUsers.value.includes(data.userName)) {
+        typingUsers.value.push(data.userName);
+      }
+    } else {
+      // Remove user from typing list
+      const index = typingUsers.value.indexOf(data.userName);
+      if (index > -1) {
+        typingUsers.value.splice(index, 1);
+      }
+    }
+  };
+
+  const startTyping = () => {
+    sendTypingIndicator(true);
+    
+    // Clear existing timeout
+    if (typingTimeout.value) {
+      clearTimeout(typingTimeout.value);
+    }
+    
+    // Set timeout to stop typing after 3 seconds of inactivity
+    typingTimeout.value = window.setTimeout(() => {
+      stopTyping();
+    }, 3000);
+  };
+
+  const stopTyping = () => {
+    sendTypingIndicator(false);
+    
+    if (typingTimeout.value) {
+      clearTimeout(typingTimeout.value);
+      typingTimeout.value = null;
     }
   };
 
@@ -258,6 +322,8 @@ export const useChatStore = defineStore("chat", () => {
     users,
     isConnected,
     solvedChallenges,
+    typingUsers,
+    getSocket,
     connect,
     init,
     recordChallengeSolved,
@@ -269,5 +335,7 @@ export const useChatStore = defineStore("chat", () => {
     totalXp,
     level,
     sendMessage,
+    startTyping,
+    stopTyping,
   };
 });
