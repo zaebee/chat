@@ -70,14 +70,14 @@ async def lifespan(app: FastAPI):
     hive_host = HiveHost("hive-chat-main")
     await hive_host.start()
     
-    print(f"🐝 Hive Chat started with HiveHost: {hive_host.host_id}")
+    # Hive Chat started
     
     yield
     
     # Cleanup
     if hive_host:
         await hive_host.stop()
-        print("🐝 Hive Chat stopped")
+        # Hive Chat stopped
 
 
 # Initialize FastAPI with HiveHost integration
@@ -337,7 +337,7 @@ async def websocket_endpoint(websocket: WebSocket, user_id: str):
                     conn.commit()
                     conn.close()
                 except Exception as e:
-                    print(f"Database error: {e}")
+                    # Database error handled
                 
                 # Publish message event to Hive
                 if hive_host:
@@ -401,9 +401,6 @@ if __name__ == "__main__":
     parser.add_argument("--host", type=str, default="0.0.0.0", help="Host to bind to")
     args = parser.parse_args()
     
-    print(f"🐝 Starting Hive Chat on {args.host}:{args.port}")
-    print(f"🌐 Chat interface: http://localhost:{args.port}")
-    print(f"📊 Status API: http://localhost:{args.port}/api/v1/status")
-    print(f"❤️ Health check: http://localhost:{args.port}/api/v1/health")
+    # Starting Hive Chat server
     
     uvicorn.run(app, host=args.host, port=args.port)

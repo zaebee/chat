@@ -48,7 +48,7 @@ class ConnectionManager:
                 try:
                     await connection.send_text(message)
                 except RuntimeError as e:
-                    print("Unable send message:", e)
+                    # Connection error handled
 
 class ChatAgent(BaseAgent):
     def __init__(self, p2p_client: Any, event_bus: asyncio.Queue, logger: logging.Logger, fastapi_app: FastAPI):

@@ -9,12 +9,17 @@
   "scripts": {
     "dev": "vite",
     "build": "run-p type-check \"build-only {@}\" --",
+    "build-fast": "vite build",
     "preview": "vite preview",
     "test:unit": "vitest",
     "build-only": "vite build",
     "type-check": "vue-tsc --build",
     "lint": "eslint . --fix",
-    "format": "prettier --write src/"
+    "format": "prettier --write src/",
+    "agro:scan": "python ../tools/agro_console_scanner.py $(find src -name '*.vue' -o -name '*.ts' -o -name '*.js')",
+    "agro:check": "npm run agro:scan && echo '✨ Sacred frontend blessed - no console violations! ✨'",
+    "sacred:validate": "npm run lint && npm run format && npm run agro:check && npm run type-check",
+    "sacred:build": "npm run sacred:validate && npm run build"
   },
   "dependencies": {
     "@codemirror/lang-python": "^6.2.1",

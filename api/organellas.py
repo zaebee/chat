@@ -181,8 +181,8 @@ async def distribute_xp_to_organellas(user_id: str, xp_amount: int, conn: sqlite
             try:
                 await add_organella_xp(organella_id, {"xp": organella_xp}, conn)
             except Exception as e:
-                print(f"Failed to distribute XP to organella {organella_id}: {e}")
+                # XP distribution failed for organella
                 continue
 
     except Exception as e:
-        print(f"Failed to distribute XP to organellas for user {user_id}: {e}")
+        # XP distribution failed for user
