@@ -29,4 +29,4 @@ async def get_messages(limit: int = 50, conn: sqlite3.Connection = Depends(get_d
 
 @router.get("/api/users")
 async def get_users():
-    return {"users": [user.dict() for user in manager.users.values()]}
+    return {"users": [user.model_dump() for user in manager.users.values()]}

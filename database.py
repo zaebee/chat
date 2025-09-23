@@ -1,5 +1,4 @@
 import sqlite3
-from fastapi import Depends
 
 DATABASE_URL = "chat.db"
 
@@ -94,6 +93,12 @@ def init_db():
             created_at TEXT NOT NULL
         );
     """)
+
+    # Create indexes for better query performance
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_messages_timestamp ON messages(timestamp)")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_messages_room_id ON messages(room_id)")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_messages_user_id ON messages(user_id)")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_rooms_active ON rooms(is_active)")
 
     # Insert default room if none exists
     if conn.execute("SELECT COUNT(*) FROM rooms").fetchone()[0] == 0:
