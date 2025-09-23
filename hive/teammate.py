@@ -16,6 +16,7 @@ from enum import Enum
 import uuid
 
 from .events import PollenEvent, HiveEventBus
+from .status_mixin import StatusMixin
 
 
 class TeammateCapability(str, Enum):
@@ -122,7 +123,7 @@ class TaskResult:
     completed_at: datetime = field(default_factory=datetime.now)
 
 
-class HiveTeammate(ABC):
+class HiveTeammate(StatusMixin, ABC):
     """
     Abstract base class for all Hive teammates.
 
@@ -300,11 +301,18 @@ class HiveTeammate(ABC):
 
     def get_status(self) -> Dict[str, Any]:
         """Return structured status following the Legibility principle."""
-        return {
-            "component": f"HiveTeammate:{self.profile.name}",
-            "type": "Teammate",
+        # Override base status fields to use profile data
+        base_status = {
             "id": self.profile.id,
             "name": self.profile.name,
+            "created_at": self.profile.created_at.isoformat(),
+            "timestamp": datetime.now().isoformat(),
+            "metadata": self.profile.metadata,
+        }
+
+        specific_status = {
+            "component": f"HiveTeammate:{self.profile.name}",
+            "type": "Teammate",
             "teammate_type": self.profile.type,
             "status": self.status.value,
             "capabilities": [cap.value for cap in self.profile.capabilities],
@@ -313,9 +321,11 @@ class HiveTeammate(ABC):
             "metrics": self.metrics,
             "last_activity": self.last_activity.isoformat(),
             "reliability_score": self.profile.reliability_score,
-            "timestamp": datetime.now().isoformat(),
             "health": "active" if self.status != TeammateStatus.ERROR else "error",
         }
+
+        base_status.update(specific_status)
+        return base_status
 
     async def subscribe_to_events(self, event_types: List[str]):
         """Subscribe to specific event types from the event bus."""

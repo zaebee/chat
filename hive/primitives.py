@@ -26,6 +26,16 @@ class HiveComponent(ABC):
     created_at: datetime = field(default_factory=datetime.now)
     metadata: Dict[str, Any] = field(default_factory=dict)
 
+    def _get_base_status(self) -> Dict[str, Any]:
+        """Get common status fields shared by all components."""
+        return {
+            "id": self.id,
+            "name": self.name,
+            "created_at": self.created_at.isoformat(),
+            "timestamp": datetime.now().isoformat(),
+            "metadata": self.metadata,
+        }
+
     @abstractmethod
     def get_status(self) -> Dict[str, Any]:
         """Return structured status for observability."""
@@ -100,10 +110,10 @@ class Aggregate(HiveComponent):
         }
 
     def get_status(self) -> Dict[str, Any]:
-        return {
+        status = self._get_base_status()
+        status.update({
             "component": f"Aggregate:{self.name}",
             "type": "A",
-            "id": self.id,
             "version": self.version,
             "invariants": self.invariants,
             "state_size": len(self.state),
@@ -111,9 +121,9 @@ class Aggregate(HiveComponent):
             "last_event": self.event_history[-1]["applied_at"]
             if self.event_history
             else None,
-            "timestamp": datetime.now().isoformat(),
             "health": "active",
-        }
+        })
+        return status
 
     async def health_check(self) -> bool:
         """Check if aggregate is healthy (all invariants satisfied)."""
@@ -182,18 +192,18 @@ class Transformation(HiveComponent):
         return self.total_execution_time / self.execution_count
 
     def get_status(self) -> Dict[str, Any]:
-        return {
+        status = self._get_base_status()
+        status.update({
             "component": f"Transformation:{self.name}",
             "type": "T",
-            "id": self.id,
             "execution_count": self.execution_count,
             "avg_execution_time": self.get_average_execution_time(),
             "last_execution": self.last_execution.isoformat()
             if self.last_execution
             else None,
-            "timestamp": datetime.now().isoformat(),
             "health": "active",
-        }
+        })
+        return status
 
     async def health_check(self) -> bool:
         """Check if transformation is healthy (can execute successfully)."""
@@ -285,10 +295,10 @@ class Connector(HiveComponent):
             return False
 
     def get_status(self) -> Dict[str, Any]:
-        return {
+        status = self._get_base_status()
+        status.update({
             "component": f"Connector:{self.name}",
             "type": "C",
-            "id": self.id,
             "input_protocol": self.input_protocol,
             "output_protocol": self.output_protocol,
             "message_count": self.message_count,
@@ -297,11 +307,11 @@ class Connector(HiveComponent):
             "last_message": self.last_message.isoformat()
             if self.last_message
             else None,
-            "timestamp": datetime.now().isoformat(),
             "health": "active"
             if self.translation_errors / max(1, self.message_count) < 0.1
             else "degraded",
-        }
+        })
+        return status
 
     async def health_check(self) -> bool:
         """Check if connector is healthy (low error rate)."""
@@ -397,19 +407,19 @@ class GenesisEvent(HiveComponent):
         return replication_event
 
     def get_status(self) -> Dict[str, Any]:
-        return {
+        status = self._get_base_status()
+        status.update({
             "component": f"GenesisEvent:{self.name}",
             "type": "G",
-            "id": self.id,
             "event_type": self.event_type,
             "generation_count": self.generation_count,
             "broadcast_count": self.broadcast_count,
             "last_generation": self.last_generation.isoformat()
             if self.last_generation
             else None,
-            "timestamp": datetime.now().isoformat(),
             "health": "active",
-        }
+        })
+        return status
 
     async def health_check(self) -> bool:
         """Check if genesis event generator is healthy."""
