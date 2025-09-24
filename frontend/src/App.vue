@@ -13,8 +13,7 @@ const chatStore = useChatStore();
 const userStore = useUserStore();
 const gameStore = useGameStore();
 const settingsStore = useSettingsStore();
-const { currentUser } = storeToRefs(userStore);
-const { totalXp, level } = storeToRefs(gameStore);
+const { currentUser, totalXp, userLevel: level } = storeToRefs(userStore);
 const { theme, language } = storeToRefs(settingsStore);
 
 // On startup, check for saved username and theme
@@ -24,7 +23,8 @@ onMounted(() => {
 
 // Watch for theme changes and apply them to the document
 watchEffect(() => {
-  document.documentElement.className = theme.value === "dark" ? "dark-theme" : "";
+  document.documentElement.className =
+    theme.value === "dark" ? "dark-theme" : "";
 });
 
 function toggleSidebar() {
@@ -44,18 +44,29 @@ async function handleLogin(username: string) {
     <aside class="sidebar" :class="{ 'is-collapsed': isCollapsed }">
       <div class="sidebar-header">
         <h2 v-if="!isCollapsed">Hive Chat</h2>
-        <button @click="toggleSidebar" class="toggle-btn collapse-btn">‹</button>
+        <button @click="toggleSidebar" class="toggle-btn collapse-btn">
+          ‹
+        </button>
       </div>
       <div class="user-profile-summary">
         <span class="username">{{ currentUser?.username }}</span>
-        <span class="consciousness-level">XP: {{ totalXp }} | Level: {{ level }}</span>
+        <span class="consciousness-level"
+          >XP: {{ totalXp }} | Level: {{ level }}</span
+        >
       </div>
       <nav class="user-list">
         <h3>Users ({{ chatStore.users.length }})</h3>
         <ul>
           <li v-for="user in chatStore.users" :key="user.id" class="user-item">
-            <span class="user-color-dot" :style="{ backgroundColor: user.color }"></span>
-            <span :style="{ fontWeight: user.id === currentUser?.id ? 'bold' : 'normal' }">
+            <span
+              class="user-color-dot"
+              :style="{ backgroundColor: user.color }"
+            ></span>
+            <span
+              :style="{
+                fontWeight: user.id === currentUser?.id ? 'bold' : 'normal',
+              }"
+            >
               {{ user.username }}
             </span>
           </li>
@@ -65,14 +76,24 @@ async function handleLogin(username: string) {
         <RouterLink to="/">Chat</RouterLink>
         <RouterLink to="/playground">Playground</RouterLink>
         <RouterLink to="/journey">Journey</RouterLink>
+        <RouterLink to="/xp-dashboard">⭐ XP Dashboard</RouterLink>
+        <RouterLink to="/topology">🔬 Sacred Topology</RouterLink>
+        <RouterLink to="/sacred-echo">🔮 Sacred Echo</RouterLink>
+        <RouterLink to="/autoevolution">🧬 AutoEvolution</RouterLink>
         <RouterLink to="/bee-test">🐝 Bee Test</RouterLink>
       </nav>
       <div class="sidebar-footer">
         <div class="lang-switcher">
-          <button @click="settingsStore.setLanguage('en')" :class="{ active: language === 'en' }">
+          <button
+            @click="settingsStore.setLanguage('en')"
+            :class="{ active: language === 'en' }"
+          >
             EN
           </button>
-          <button @click="settingsStore.setLanguage('ru')" :class="{ active: language === 'ru' }">
+          <button
+            @click="settingsStore.setLanguage('ru')"
+            :class="{ active: language === 'ru' }"
+          >
             RU
           </button>
         </div>
@@ -82,7 +103,13 @@ async function handleLogin(username: string) {
       </div>
     </aside>
     <main class="main-content">
-      <button @click="toggleSidebar" class="toggle-btn open-btn" v-if="isCollapsed">›</button>
+      <button
+        @click="toggleSidebar"
+        class="toggle-btn open-btn"
+        v-if="isCollapsed"
+      >
+        ›
+      </button>
       <RouterView />
     </main>
   </div>
