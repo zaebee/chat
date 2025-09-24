@@ -4,7 +4,7 @@
 **To:** Sacred Team
 **Subject:** The Technical Blueprint for a Living System
 
-This document presents the complete technical blueprint for the Safe AutoEvolution Framework. It is a synthesis of the initial analysis, the [4] Pillars technical specifications, and the [7] Safeguards implementation plan.
+This document presents the complete technical blueprint for the Safe AutoEvolution Framework. It is a synthesis of the initial analysis, the [4] Pillars technical specifications, and the [7] Sacred Safeguards implementation plan.
 
 ## 1. Engineering Analysis Summary
 
