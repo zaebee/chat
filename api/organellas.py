@@ -2,8 +2,6 @@ from fastapi import APIRouter, HTTPException, Depends
 import sqlite3
 import json
 from datetime import datetime
-from typing import Optional
-from pydantic import BaseModel
 
 from database import get_db
 from models import OrganellaCreate, OrganellaUpdate
@@ -12,21 +10,32 @@ router = APIRouter()
 
 
 @router.post("/api/organellas")
-async def create_organella(organella: OrganellaCreate, conn: sqlite3.Connection = Depends(get_db)):
+async def create_organella(
+    organella: OrganellaCreate, conn: sqlite3.Connection = Depends(get_db)
+):
     """Create a new organella"""
     timestamp = datetime.now().isoformat()
     organella_id = f"org_{int(datetime.now().timestamp())}"
 
     try:
-        conn.execute("""
+        conn.execute(
+            """
             INSERT INTO organellas (id, user_id, name, type, stage, level, experience_points,
                                   skills, mystical_appearance, birth_timestamp, last_active, unlocked_sections)
             VALUES (?, ?, ?, ?, ?, 1, 0, ?, ?, ?, ?, '[]')
-        """, (
-            organella_id, organella.user_id, organella.name, organella.type, organella.stage,
-            json.dumps(organella.skills or {}), organella.mystical_appearance or "",
-            timestamp, timestamp
-        ))
+        """,
+            (
+                organella_id,
+                organella.user_id,
+                organella.name,
+                organella.type,
+                organella.stage,
+                json.dumps(organella.skills or {}),
+                organella.mystical_appearance or "",
+                timestamp,
+                timestamp,
+            ),
+        )
         conn.commit()
 
         return {
@@ -41,10 +50,11 @@ async def create_organella(organella: OrganellaCreate, conn: sqlite3.Connection 
             "mystical_appearance": organella.mystical_appearance or "",
             "birth_timestamp": timestamp,
             "last_active": timestamp,
-            "unlocked_sections": []
+            "unlocked_sections": [],
         }
     except sqlite3.IntegrityError:
         raise HTTPException(status_code=400, detail="Organella creation failed")
+
 
 @router.get("/api/organellas/{organella_id}")
 async def get_organella(organella_id: str, conn: sqlite3.Connection = Depends(get_db)):
@@ -67,11 +77,16 @@ async def get_organella(organella_id: str, conn: sqlite3.Connection = Depends(ge
         "mystical_appearance": row[8],
         "birth_timestamp": row[9],
         "last_active": row[10],
-        "unlocked_sections": json.loads(row[11]) if row[11] else []
+        "unlocked_sections": json.loads(row[11]) if row[11] else [],
     }
 
+
 @router.put("/api/organellas/{organella_id}")
-async def update_organella(organella_id: str, updates: OrganellaUpdate, conn: sqlite3.Connection = Depends(get_db)):
+async def update_organella(
+    organella_id: str,
+    updates: OrganellaUpdate,
+    conn: sqlite3.Connection = Depends(get_db),
+):
     """Update organella data"""
     # Check if organella exists
     cursor = conn.execute("SELECT * FROM organellas WHERE id = ?", (organella_id,))
@@ -127,8 +142,11 @@ async def update_organella(organella_id: str, updates: OrganellaUpdate, conn: sq
     # Return updated organella
     return await get_organella(organella_id, conn)
 
+
 @router.post("/api/organellas/{organella_id}/add_xp")
-async def add_organella_xp(organella_id: str, xp_data: dict, conn: sqlite3.Connection = Depends(get_db)):
+async def add_organella_xp(
+    organella_id: str, xp_data: dict, conn: sqlite3.Connection = Depends(get_db)
+):
     """Add XP to organella and handle progression"""
     xp_gain = xp_data.get("xp", 0)
 
@@ -140,7 +158,9 @@ async def add_organella_xp(organella_id: str, xp_data: dict, conn: sqlite3.Conne
 
     # Calculate new XP and level
     new_experience = organella["experience_points"] + xp_gain
-    new_level = max(1, (new_experience // 50) + 1)  # Level up every 50 XP for organellas
+    new_level = max(
+        1, (new_experience // 50) + 1
+    )  # Level up every 50 XP for organellas
 
     # Update organella
     updates = OrganellaUpdate(
@@ -150,8 +170,8 @@ async def add_organella_xp(organella_id: str, xp_data: dict, conn: sqlite3.Conne
             **organella["skills"],
             "totalXP": new_experience,
             "lastXPGain": xp_gain,
-            "lastXPGainAt": datetime.now().isoformat()
-        }
+            "lastXPGainAt": datetime.now().isoformat(),
+        },
     )
 
     updated_organella = await update_organella(organella_id, updates, conn)
@@ -160,10 +180,13 @@ async def add_organella_xp(organella_id: str, xp_data: dict, conn: sqlite3.Conne
         "organella": updated_organella,
         "xp_gained": xp_gain,
         "new_level": new_level,
-        "leveled_up": new_level > organella["level"]
+        "leveled_up": new_level > organella["level"],
     }
 
-async def distribute_xp_to_organellas(user_id: str, xp_amount: int, conn: sqlite3.Connection):
+
+async def distribute_xp_to_organellas(
+    user_id: str, xp_amount: int, conn: sqlite3.Connection
+):
     """Distribute XP to user's organellas when user gains XP"""
     try:
         # Get all user's organellas
@@ -180,9 +203,10 @@ async def distribute_xp_to_organellas(user_id: str, xp_amount: int, conn: sqlite
         for organella_id in organella_ids:
             try:
                 await add_organella_xp(organella_id, {"xp": organella_xp}, conn)
-            except Exception as e:
+            except Exception:
                 # XP distribution failed for organella
                 continue
 
-    except Exception as e:
+    except Exception:
         # XP distribution failed for user
+        pass
