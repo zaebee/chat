@@ -14,6 +14,7 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime
 from enum import Enum
 import uuid
+import logging
 
 from .events import PollenEvent, HiveEventBus
 
@@ -134,6 +135,7 @@ class HiveTeammate(ABC):
         self.profile = profile
         self.event_bus = event_bus
         self.status = TeammateStatus.INITIALIZING
+        self.logger = logging.getLogger(f"HiveTeammate.{self.profile.name}")
         self.current_tasks: Dict[str, TaskRequest] = {}
         self.completed_tasks: List[str] = []
         self.last_activity: datetime = datetime.now()
@@ -245,7 +247,7 @@ class HiveTeammate(ABC):
             return False
 
         # Remove from current tasks
-        task = self.current_tasks.pop(task_id)
+        _task = self.current_tasks.pop(task_id)
         self.completed_tasks.append(task_id)
 
         # Update metrics
