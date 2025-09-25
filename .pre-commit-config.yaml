@@ -39,7 +39,7 @@ repos:
         entry: python3 tools/agro_console_scanner.py
         language: system
         files: \.(py|js|ts|vue)$
-        exclude: ^tools/agro_scanner\.py$
+        exclude: ^tools/agro_console_scanner\.py$
         pass_filenames: true
         stages: [commit, push]
 
