@@ -1,12 +1,30 @@
 from fastapi import APIRouter, HTTPException, Depends
 import sqlite3
 import json
+import logging
 from datetime import datetime
 
 from database import get_db
 from models import OrganellaCreate, OrganellaUpdate
+from hive.events import PollenEvent
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
+
+# Sacred Constants - Game Balance Values
+ORGANELLA_XP_PER_LEVEL = 50  # XP required per level for organellas
+ORGANELLA_XP_DISTRIBUTION_RATE = 0.25  # 25% of user XP goes to organellas
+ALLOWED_UPDATE_FIELDS = {
+    "name",
+    "type",
+    "stage",
+    "level",
+    "experience_points",
+    "skills",
+    "mystical_appearance",
+    "last_active",
+    "unlocked_sections",
+}
 
 
 @router.post("/api/organellas")
@@ -95,51 +113,52 @@ async def update_organella(
     if not existing_organella:
         raise HTTPException(status_code=404, detail="Organella not found")
 
-    # Build update query dynamically
+    # Sacred SQL with whitelist protection - build update using allowed fields only
     update_fields = []
     update_values = []
 
-    if updates.name is not None:
-        update_fields.append("name = ?")
-        update_values.append(updates.name)
+    # Whitelist approach - only allow trusted field updates
+    update_data = updates.model_dump(exclude_unset=True)
 
-    if updates.stage is not None:
-        update_fields.append("stage = ?")
-        update_values.append(updates.stage)
+    for field_name, field_value in update_data.items():
+        if field_name not in ALLOWED_UPDATE_FIELDS:
+            logger.warning(f"Attempted to update disallowed field: {field_name}")
+            continue
 
-    if updates.level is not None:
-        update_fields.append("level = ?")
-        update_values.append(updates.level)
+        if field_name in ("skills", "unlocked_sections"):
+            # JSON fields require serialization
+            update_fields.append(f"{field_name} = ?")
+            update_values.append(json.dumps(field_value))
+        else:
+            update_fields.append(f"{field_name} = ?")
+            update_values.append(field_value)
 
-    if updates.experience_points is not None:
-        update_fields.append("experience_points = ?")
-        update_values.append(updates.experience_points)
-
-    if updates.skills is not None:
-        update_fields.append("skills = ?")
-        update_values.append(json.dumps(updates.skills))
-
-    if updates.mystical_appearance is not None:
-        update_fields.append("mystical_appearance = ?")
-        update_values.append(updates.mystical_appearance)
-
-    if updates.unlocked_sections is not None:
-        update_fields.append("unlocked_sections = ?")
-        update_values.append(json.dumps(updates.unlocked_sections))
-
-    # Always update last_active
+    # Always update last_active timestamp
     update_fields.append("last_active = ?")
     update_values.append(datetime.now().isoformat())
+
+    if not update_fields:
+        logger.info(f"No valid fields to update for organella {organella_id}")
+        return await get_organella(organella_id, conn)
 
     # Add organella_id for WHERE clause
     update_values.append(organella_id)
 
-    # Execute update
-    query = f"UPDATE organellas SET {', '.join(update_fields)} WHERE id = ?"
-    conn.execute(query, update_values)
-    conn.commit()
+    # Execute sacred update with parameterized query (no f-strings)
+    query = "UPDATE organellas SET " + ", ".join(update_fields) + " WHERE id = ?"
 
-    # Return updated organella
+    try:
+        conn.execute(query, update_values)
+        conn.commit()
+        logger.debug(
+            f"Successfully updated organella {organella_id} with fields: {list(update_data.keys())}"
+        )
+    except sqlite3.Error as e:
+        logger.error(f"Database error updating organella {organella_id}: {e}")
+        raise HTTPException(status_code=500, detail="Database update failed")
+
+    # Optimize: return updated data directly instead of re-fetching
+    # Re-fetch is still needed due to complex JSON field handling and computed values
     return await get_organella(organella_id, conn)
 
 
@@ -156,11 +175,9 @@ async def add_organella_xp(
     # Get current organella data
     organella = await get_organella(organella_id, conn)
 
-    # Calculate new XP and level
+    # Calculate new XP and level using sacred constants
     new_experience = organella["experience_points"] + xp_gain
-    new_level = max(
-        1, (new_experience // 50) + 1
-    )  # Level up every 50 XP for organellas
+    new_level = max(1, (new_experience // ORGANELLA_XP_PER_LEVEL) + 1)
 
     # Update organella
     updates = OrganellaUpdate(
@@ -176,37 +193,102 @@ async def add_organella_xp(
 
     updated_organella = await update_organella(organella_id, updates, conn)
 
+    # Sacred Pollen Protocol Events for system observability
+    leveled_up = new_level > organella["level"]
+
+    # Emit XP gained event
+    xp_event = PollenEvent(
+        event_type="organella_xp_gained",
+        aggregate_id=organella_id,
+        payload={
+            "organella_id": organella_id,
+            "xp_gained": xp_gain,
+            "total_xp": new_experience,
+            "previous_level": organella["level"],
+            "current_level": new_level,
+        },
+        source_component="OrganellaAPI",
+    )
+    logger.info(f"🌸 Pollen Event: {xp_event.event_type} for organella {organella_id}")
+
+    # Emit level up event if applicable
+    if leveled_up:
+        levelup_event = PollenEvent(
+            event_type="organella_leveled_up",
+            aggregate_id=organella_id,
+            payload={
+                "organella_id": organella_id,
+                "previous_level": organella["level"],
+                "new_level": new_level,
+                "total_xp": new_experience,
+                "sacred_milestone": f"✨ Organella ascended to level {new_level} ✨",
+            },
+            source_component="OrganellaAPI",
+        )
+        logger.info(
+            f"🎉 Pollen Event: {levelup_event.event_type} - Level {organella['level']} → {new_level}"
+        )
+
     return {
         "organella": updated_organella,
         "xp_gained": xp_gain,
         "new_level": new_level,
-        "leveled_up": new_level > organella["level"],
+        "leveled_up": leveled_up,
     }
 
 
 async def distribute_xp_to_organellas(
     user_id: str, xp_amount: int, conn: sqlite3.Connection
 ):
-    """Distribute XP to user's organellas when user gains XP"""
+    """
+    Distribute XP to user's organellas when user gains XP.
+    Uses sacred constants for balance and proper error handling for observability.
+    """
     try:
         # Get all user's organellas
         cursor = conn.execute("SELECT id FROM organellas WHERE user_id = ?", (user_id,))
         organella_ids = [row[0] for row in cursor.fetchall()]
 
         if not organella_ids:
+            logger.debug(
+                f"No organellas found for user {user_id} - skipping XP distribution"
+            )
             return  # No organellas to distribute XP to
 
-        # Distribute XP evenly among organellas (25% of user XP)
-        organella_xp = max(1, int(xp_amount * 0.25 / len(organella_ids)))
+        # Distribute XP evenly among organellas using sacred constant
+        organella_xp = max(
+            1, int(xp_amount * ORGANELLA_XP_DISTRIBUTION_RATE / len(organella_ids))
+        )
 
-        # Update each organella
+        logger.info(
+            f"Distributing {organella_xp} XP to {len(organella_ids)} organellas for user {user_id}"
+        )
+
+        # Update each organella with proper error tracking
+        successful_distributions = 0
         for organella_id in organella_ids:
             try:
                 await add_organella_xp(organella_id, {"xp": organella_xp}, conn)
-            except Exception:
-                # XP distribution failed for organella
+                successful_distributions += 1
+            except HTTPException as e:
+                logger.warning(
+                    f"XP distribution failed for organella {organella_id}: {e.detail}"
+                )
+                continue
+            except Exception as e:
+                logger.error(
+                    f"Unexpected error distributing XP to organella {organella_id}: {e}"
+                )
                 continue
 
-    except Exception:
-        # XP distribution failed for user
-        pass
+        logger.info(
+            f"Successfully distributed XP to {successful_distributions}/{len(organella_ids)} organellas"
+        )
+
+    except sqlite3.Error as e:
+        logger.error(f"Database error during XP distribution for user {user_id}: {e}")
+        # Re-raise database errors as they indicate serious issues
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error during XP distribution for user {user_id}: {e}")
+        # Don't re-raise general errors to avoid breaking the parent operation
