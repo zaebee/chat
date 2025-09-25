@@ -36,7 +36,7 @@ repos:
     hooks:
       - id: micro-agro-scanner
         name: 🔬 Micro-AGRO Scanner
-        entry: python3 tools/agro_scanner.py
+        entry: python3 tools/agro_console_scanner.py
         language: system
         files: \.(py|js|ts|vue)$
         exclude: ^tools/agro_scanner\.py$
