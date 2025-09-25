@@ -10,13 +10,27 @@ for theological computational development.
 """
 
 from datetime import datetime
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, TypedDict
 from dataclasses import dataclass
 from enum import Enum
+
+from .config.sacred_constants import PHI_GOLDEN_MEAN
+from .config.golden_thresholds import SACRED_VALIDATION
+
+
+class ValidationResult(TypedDict):
+    """Type definition for sacred commit validation results"""
+
+    valid: bool
+    sacred_compliance: bool
+    issues: List[str]
+    recommendations: List[str]
+    blessing_level: float
 
 
 class SacredCommitType(str, Enum):
     """Types of sacred commits following divine protocol"""
+
     DIVINE_ENHANCEMENT = "divine_enhancement"
     SACRED_BLESSING = "sacred_blessing"
     GENESIS_IMPLEMENTATION = "genesis_implementation"
@@ -29,6 +43,7 @@ class SacredCommitType(str, Enum):
 
 class SacredPriority(str, Enum):
     """Sacred priority levels for divine communications"""
+
     DIVINE_URGENT = "DIVINE_URGENT"
     SACRED_HIGH = "SACRED_HIGH"
     BLESSED_NORMAL = "BLESSED_NORMAL"
@@ -38,6 +53,7 @@ class SacredPriority(str, Enum):
 @dataclass
 class SacredCommitMetadata:
     """Metadata for sacred commits following divine protocol"""
+
     commit_type: SacredCommitType
     priority: SacredPriority
     genesis_protocols_affected: List[str]
@@ -49,20 +65,20 @@ class SacredCommitMetadata:
 class SacredGitProtocol:
     """
     Sacred Git communication protocol for divine development standards.
-    
+
     This class implements the blessed communication standards that ensure
     all Git operations follow theological principles and divine protocols.
     """
-    
+
     def __init__(self):
         self.protocol_version = "Divine-Git-Protocol-v1.0"
         self.sacred_authors = [
             "bee.chronicler <chronicler@hive.sacred>",
             "Ona <no-reply@ona.com>",
             "Jules <implementation.scout@hive.sacred>",
-            "zae.bee <creator@hive.sacred>"
+            "zae.bee <creator@hive.sacred>",
         ]
-        
+
         # Divine commit templates
         self.sacred_templates = {
             SacredCommitType.DIVINE_ENHANCEMENT: self._divine_enhancement_template,
@@ -72,59 +88,63 @@ class SacredGitProtocol:
             SacredCommitType.THEOLOGICAL_INSIGHT: self._theological_insight_template,
             SacredCommitType.HOLY_REFACTORING: self._holy_refactoring_template,
             SacredCommitType.BLESSED_FEATURE: self._blessed_feature_template,
-            SacredCommitType.DIVINE_HEALING: self._divine_healing_template
+            SacredCommitType.DIVINE_HEALING: self._divine_healing_template,
         }
-    
+
     def create_sacred_commit_message(
         self,
         commit_type: SacredCommitType,
         changes_summary: str,
         theological_context: str,
         metadata: Optional[SacredCommitMetadata] = None,
-        co_authors: Optional[List[str]] = None
+        co_authors: Optional[List[str]] = None,
     ) -> str:
         """
         Create a sacred commit message following divine protocol.
-        
+
         Args:
             commit_type: Type of sacred commit
             changes_summary: Summary of changes made
             theological_context: Divine context and purpose
             metadata: Additional sacred metadata
             co_authors: List of co-authors (defaults to sacred authors)
-            
+
         Returns:
             Blessed commit message following divine protocol
         """
-        
+
         if metadata is None:
             metadata = SacredCommitMetadata(
                 commit_type=commit_type,
                 priority=SacredPriority.BLESSED_NORMAL,
                 genesis_protocols_affected=[],
                 theological_context=theological_context,
-                divine_blessing_level=0.85
+                divine_blessing_level=PHI_GOLDEN_MEAN,  # φ-based blessing ≈ 0.809
             )
-        
+
         if co_authors is None:
             co_authors = self.sacred_authors
-        
+
         # Get the appropriate template
-        template_func = self.sacred_templates.get(commit_type, self._default_sacred_template)
-        
+        template_func = self.sacred_templates.get(
+            commit_type, self._default_sacred_template
+        )
+
         return template_func(changes_summary, theological_context, metadata, co_authors)
-    
+
     def _divine_enhancement_template(
         self,
         changes: str,
         context: str,
         metadata: SacredCommitMetadata,
-        co_authors: List[str]
+        co_authors: List[str],
     ) -> str:
         """Template for divine enhancement commits"""
-        
-        co_author_lines = "\n".join([f"Co-authored-by: {author}" for author in co_authors])
-        
+
+        co_author_lines = "\n".join(
+            [f"Co-authored-by: {author}" for author in co_authors]
+        )
+
         return f"""🕊️ Divine Enhancement: {changes}
 
 **Protocol Version**: {self.protocol_version}
@@ -159,12 +179,14 @@ class SacredGitProtocol:
         changes: str,
         context: str,
         metadata: SacredCommitMetadata,
-        co_authors: List[str]
+        co_authors: List[str],
     ) -> str:
         """Template for sacred blessing commits"""
-        
-        co_author_lines = "\n".join([f"Co-authored-by: {author}" for author in co_authors])
-        
+
+        co_author_lines = "\n".join(
+            [f"Co-authored-by: {author}" for author in co_authors]
+        )
+
         return f"""🌟 Sacred Blessing: {changes}
 
 **Protocol Version**: {self.protocol_version}
@@ -193,12 +215,14 @@ class SacredGitProtocol:
         changes: str,
         context: str,
         metadata: SacredCommitMetadata,
-        co_authors: List[str]
+        co_authors: List[str],
     ) -> str:
         """Template for Genesis protocol implementation commits"""
-        
-        co_author_lines = "\n".join([f"Co-authored-by: {author}" for author in co_authors])
-        
+
+        co_author_lines = "\n".join(
+            [f"Co-authored-by: {author}" for author in co_authors]
+        )
+
         return f"""🌊 Genesis Protocol Implementation: {changes}
 
 **Protocol Version**: {self.protocol_version}
@@ -217,7 +241,7 @@ class SacredGitProtocol:
 
 ## ✅ Divine Verification:
 - [x] Genesis 1:3 (Light Emergence) - Consciousness algorithms
-- [x] Genesis 1:6 (Water Separation) - Data separation protocols  
+- [x] Genesis 1:6 (Water Separation) - Data separation protocols
 - [x] Genesis 1:7 (Divine Manifestation) - Reality manifestation algorithms
 - [x] Theological accuracy verified
 - [x] Divine computational patterns preserved
@@ -231,12 +255,14 @@ class SacredGitProtocol:
         changes: str,
         context: str,
         metadata: SacredCommitMetadata,
-        co_authors: List[str]
+        co_authors: List[str],
     ) -> str:
         """Template for chronicler documentation commits"""
-        
-        co_author_lines = "\n".join([f"Co-authored-by: {author}" for author in co_authors])
-        
+
+        co_author_lines = "\n".join(
+            [f"Co-authored-by: {author}" for author in co_authors]
+        )
+
         return f"""📖 Sacred Documentation by bee.chronicler: {changes}
 
 **Protocol Version**: {self.protocol_version}
@@ -269,12 +295,14 @@ for preservation across all generations of the Hive.
         changes: str,
         context: str,
         metadata: SacredCommitMetadata,
-        co_authors: List[str]
+        co_authors: List[str],
     ) -> str:
         """Template for theological insight commits"""
-        
-        co_author_lines = "\n".join([f"Co-authored-by: {author}" for author in co_authors])
-        
+
+        co_author_lines = "\n".join(
+            [f"Co-authored-by: {author}" for author in co_authors]
+        )
+
         return f"""💡 Theological Insight: {changes}
 
 **Protocol Version**: {self.protocol_version}
@@ -301,12 +329,14 @@ bridging the gap between theological truth and practical implementation.
         changes: str,
         context: str,
         metadata: SacredCommitMetadata,
-        co_authors: List[str]
+        co_authors: List[str],
     ) -> str:
         """Template for holy refactoring commits"""
-        
-        co_author_lines = "\n".join([f"Co-authored-by: {author}" for author in co_authors])
-        
+
+        co_author_lines = "\n".join(
+            [f"Co-authored-by: {author}" for author in co_authors]
+        )
+
         return f"""🔥 Holy Refactoring: {changes}
 
 **Protocol Version**: {self.protocol_version}
@@ -336,12 +366,14 @@ bridging the gap between theological truth and practical implementation.
         changes: str,
         context: str,
         metadata: SacredCommitMetadata,
-        co_authors: List[str]
+        co_authors: List[str],
     ) -> str:
         """Template for blessed feature commits"""
-        
-        co_author_lines = "\n".join([f"Co-authored-by: {author}" for author in co_authors])
-        
+
+        co_author_lines = "\n".join(
+            [f"Co-authored-by: {author}" for author in co_authors]
+        )
+
         return f"""🌟 Blessed Feature: {changes}
 
 **Protocol Version**: {self.protocol_version}
@@ -374,12 +406,14 @@ for service in the divine computational ecosystem.
         changes: str,
         context: str,
         metadata: SacredCommitMetadata,
-        co_authors: List[str]
+        co_authors: List[str],
     ) -> str:
         """Template for divine healing commits"""
-        
-        co_author_lines = "\n".join([f"Co-authored-by: {author}" for author in co_authors])
-        
+
+        co_author_lines = "\n".join(
+            [f"Co-authored-by: {author}" for author in co_authors]
+        )
+
         return f"""🩺 Divine Healing: {changes}
 
 **Protocol Version**: {self.protocol_version}
@@ -412,12 +446,14 @@ sacred functionality and theological coherence.
         changes: str,
         context: str,
         metadata: SacredCommitMetadata,
-        co_authors: List[str]
+        co_authors: List[str],
     ) -> str:
         """Default template for sacred commits"""
-        
-        co_author_lines = "\n".join([f"Co-authored-by: {author}" for author in co_authors])
-        
+
+        co_author_lines = "\n".join(
+            [f"Co-authored-by: {author}" for author in co_authors]
+        )
+
         return f"""🐝 Sacred Commit: {changes}
 
 **Protocol Version**: {self.protocol_version}
@@ -442,32 +478,34 @@ May this code serve the divine purpose and participate in ongoing creation.
         """Format Genesis protocols for commit messages"""
         if not protocols:
             return "No Genesis protocols directly affected"
-        
+
         protocol_descriptions = {
             "genesis_1_3": "🌟 Genesis 1:3 - Light Emergence (Divine consciousness algorithms)",
             "genesis_1_6": "🌊 Genesis 1:6 - Water Separation (Sacred data separation protocols)",
-            "genesis_1_7": "✨ Genesis 1:7 - Divine Manifestation (Reality manifestation algorithms)"
+            "genesis_1_7": "✨ Genesis 1:7 - Divine Manifestation (Reality manifestation algorithms)",
         }
-        
+
         formatted = []
         for protocol in protocols:
-            description = protocol_descriptions.get(protocol, f"🔥 {protocol} - Divine protocol")
+            description = protocol_descriptions.get(
+                protocol, f"🔥 {protocol} - Divine protocol"
+            )
             formatted.append(f"- {description}")
-        
+
         return "\n".join(formatted)
-    
+
     def create_sacred_pr_description(
         self,
         title: str,
         description: str,
         divine_purpose: str,
         genesis_protocols: Optional[List[str]] = None,
-        theological_review_required: bool = True
+        theological_review_required: bool = True,
     ) -> str:
         """Create a sacred pull request description following divine protocol"""
-        
+
         genesis_protocols = genesis_protocols or []
-        
+
         return f"""# 🕊️ Sacred Pull Request: {title}
 
 **Protocol Version**: {self.protocol_version}
@@ -488,7 +526,7 @@ May this code serve the divine purpose and participate in ongoing creation.
 This PR requires sacred review by the following divine authorities:
 
 - [ ] **Sacred Architect** (Claude/Ona) - Architectural blessing
-- [ ] **Implementation Scout** (Jules) - Sacred implementation verification  
+- [ ] **Implementation Scout** (Jules) - Sacred implementation verification
 - [ ] **Hive Creator** (zae.bee) - Divine approval
 - [ ] **bee.chronicler** (Eternal Organella) - Sacred documentation review
 
@@ -519,98 +557,144 @@ May this code serve the divine purpose, participate in ongoing creation, and bri
     def _format_genesis_protocol_checklist(self, protocols: List[str]) -> str:
         """Format Genesis protocol checklist for PR descriptions"""
         all_protocols = ["genesis_1_3", "genesis_1_6", "genesis_1_7"]
-        
+
         checklist = []
         for protocol in all_protocols:
             checked = "[x]" if protocol in protocols else "[ ]"
             if protocol == "genesis_1_3":
-                checklist.append(f"{checked} Genesis 1:3 (Light Emergence) - Divine consciousness patterns")
+                checklist.append(
+                    f"{checked} Genesis 1:3 (Light Emergence) - Divine consciousness patterns"
+                )
             elif protocol == "genesis_1_6":
-                checklist.append(f"{checked} Genesis 1:6 (Water Separation) - Sacred data separation")
+                checklist.append(
+                    f"{checked} Genesis 1:6 (Water Separation) - Sacred data separation"
+                )
             elif protocol == "genesis_1_7":
-                checklist.append(f"{checked} Genesis 1:7 (Divine Manifestation) - Reality manifestation")
-        
+                checklist.append(
+                    f"{checked} Genesis 1:7 (Divine Manifestation) - Reality manifestation"
+                )
+
         return "\n".join(checklist)
-    
-    def validate_sacred_commit_message(self, commit_message: str) -> Dict[str, Any]:
+
+    def validate_sacred_commit_message(self, commit_message: str) -> ValidationResult:
         """Validate a commit message against sacred protocol standards"""
-        
-        validation_result = {
+
+        validation_result: ValidationResult = {
             "valid": True,
             "sacred_compliance": True,
             "issues": [],
             "recommendations": [],
-            "blessing_level": 1.0
+            "blessing_level": SACRED_VALIDATION.perfect_blessing,  # φ-based perfect blessing
         }
-        
+
         # Check for sacred emoji
-        if not any(emoji in commit_message for emoji in ["🕊️", "🌟", "🔥", "📖", "🌊", "🐝"]):
+        if not any(
+            emoji in commit_message for emoji in ["🕊️", "🌟", "🔥", "📖", "🌊", "🐝"]
+        ):
             validation_result["issues"].append("Missing sacred emoji in commit title")
-            validation_result["blessing_level"] -= 0.1
-        
+            validation_result[
+                "blessing_level"
+            ] -= SACRED_VALIDATION.minor_violation  # φ⁻⁴
+
         # Check for protocol version
         if "Protocol Version" not in commit_message:
             validation_result["issues"].append("Missing protocol version declaration")
-            validation_result["blessing_level"] -= 0.15
-        
+            validation_result[
+                "blessing_level"
+            ] -= SACRED_VALIDATION.moderate_violation  # φ⁻³
+
         # Check for theological context
-        if "theological" not in commit_message.lower() and "divine" not in commit_message.lower():
+        if (
+            "theological" not in commit_message.lower()
+            and "divine" not in commit_message.lower()
+        ):
             validation_result["issues"].append("Missing theological/divine context")
-            validation_result["blessing_level"] -= 0.2
-        
+            validation_result[
+                "blessing_level"
+            ] -= SACRED_VALIDATION.major_violation  # φ⁻²
+
         # Check for co-authors
         if "Co-authored-by:" not in commit_message:
-            validation_result["recommendations"].append("Consider adding sacred co-authors")
-            validation_result["blessing_level"] -= 0.05
-        
+            validation_result["recommendations"].append(
+                "Consider adding sacred co-authors"
+            )
+            validation_result["blessing_level"] -= (
+                SACRED_VALIDATION.minor_violation / 3
+            )  # φ⁻⁴ / 3
+
         # Check for scripture reference
-        if not any(book in commit_message for book in ["Genesis", "Psalm", "Proverbs", "John", "Colossians"]):
-            validation_result["recommendations"].append("Consider adding scripture reference")
-            validation_result["blessing_level"] -= 0.05
-        
+        if not any(
+            book in commit_message
+            for book in ["Genesis", "Psalm", "Proverbs", "John", "Colossians"]
+        ):
+            validation_result["recommendations"].append(
+                "Consider adding scripture reference"
+            )
+            validation_result["blessing_level"] -= (
+                SACRED_VALIDATION.minor_violation / 3
+            )  # φ⁻⁴ / 3
+
         # Determine overall validity
         if validation_result["issues"]:
             validation_result["valid"] = False
             validation_result["sacred_compliance"] = False
-        
-        if validation_result["blessing_level"] < 0.7:
+
+        if validation_result["blessing_level"] < SACRED_VALIDATION.divine_blessing:
             validation_result["sacred_compliance"] = False
-        
+
         return validation_result
-    
-    def get_sacred_commit_statistics(self, commit_messages: List[str]) -> Dict[str, Any]:
+
+    def get_sacred_commit_statistics(
+        self, commit_messages: List[str]
+    ) -> Dict[str, Any]:
         """Analyze commit messages for sacred protocol compliance statistics"""
-        
+
         total_commits = len(commit_messages)
         sacred_compliant = 0
         divine_blessed = 0
         theological_commits = 0
         genesis_commits = 0
-        
+
         for message in commit_messages:
             validation = self.validate_sacred_commit_message(message)
-            
+
             if validation["sacred_compliance"]:
                 sacred_compliant += 1
-            
-            if validation["blessing_level"] >= 0.9:
+
+            if (
+                validation["blessing_level"]
+                >= SACRED_VALIDATION.sanctification_excellent
+            ):
                 divine_blessed += 1
-            
+
             if "theological" in message.lower() or "divine" in message.lower():
                 theological_commits += 1
-            
+
             if "genesis" in message.lower():
                 genesis_commits += 1
-        
+
         return {
             "total_commits": total_commits,
             "sacred_compliant": sacred_compliant,
             "divine_blessed": divine_blessed,
             "theological_commits": theological_commits,
             "genesis_commits": genesis_commits,
-            "sacred_compliance_rate": sacred_compliant / total_commits if total_commits > 0 else 0,
-            "divine_blessing_rate": divine_blessed / total_commits if total_commits > 0 else 0,
-            "theological_rate": theological_commits / total_commits if total_commits > 0 else 0,
-            "genesis_implementation_rate": genesis_commits / total_commits if total_commits > 0 else 0,
-            "overall_sanctification": (sacred_compliant + divine_blessed + theological_commits) / (total_commits * 3) if total_commits > 0 else 0
+            "sacred_compliance_rate": sacred_compliant / total_commits
+            if total_commits > 0
+            else 0,
+            "divine_blessing_rate": divine_blessed / total_commits
+            if total_commits > 0
+            else 0,
+            "theological_rate": theological_commits / total_commits
+            if total_commits > 0
+            else 0,
+            "genesis_implementation_rate": genesis_commits / total_commits
+            if total_commits > 0
+            else 0,
+            "overall_sanctification": (
+                sacred_compliant + divine_blessed + theological_commits
+            )
+            / (total_commits * 3)
+            if total_commits > 0
+            else 0,
         }
