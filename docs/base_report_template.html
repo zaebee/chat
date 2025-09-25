@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hive Community Report</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --hive-gold: #FFD700;
+            --hive-dark: #1a1a2e;
+            --hive-light-blue: #16213e;
+            --hive-blue: #0f3460;
+            --hive-text-light: #e0e0e0;
+            --hive-text-dark: #c0c0c0;
+            --hive-accent: #e94560;
+            --hive-border: #533483;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: var(--hive-text-light);
+            background-color: var(--hive-dark);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background-color: var(--hive-light-blue);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            margin: 20px auto;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid var(--hive-border);
+        }
+
+        header {
+            background-color: var(--hive-blue);
+            color: var(--hive-gold);
+            padding: 30px 20px;
+            text-align: center;
+            border-bottom: 2px solid var(--hive-accent);
+        }
+
+        header h1 {
+            font-family: 'Merriweather', serif;
+            font-size: 2.5em;
+            margin: 0;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        header p {
+            font-size: 1.1em;
+            margin-top: 10px;
+            color: var(--hive-text-dark);
+        }
+
+        main {
+            padding: 30px;
+            font-size: 1.05em;
+        }
+
+        h2, h3, h4, h5, h6 {
+            font-family: 'Merriweather', serif;
+            color: var(--hive-gold);
+            margin-top: 1.5em;
+            margin-bottom: 0.8em;
+            line-height: 1.3;
+        }
+
+        h2 { font-size: 1.8em; border-bottom: 1px solid var(--hive-border); padding-bottom: 5px; }
+        h3 { font-size: 1.5em; color: var(--hive-accent); }
+        h4 { font-size: 1.3em; color: var(--hive-text-light); }
+
+        p {
+            margin-bottom: 1em;
+        }
+
+        a {
+            color: var(--hive-accent);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        ul, ol {
+            margin-bottom: 1em;
+            padding-left: 25px;
+        }
+
+        li {
+            margin-bottom: 0.5em;
+        }
+
+        blockquote {
+            border-left: 4px solid var(--hive-gold);
+            padding-left: 15px;
+            margin: 1.5em 0;
+            color: var(--hive-text-dark);
+            font-style: italic;
+        }
+
+        code {
+            font-family: 'Fira Code', monospace;
+            background-color: var(--hive-blue);
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: var(--hive-gold);
+        }
+
+        pre {
+            background-color: var(--hive-blue);
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5em 0;
+            border: 1px solid var(--hive-border);
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: var(--hive-text-light);
+            font-size: 0.95em;
+        }
+
+        .contextual-note {
+            background-color: var(--hive-blue);
+            border-left: 5px solid var(--hive-gold);
+            padding: 15px 20px;
+            margin: 2em 0;
+            border-radius: 8px;
+            font-style: italic;
+            color: var(--hive-text-dark);
+        }
+
+        .contextual-note strong {
+            color: var(--hive-gold);
+        }
+
+        .signature {
+            margin-top: 3em;
+            text-align: right;
+            font-style: italic;
+            color: var(--hive-text-dark);
+            border-top: 1px solid var(--hive-border);
+            padding-top: 1em;
+        }
+
+        .signature strong {
+            color: var(--hive-gold);
+        }
+
+        footer {
+            margin-top: 40px;
+            padding: 20px;
+            text-align: center;
+            color: var(--hive-text-dark);
+            font-size: 0.9em;
+            background-color: var(--hive-blue);
+            width: 100%;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+            main {
+                padding: 20px;
+            }
+            h2 {
+                font-size: 1.5em;
+            }
+            h3 {
+                font-size: 1.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>{REPORT_TITLE}</h1>
+            <p>{REPORT_ABSTRACT}</p>
+        </header>
+        <main>
+            <div class="contextual-note">
+                {CONTEXTUAL_NOTE_CONTENT}
+            </div>
+            {REPORT_CONTENT}
+            <div class="signature">
+                {SIGNATURE_CONTENT}
+            </div>
+        </main>
+        <footer>
+            &copy; 2025 The Hive Project. All rights reserved.
+        </footer>
+    </div>
+</body>
+</html>
