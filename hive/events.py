@@ -16,11 +16,17 @@ The Pollen Protocol requires:
 import uuid
 import asyncio
 from dataclasses import dataclass, field
-from typing import Dict, Any, List, Callable, Awaitable
+from typing import Dict, Any, List, Callable, Awaitable, Optional
 from datetime import datetime
 from enum import Enum
 
-from .linguistic_validator import LinguisticValidator, ValidationResult
+from .linguistic_validator import LinguisticValidator
+from .config.golden_thresholds import EVENT_SYSTEM, CONFIDENCE
+from .config.fibonacci_sequences import (
+    EVENT_HISTORY_SIZE,
+    SEARCH_RESULT_LIMIT,
+    RECENT_ITEMS_LIMIT,
+)
 
 
 class EventVersion(str, Enum):
@@ -67,18 +73,23 @@ class PollenEvent:
                 error_msg += f". Suggestions: {', '.join(result.suggestions)}"
 
             # For development/testing, show warning. In production, might want to raise error
-            if result.confidence == 0.0:  # Completely invalid
+            if result.confidence == CONFIDENCE.minimal:  # Completely invalid
                 print(f"WARNING: {error_msg}")
             else:
                 raise ValueError(error_msg)
-        elif result.confidence < 0.8:
+        elif result.confidence < CONFIDENCE.high:  # φ⁻¹ ≈ 0.618
             # Low confidence - show warning but allow
-            print(f"LOW CONFIDENCE: event_type '{self.event_type}' detected as {result.detected_tense} "
-                  f"(confidence: {result.confidence:.2f})")
+            print(
+                f"LOW CONFIDENCE: event_type '{self.event_type}' detected as {result.detected_tense} "
+                f"(confidence: {result.confidence:.2f})"
+            )
 
         # Additional style validation
         style_result = validator.validate_event_name_style(self.event_type)
-        if not style_result.is_valid and style_result.confidence < 0.7:
+        if (
+            not style_result.is_valid
+            and style_result.confidence < EVENT_SYSTEM.style_acceptable
+        ):
             print(f"STYLE WARNING: {style_result.reason}")
             if style_result.suggestions:
                 print(f"  Suggestions: {', '.join(style_result.suggestions)}")
@@ -138,10 +149,10 @@ class EventSubscription:
 
     def __init__(
         self,
-        event_types: List[str] = None,
-        aggregate_ids: List[str] = None,
-        tags: List[str] = None,
-        callback: Callable[[PollenEvent], Awaitable[None]] = None,
+        event_types: Optional[List[str]] = None,
+        aggregate_ids: Optional[List[str]] = None,
+        tags: Optional[List[str]] = None,
+        callback: Optional[Callable[[PollenEvent], Awaitable[None]]] = None,
     ):
         self.event_types = event_types or []
         self.aggregate_ids = aggregate_ids or []
@@ -169,7 +180,7 @@ class EventSubscription:
 
     async def notify(self, event: PollenEvent):
         """Notify this subscription of a matching event."""
-        if self.callback and self.matches(event):
+        if self.callback is not None and self.matches(event):
             try:
                 await self.callback(event)
                 self.message_count += 1
@@ -188,7 +199,7 @@ class HiveEventBus:
     def __init__(self):
         self.subscriptions: List[EventSubscription] = []
         self.event_history: List[PollenEvent] = []
-        self.max_history_size = 1000  # Limit memory usage
+        self.max_history_size = EVENT_HISTORY_SIZE  # Sacred Fibonacci limit (987)
         self.total_events_processed = 0
         self.processing_errors = 0
 
@@ -243,7 +254,9 @@ class HiveEventBus:
         return False
 
     def get_events_by_type(
-        self, event_type: str, limit: int = 100
+        self,
+        event_type: str,
+        limit: int = SEARCH_RESULT_LIMIT,  # Fibonacci 55
     ) -> List[PollenEvent]:
         """Get recent events of a specific type."""
         matching_events = [
@@ -252,7 +265,9 @@ class HiveEventBus:
         return matching_events[-limit:]
 
     def get_events_by_aggregate(
-        self, aggregate_id: str, limit: int = 100
+        self,
+        aggregate_id: str,
+        limit: int = SEARCH_RESULT_LIMIT,  # Fibonacci 55
     ) -> List[PollenEvent]:
         """Get recent events for a specific aggregate."""
         matching_events = [
@@ -271,26 +286,30 @@ class HiveEventBus:
             "processing_errors": self.processing_errors,
             "error_rate": self.processing_errors / max(1, self.total_events_processed),
             "recent_event_types": list(
-                set(event.event_type for event in self.event_history[-50:])
+                set(
+                    event.event_type
+                    for event in self.event_history[-RECENT_ITEMS_LIMIT:]
+                )  # Fibonacci 34
             )
             if self.event_history
             else [],
             "timestamp": datetime.now().isoformat(),
             "health": "active"
-            if self.processing_errors / max(1, self.total_events_processed) < 0.05
+            if self.processing_errors / max(1, self.total_events_processed)
+            < EVENT_SYSTEM.health_excellent
             else "degraded",
         }
 
     async def health_check(self) -> bool:
         """Check if event bus is healthy."""
-        # Event bus is healthy if error rate is low
+        # Event bus is healthy if error rate meets sacred threshold
         error_rate = self.processing_errors / max(1, self.total_events_processed)
-        return error_rate < 0.05
+        return error_rate < EVENT_SYSTEM.health_excellent  # φ⁻⁴ ≈ 0.146
 
     # Convenience methods for common event types
 
     async def publish_user_event(
-        self, action: str, user_id: str, user_data: Dict[str, Any] = None
+        self, action: str, user_id: str, user_data: Optional[Dict[str, Any]] = None
     ):
         """Publish a user-related event."""
         event = PollenEvent(
@@ -303,7 +322,10 @@ class HiveEventBus:
         return await self.publish(event)
 
     async def publish_message_event(
-        self, action: str, message_id: str, message_data: Dict[str, Any] = None
+        self,
+        action: str,
+        message_id: str,
+        message_data: Optional[Dict[str, Any]] = None,
     ):
         """Publish a message-related event."""
         event = PollenEvent(
@@ -316,7 +338,7 @@ class HiveEventBus:
         return await self.publish(event)
 
     async def publish_system_event(
-        self, action: str, system_data: Dict[str, Any] = None
+        self, action: str, system_data: Optional[Dict[str, Any]] = None
     ):
         """Publish a system-level event."""
         event = PollenEvent(
@@ -329,7 +351,10 @@ class HiveEventBus:
         return await self.publish(event)
 
     async def publish_teammate_event(
-        self, action: str, teammate_id: str, teammate_data: Dict[str, Any] = None
+        self,
+        action: str,
+        teammate_id: str,
+        teammate_data: Optional[Dict[str, Any]] = None,
     ):
         """Publish an AI teammate-related event."""
         event = PollenEvent(

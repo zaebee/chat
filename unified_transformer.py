@@ -5,6 +5,9 @@ from datetime import datetime
 from dataclasses import dataclass
 from typing import Dict, Any
 
+from hive.config.golden_thresholds import SACRED_METRICS
+from hive.config.sacred_constants import SACRED_PRECISION
+
 from markdown_it import MarkdownIt
 from mdit_py_plugins.front_matter import front_matter_plugin
 from mdit_py_plugins.footnote import footnote_plugin
@@ -197,17 +200,30 @@ class UnifiedMarkdownToHtmlTransformation:
         # τ (tau): System complexity based on error rate and processing time
         error_rate = self.error_count / self.transformation_count
         avg_processing_time = self.total_processing_time / self.transformation_count
-        tau = min(1.0, error_rate * 2.0 + (avg_processing_time * 0.1))
+        tau = min(
+            1.0,
+            error_rate * SACRED_METRICS.tau_error_multiplier
+            + (avg_processing_time * SACRED_METRICS.tau_time_factor),
+        )  # φ and φ⁻² scaling
 
         # φ (phi): Code quality based on success rate and efficiency
         success_rate = 1.0 - error_rate
-        phi = success_rate * max(0.0, 1.0 - (avg_processing_time * 0.05))
+        phi = success_rate * max(
+            0.0, 1.0 - (avg_processing_time * SACRED_METRICS.phi_time_penalty)
+        )  # φ⁻³ penalty
 
         # σ (sigma): Collaboration efficiency based on throughput
-        sigma = min(1.0, self.transformation_count * 0.1) * success_rate
+        sigma = (
+            min(1.0, self.transformation_count * SACRED_METRICS.sigma_throughput_factor)
+            * success_rate
+        )  # φ⁻² throughput factor
 
-        # Trinity Safety Score: f(τ,φ,σ) = (φ + σ) * (1 - τ/2) / 2
-        trinity_score = (phi + sigma) * (1.0 - tau / 2.0) / 2.0
+        # Trinity Safety Score: f(τ,φ,σ) = (φ + σ) * (1 - τ/φ) / φ (Golden Ratio balanced)
+        trinity_score = (
+            (phi + sigma)
+            * (1.0 - tau / SACRED_METRICS.trinity_balance_factor)
+            / SACRED_METRICS.trinity_balance_factor
+        )  # φ scaling
 
         return SacredMetrics(
             tau=tau,
@@ -231,10 +247,10 @@ class UnifiedMarkdownToHtmlTransformation:
             "avg_processing_time": self.total_processing_time
             / max(1, self.transformation_count),
             "sacred_metrics": {
-                "tau": round(metrics.tau, 3),
-                "phi": round(metrics.phi, 3),
-                "sigma": round(metrics.sigma, 3),
-                "trinity_score": round(metrics.trinity_score, 3),
+                "tau": round(metrics.tau, SACRED_PRECISION),
+                "phi": round(metrics.phi, SACRED_PRECISION),
+                "sigma": round(metrics.sigma, SACRED_PRECISION),
+                "trinity_score": round(metrics.trinity_score, SACRED_PRECISION),
             },
             "created_at": self.created_at,
             "sage_wisdom": "🐝 Documentation is the bridge between vision and understanding",
