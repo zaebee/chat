@@ -34,12 +34,12 @@ repos:
   # AGRO Console.log Scanner (Sacred Production Protection)
   - repo: local
     hooks:
-      - id: agro-console-scanner
-        name: 🚨 AGRO Console.log Violation Scanner
-        entry: python tools/agro_console_scanner.py
+      - id: micro-agro-scanner
+        name: 🔬 Micro-AGRO Scanner
+        entry: python3 tools/agro_scanner.py
         language: system
         files: \.(py|js|ts|vue)$
-        exclude: ^tools/agro_console_scanner\.py$
+        exclude: ^tools/agro_scanner\.py$
         pass_filenames: true
         stages: [commit, push]
 
@@ -72,7 +72,7 @@ repos:
     hooks:
       - id: detect-secrets
         name: 🔐 Detect Secrets
-        args: ['--baseline', '.secrets.baseline']
+        args: ["--baseline", ".secrets.baseline"]
         exclude: package.lock.json
 
 # Sacred Configuration

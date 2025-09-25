@@ -1,0 +1,46 @@
+name: Build Documentation
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "docs/**"
+      - "scripts/build_docs.py"
+  pull_request:
+    paths:
+      - "docs/**"
+      - "scripts/build_docs.py"
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Install Dependencies
+        run: uv sync
+
+      - name: Build Documentation
+        run: uv run python scripts/build_docs.py
+
+      # The old mermaid-cli logic can be deprecated in favor of
+      # adding that functionality to the build_docs.py script in the future.
+
+      - name: Deploy to GitHub Pages (Optional)
+        uses: peaceiris/actions-gh-pages@v3
+        if: github.ref == 'refs/heads/main'
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
