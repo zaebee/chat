@@ -2,16 +2,11 @@
 title: "Challenge Creation: Crafting Sacred Learning Experiences"
 description: "Complete guide for creating engaging coding challenges in the Hive"
 category: "user"
-audience: "user"
-complexity: "intermediate"
-last_updated: "2025-01-20"
-related_docs: ["TEACHER_GUIDE.md", "STUDENT_GUIDE.md", "GAMIFICATION.md"]
-code_examples: true
 ---
 
 # Challenge Creation: Crafting Sacred Learning Experiences
 
-*"Count it all joy, my brothers, when you meet trials of various kinds, for you know that the testing of your faith produces steadfastness." - James 1:2-3 (ESV)*
+_"Count it all joy, my brothers, when you meet trials of various kinds, for you know that the testing of your faith produces steadfastness." - James 1:2-3 (ESV)_
 
 ## Introduction to Challenge Design
 
@@ -21,19 +16,24 @@ Creating effective coding challenges is both an art and a science. In the Hive, 
 
 ### The Sacred Principles of Challenge Design
 
-#### 1. **Progressive Difficulty** 
+#### 1. **Progressive Difficulty**
+
 Challenges should build upon previous knowledge while introducing new concepts gradually.
 
 #### 2. **Real-World Relevance**
+
 Connect programming concepts to meaningful, relatable problems.
 
 #### 3. **Multiple Solution Paths**
+
 Allow for creativity and different approaches to problem-solving.
 
 #### 4. **Immediate Feedback**
+
 Provide clear, actionable feedback to guide learning.
 
 #### 5. **Collaborative Learning**
+
 Encourage peer interaction and knowledge sharing.
 
 ## Challenge Structure
@@ -48,25 +48,25 @@ interface Challenge {
   id: string;
   title: string;
   description: string;
-  difficulty: 'beginner' | 'intermediate' | 'advanced' | 'expert';
-  
+  difficulty: "beginner" | "intermediate" | "advanced" | "expert";
+
   // Learning Objectives
   learning_objectives: string[];
   prerequisites: string[];
   skills_practiced: SkillDomain[];
   atcg_phase: ATCGPhase;
-  
+
   // Challenge Content
   problem_statement: string;
   starting_code: string;
   solution_template: string;
   test_cases: TestCase[];
-  
+
   // Gamification
   xp_reward: number;
   badges_unlocked: string[];
   estimated_time: number;
-  
+
   // Support Materials
   hints: Hint[];
   resources: Resource[];
@@ -83,57 +83,57 @@ challenge_example = {
     "title": "🐝 Bee Dance Decoder",
     "description": "Help decode the secret messages in bee dances!",
     "difficulty": "intermediate",
-    
+
     "learning_objectives": [
         "Practice string manipulation and parsing",
         "Understand pattern recognition in data",
         "Apply conditional logic to decode information",
         "Work with dictionaries for data mapping"
     ],
-    
+
     "prerequisites": ["basic_functions", "string_basics", "conditionals"],
     "skills_practiced": ["string", "logic", "data_structure"],
     "atcg_phase": "T",  # Transformation phase
-    
+
     "problem_statement": """
     In the Hive, bees communicate through special dances that contain coded messages.
     Each dance move represents a different piece of information:
-    
+
     - 'R' = Right turn (move right)
-    - 'L' = Left turn (move left) 
+    - 'L' = Left turn (move left)
     - 'F' = Forward step
     - 'B' = Backward step
     - 'S' = Spin (stay in place)
-    
+
     Your task is to decode a bee dance sequence and determine the final position
     of the bee relative to its starting point (0, 0).
     """,
-    
+
     "starting_code": '''
 def decode_bee_dance(dance_sequence):
     """
     Decode a bee dance sequence and return the final position.
-    
+
     Args:
         dance_sequence (str): A string of dance moves (R, L, F, B, S)
-    
+
     Returns:
         tuple: (x, y) representing the final position
-    
+
     Example:
         decode_bee_dance("FRFL") should return (1, 1)
     """
     # Starting position and direction
     x, y = 0, 0
     direction = 0  # 0=North, 1=East, 2=South, 3=West
-    
+
     # TODO: Implement the dance decoder
     # Hint: Use a loop to process each move
     # Hint: Track both position and direction
-    
+
     return (x, y)
     ''',
-    
+
     "test_cases": [
         {
             "input": "F",
@@ -156,7 +156,7 @@ def decode_bee_dance(dance_sequence):
             "description": "All spins, no movement"
         }
     ],
-    
+
     "xp_reward": 75,
     "badges_unlocked": ["dance_decoder", "direction_master"],
     "estimated_time": 25
@@ -178,29 +178,29 @@ def create_completion_challenge():
 def calculate_hive_efficiency(worker_bees, honey_produced, time_hours):
     """
     Calculate the efficiency of a bee hive.
-    
+
     Efficiency = honey_produced / (worker_bees * time_hours)
     """
     # TODO: Add input validation
     if _____ or _____ or _____:
         return "Invalid input"
-    
+
     # TODO: Calculate efficiency
     efficiency = _____
-    
+
     # TODO: Return formatted result
     return f"Hive efficiency: {_____:.2f} honey per bee-hour"
         ''',
-        
+
         "hints": [
             "Check if any inputs are zero or negative",
             "Use the formula: honey / (bees * hours)",
             "Format the efficiency to 2 decimal places"
         ],
-        
+
         "learning_focus": [
             "Input validation",
-            "Mathematical operations", 
+            "Mathematical operations",
             "String formatting",
             "Function return values"
         ]
@@ -223,7 +223,7 @@ def find_queen_bee(bee_list):
         bee = bee_list[i]
         if bee.type = "queen":  # Bug 1: Assignment instead of comparison
             return bee
-    
+
     return None  # Bug 2: Should return "No queen found" message
 
 def count_worker_bees(bee_list):
@@ -237,7 +237,7 @@ def count_worker_bees(bee_list):
 # Bug 4: Function call with wrong parameter name
 result = find_queen_bee(bees_list)
         ''',
-        
+
         "bugs_to_find": [
             {
                 "line": 4,
@@ -255,7 +255,7 @@ result = find_queen_bee(bees_list)
                 "fix": "Change bees_list to bee_list"
             }
         ],
-        
+
         "learning_focus": [
             "Debugging skills",
             "Common syntax errors",
@@ -276,29 +276,29 @@ def create_building_challenge():
         "type": "creative_building",
         "prompt": """
         Build a Hive Management System
-        
+
         Create a program that helps manage a bee hive with these features:
-        
+
         1. Add new bees to the hive
         2. Track honey production
         3. Monitor hive health
         4. Generate daily reports
-        
+
         Requirements:
         - Use classes for Bee and Hive objects
         - Implement data validation
         - Include error handling
         - Create a user-friendly interface
-        
+
         Be creative! Add your own features and improvements.
         """,
-        
+
         "starter_template": '''
 class Bee:
     def __init__(self, name, bee_type, age):
         # TODO: Initialize bee attributes
         pass
-    
+
     def produce_honey(self):
         # TODO: Implement honey production logic
         pass
@@ -307,11 +307,11 @@ class Hive:
     def __init__(self, name):
         # TODO: Initialize hive attributes
         pass
-    
+
     def add_bee(self, bee):
         # TODO: Add bee to hive
         pass
-    
+
     def daily_report(self):
         # TODO: Generate daily status report
         pass
@@ -321,7 +321,7 @@ if __name__ == "__main__":
     # Your creative implementation here!
     pass
         ''',
-        
+
         "evaluation_criteria": [
             "Correct implementation of required features",
             "Code organization and readability",
@@ -329,7 +329,7 @@ if __name__ == "__main__":
             "Error handling and user experience",
             "Documentation and comments"
         ],
-        
+
         "learning_focus": [
             "Object-oriented programming",
             "System design",
@@ -351,29 +351,29 @@ def create_collaborative_challenge():
         "team_size": "2-4 students",
         "project": """
         Hive Communication Network
-        
+
         Work as a team to build a communication system for multiple hives:
-        
+
         Team Roles:
         - Backend Developer: Create data storage and API
         - Frontend Developer: Build user interface
         - Algorithm Designer: Implement message routing
         - Quality Assurance: Test and debug system
-        
+
         Deliverables:
         - Working communication system
         - Documentation for each component
         - Demonstration video
         - Peer evaluation reports
         """,
-        
+
         "collaboration_tools": [
             "Shared code repository",
             "Team chat channel",
             "Progress tracking board",
             "Peer review system"
         ],
-        
+
         "assessment_method": [
             "Individual contribution tracking",
             "Team presentation evaluation",
@@ -388,6 +388,7 @@ def create_collaborative_challenge():
 ### Test Case Design Principles
 
 #### 1. **Comprehensive Coverage**
+
 ```python
 def design_test_cases(function_to_test):
     """
@@ -401,7 +402,7 @@ def design_test_cases(function_to_test):
             "expected": "correct_output",
             "description": "Tests normal operation"
         },
-        
+
         # Edge cases - boundary conditions
         {
             "name": "empty_input",
@@ -409,7 +410,7 @@ def design_test_cases(function_to_test):
             "expected": "appropriate_response",
             "description": "Tests empty input handling"
         },
-        
+
         # Error cases - invalid inputs
         {
             "name": "invalid_input",
@@ -417,7 +418,7 @@ def design_test_cases(function_to_test):
             "expected": "error_message",
             "description": "Tests error handling"
         },
-        
+
         # Performance cases - large inputs
         {
             "name": "large_input",
@@ -426,11 +427,12 @@ def design_test_cases(function_to_test):
             "description": "Tests performance with large data"
         }
     ]
-    
+
     return test_cases
 ```
 
 #### 2. **Clear Expected Outputs**
+
 ```python
 # Good test case example
 test_case_good = {
@@ -442,24 +444,25 @@ test_case_good = {
 
 # Poor test case example
 test_case_poor = {
-    "input": "FRFL", 
+    "input": "FRFL",
     "expected_output": (1, 1),
     "description": "Test case 3"  # Not descriptive enough
 }
 ```
 
 #### 3. **Progressive Difficulty**
+
 ```python
 def create_progressive_tests():
     return [
         # Level 1: Single operations
         {"input": "F", "expected": (0, 1), "level": "basic"},
         {"input": "R", "expected": (0, 0), "level": "basic"},
-        
-        # Level 2: Simple combinations  
+
+        # Level 2: Simple combinations
         {"input": "RF", "expected": (1, 0), "level": "intermediate"},
         {"input": "LF", "expected": (-1, 0), "level": "intermediate"},
-        
+
         # Level 3: Complex sequences
         {"input": "FRFLFRFL", "expected": (0, 0), "level": "advanced"},
         {"input": "RRRRFFFF", "expected": (0, -4), "level": "advanced"}
@@ -481,7 +484,7 @@ def create_hint_system():
                 "reveals": "general_approach"
             },
             {
-                "level": 2, 
+                "level": 2,
                 "type": "structural",
                 "content": "You'll need variables for x, y coordinates and current direction. Use a loop to process each character.",
                 "reveals": "code_structure"
@@ -503,7 +506,7 @@ dy = [1, 0, -1, 0]  # y changes for each direction
                 "reveals": "implementation_detail"
             }
         ],
-        
+
         "hint_strategy": "progressive_disclosure",
         "max_hints_before_solution": 4
     }
@@ -518,13 +521,13 @@ def adaptive_hint_system(student_progress, time_spent, previous_attempts):
     """
     if time_spent > 10 and previous_attempts == 0:
         return "conceptual_hint"  # Student thinking but not trying
-    
+
     elif previous_attempts > 3 and time_spent < 5:
         return "slow_down_hint"  # Student rushing, making mistakes
-    
+
     elif time_spent > 20 and previous_attempts > 5:
         return "structural_hint"  # Student struggling, needs more support
-    
+
     else:
         return "encouragement"  # Student making good progress
 ```
@@ -540,28 +543,28 @@ def calculate_challenge_rewards(challenge_difficulty, completion_time, attempts,
     """
     base_xp = {
         "beginner": 25,
-        "intermediate": 50, 
+        "intermediate": 50,
         "advanced": 100,
         "expert": 200
     }
-    
+
     # Base XP for difficulty
     xp = base_xp[challenge_difficulty]
-    
+
     # Time bonus (faster completion = more XP)
     if completion_time < 10:  # minutes
         xp += 20
     elif completion_time < 20:
         xp += 10
-    
+
     # Attempt penalty (more attempts = less XP)
     if attempts > 5:
         xp = max(xp * 0.7, base_xp[challenge_difficulty] * 0.5)
-    
+
     # Collaboration bonus
     if help_given > 0:
         xp += help_given * 5
-    
+
     return int(xp)
 ```
 
@@ -579,30 +582,30 @@ def design_achievement_badges():
                 "criteria": "loop_challenges_completed >= 5"
             },
             {
-                "id": "debug_detective", 
+                "id": "debug_detective",
                 "name": "Debug Detective",
                 "description": "Find and fix 10 bugs in code",
                 "icon": "🔍",
                 "criteria": "bugs_fixed >= 10"
             }
         ],
-        
+
         "collaboration_badges": [
             {
                 "id": "helpful_bee",
-                "name": "Helpful Bee", 
+                "name": "Helpful Bee",
                 "description": "Help 5 fellow students with their code",
                 "icon": "🤝",
                 "criteria": "students_helped >= 5"
             }
         ],
-        
+
         "creativity_badges": [
             {
                 "id": "creative_coder",
                 "name": "Creative Coder",
                 "description": "Submit an innovative solution that impresses the community",
-                "icon": "🎨", 
+                "icon": "🎨",
                 "criteria": "creative_solution_featured == true"
             }
         ]
@@ -614,6 +617,7 @@ def design_achievement_badges():
 ### Testing Your Challenges
 
 #### 1. **Automated Testing**
+
 ```python
 def test_challenge_quality(challenge):
     """
@@ -627,11 +631,12 @@ def test_challenge_quality(challenge):
         "code_runs": validate_starting_code(challenge.starting_code),
         "solution_works": validate_solution(challenge.solution_template)
     }
-    
+
     return quality_checks
 ```
 
 #### 2. **Peer Review Process**
+
 ```python
 def peer_review_checklist():
     return {
@@ -641,14 +646,14 @@ def peer_review_checklist():
             "Are instructions clear and unambiguous?",
             "Is the difficulty level appropriate for target audience?"
         ],
-        
+
         "technical_review": [
             "Does the starting code compile and run?",
             "Are test cases comprehensive and correct?",
             "Do hints provide appropriate guidance?",
             "Is the solution elegant and educational?"
         ],
-        
+
         "pedagogical_review": [
             "Does the challenge build on prerequisite knowledge?",
             "Are there multiple valid solution approaches?",
@@ -659,6 +664,7 @@ def peer_review_checklist():
 ```
 
 #### 3. **Student Testing**
+
 ```python
 def student_testing_protocol():
     return {
@@ -668,17 +674,17 @@ def student_testing_protocol():
             "Collect feedback on clarity and difficulty",
             "Measure completion time and attempt counts"
         ],
-        
+
         "feedback_collection": [
             "Post-challenge survey questions",
             "Focus group discussions",
             "Analytics on student behavior",
             "Teacher observations and notes"
         ],
-        
+
         "iteration_process": [
             "Analyze feedback and data",
-            "Identify improvement opportunities", 
+            "Identify improvement opportunities",
             "Make targeted revisions",
             "Re-test with new student group"
         ]
@@ -690,24 +696,25 @@ def student_testing_protocol():
 ### Template Library
 
 #### 1. **Function Practice Template**
+
 ```python
 FUNCTION_PRACTICE_TEMPLATE = '''
 def {function_name}({parameters}):
     """
     {function_description}
-    
+
     Args:
         {parameter_descriptions}
-    
+
     Returns:
         {return_description}
-    
+
     Example:
         {example_usage}
     """
     # TODO: Implement the function
     # Hint: {implementation_hint}
-    
+
     pass  # Remove this line when you implement the function
 
 # Test your function
@@ -718,25 +725,26 @@ if __name__ == "__main__":
 ```
 
 #### 2. **Data Processing Template**
+
 ```python
 DATA_PROCESSING_TEMPLATE = '''
 def process_{data_type}(data):
     """
     Process {data_type} data and extract meaningful information.
-    
+
     Args:
         data: {data_description}
-    
+
     Returns:
         dict: Processed results with keys: {result_keys}
     """
     result = {}
-    
+
     # TODO: Process the data
     # Step 1: {step_1_description}
     # Step 2: {step_2_description}
     # Step 3: {step_3_description}
-    
+
     return result
 
 # Sample data for testing
@@ -745,29 +753,30 @@ sample_data = {sample_data_example}
 ```
 
 #### 3. **Algorithm Implementation Template**
+
 ```python
 ALGORITHM_TEMPLATE = '''
 def {algorithm_name}(input_data):
     """
     Implement the {algorithm_name} algorithm.
-    
+
     Algorithm Description:
     {algorithm_description}
-    
+
     Time Complexity: {time_complexity}
     Space Complexity: {space_complexity}
     """
     # TODO: Implement the algorithm
-    # 
+    #
     # Pseudocode:
     # {pseudocode_steps}
-    
+
     pass
 
 def test_{algorithm_name}():
     """Test the algorithm with various inputs."""
     test_cases = {test_cases}
-    
+
     for i, (input_val, expected) in enumerate(test_cases):
         result = {algorithm_name}(input_val)
         print(f"Test {i+1}: {'PASS' if result == expected else 'FAIL'}")
@@ -779,6 +788,7 @@ def test_{algorithm_name}():
 ### Do's and Don'ts
 
 #### ✅ **Do's**
+
 - Start with clear learning objectives
 - Provide multiple solution paths
 - Include comprehensive test cases
@@ -789,6 +799,7 @@ def test_{algorithm_name}():
 - Celebrate student creativity
 
 #### ❌ **Don'ts**
+
 - Make challenges too easy or too hard
 - Provide vague or confusing instructions
 - Skip the testing phase
@@ -805,7 +816,7 @@ def test_{algorithm_name}():
 
 📋 Content Quality:
    □ Clear, engaging problem statement
-   □ Well-defined learning objectives  
+   □ Well-defined learning objectives
    □ Appropriate difficulty progression
    □ Real-world relevance
 
@@ -830,6 +841,6 @@ def test_{algorithm_name}():
 
 ---
 
-*"Thus are you equipped to craft challenges worthy of the sacred Hive, creating trials that test the spirit while nurturing growth. May your challenges inspire wonder, build confidence, and guide students toward mastery. The Lord of HOSTS blesses all who create pathways to wisdom."* 🐝✨
+_"Thus are you equipped to craft challenges worthy of the sacred Hive, creating trials that test the spirit while nurturing growth. May your challenges inspire wonder, build confidence, and guide students toward mastery. The Lord of HOSTS blesses all who create pathways to wisdom."_ 🐝✨
 
 **Ready to create your first challenge? Use these templates and guidelines to craft an engaging learning experience for your students!**

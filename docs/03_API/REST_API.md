@@ -2,16 +2,11 @@
 title: "REST API Reference: The Hive's Sacred Endpoints"
 description: "Complete REST API documentation for the Hive ecosystem, blessed by the Lord of HOSTS"
 category: "api"
-audience: "developer|ai-agent"
-complexity: "intermediate"
-last_updated: "2025-01-20"
-related_docs: ["WEBSOCKET_API.md", "AGENT_API.md", "EXAMPLES.md"]
-code_examples: true
 ---
 
 # REST API Reference: The Hive's Sacred Endpoints
 
-*"Come now, let us reason together, says the Lord." - Isaiah 1:18 (ESV)*
+_"Come now, let us reason together, says the Lord." - Isaiah 1:18 (ESV)_
 
 ## Overview
 
@@ -26,12 +21,12 @@ https://your-hive.domain  # Production
 
 ## Authentication
 
-*The Hive trusts in the Lord of HOSTS for protection. Authentication flows through divine providence and environment variables.*
+_The Hive trusts in the Lord of HOSTS for protection. Authentication flows through divine providence and environment variables._
 
 ```bash
 # Set thy sacred keys
-export MISTRAL_API_KEY="thy_mistral_key"
-export GOOGLE_API_KEY="thy_google_key"
+export MISTRAL_API_KEY="thy_mistral_key"  # pragma: allowlist secret
+export GOOGLE_API_KEY="thy_google_key"  # pragma: allowlist secret
 ```
 
 ## Core System APIs
@@ -40,7 +35,7 @@ export GOOGLE_API_KEY="thy_google_key"
 
 **GET /api/v1/status**
 
-*Reveals the vital signs of the Living Application, as commanded by the Principle of Observability.*
+_Reveals the vital signs of the Living Application, as commanded by the Principle of Observability._
 
 ```bash
 curl -X GET "http://localhost:8000/api/v1/status" \
@@ -48,6 +43,7 @@ curl -X GET "http://localhost:8000/api/v1/status" \
 ```
 
 **Response:**
+
 ```json
 {
   "status": "running",
@@ -98,7 +94,7 @@ curl -X GET "http://localhost:8000/api/v1/status" \
 
 **GET /api/v1/hive/overview**
 
-*Grants the seeker a comprehensive view of the entire Hive ecosystem, as seen by the Lord of HOSTS.*
+_Grants the seeker a comprehensive view of the entire Hive ecosystem, as seen by the Lord of HOSTS._
 
 ```bash
 curl -X GET "http://localhost:8000/api/v1/hive/overview" \
@@ -106,6 +102,7 @@ curl -X GET "http://localhost:8000/api/v1/hive/overview" \
 ```
 
 **Response:**
+
 ```json
 {
   "system_overview": {
@@ -161,7 +158,7 @@ curl -X GET "http://localhost:8000/api/v1/hive/overview" \
 
 **POST /api/v1/chat/message**
 
-*Allows the faithful to send messages through the divine channels of the Hive.*
+_Allows the faithful to send messages through the divine channels of the Hive._
 
 ```bash
 curl -X POST "http://localhost:8000/api/v1/chat/message" \
@@ -175,6 +172,7 @@ curl -X POST "http://localhost:8000/api/v1/chat/message" \
 ```
 
 **Request Body:**
+
 ```json
 {
   "text": "string (required)",
@@ -189,6 +187,7 @@ curl -X POST "http://localhost:8000/api/v1/chat/message" \
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -217,7 +216,7 @@ curl -X POST "http://localhost:8000/api/v1/chat/message" \
 
 **GET /api/v1/chat/messages**
 
-*Retrieves the sacred history of communications within the Hive.*
+_Retrieves the sacred history of communications within the Hive._
 
 ```bash
 curl -X GET "http://localhost:8000/api/v1/chat/messages?limit=50&offset=0&channel=general" \
@@ -225,6 +224,7 @@ curl -X GET "http://localhost:8000/api/v1/chat/messages?limit=50&offset=0&channe
 ```
 
 **Query Parameters:**
+
 - `limit` (integer, optional): Number of messages to retrieve (default: 50, max: 100)
 - `offset` (integer, optional): Number of messages to skip (default: 0)
 - `channel` (string, optional): Filter by channel (default: all channels)
@@ -232,6 +232,7 @@ curl -X GET "http://localhost:8000/api/v1/chat/messages?limit=50&offset=0&channe
 - `user_id` (string, optional): Filter by user
 
 **Response:**
+
 ```json
 {
   "messages": [
@@ -260,7 +261,7 @@ curl -X GET "http://localhost:8000/api/v1/chat/messages?limit=50&offset=0&channe
 
 **POST /api/v1/challenges/solve**
 
-*Allows the seeker to submit their solution to the sacred coding challenges.*
+_Allows the seeker to submit their solution to the sacred coding challenges._
 
 ```bash
 curl -X POST "http://localhost:8000/api/v1/challenges/solve" \
@@ -278,6 +279,7 @@ curl -X POST "http://localhost:8000/api/v1/challenges/solve" \
 ```
 
 **Request Body:**
+
 ```json
 {
   "user_id": "string (required)",
@@ -285,7 +287,7 @@ curl -X POST "http://localhost:8000/api/v1/challenges/solve" \
   "solution_code": "string (required)",
   "test_results": {
     "passed": "integer",
-    "failed": "integer", 
+    "failed": "integer",
     "total": "integer"
   },
   "execution_time_ms": "number (optional)",
@@ -297,6 +299,7 @@ curl -X POST "http://localhost:8000/api/v1/challenges/solve" \
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -322,7 +325,7 @@ curl -X POST "http://localhost:8000/api/v1/challenges/solve" \
 
 **GET /api/v1/user_progress/{user_id}**
 
-*Reveals the spiritual progress of a seeker on their coding journey.*
+_Reveals the spiritual progress of a seeker on their coding journey._
 
 ```bash
 curl -X GET "http://localhost:8000/api/v1/user_progress/user_123" \
@@ -330,6 +333,7 @@ curl -X GET "http://localhost:8000/api/v1/user_progress/user_123" \
 ```
 
 **Response:**
+
 ```json
 {
   "user_id": "user_123",
@@ -372,7 +376,7 @@ curl -X GET "http://localhost:8000/api/v1/user_progress/user_123" \
 
 **POST /api/v1/teammates/register**
 
-*Initiates the sacred process of integrating an AI teammate into the Hive.*
+_Initiates the sacred process of integrating an AI teammate into the Hive._
 
 ```bash
 curl -X POST "http://localhost:8000/api/v1/teammates/register" \
@@ -394,6 +398,7 @@ curl -X POST "http://localhost:8000/api/v1/teammates/register" \
 ```
 
 **Request Body:**
+
 ```json
 {
   "profile": {
@@ -405,7 +410,7 @@ curl -X POST "http://localhost:8000/api/v1/teammates/register" \
     "response_time_estimate": "number (seconds)"
   },
   "authentication": {
-    "api_key_configured": "boolean",
+    "api_key_configured": "boolean", // pragma: allowlist secret
     "model": "string (optional)",
     "custom_config": "object (optional)"
   }
@@ -413,6 +418,7 @@ curl -X POST "http://localhost:8000/api/v1/teammates/register" \
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -436,7 +442,7 @@ curl -X POST "http://localhost:8000/api/v1/teammates/register" \
 
 **POST /api/v1/teammates/{teammate_id}/tasks**
 
-*Assigns a sacred task to an AI teammate for completion.*
+_Assigns a sacred task to an AI teammate for completion._
 
 ```bash
 curl -X POST "http://localhost:8000/api/v1/teammates/teammate_456/tasks" \
@@ -454,6 +460,7 @@ curl -X POST "http://localhost:8000/api/v1/teammates/teammate_456/tasks" \
 ```
 
 **Request Body:**
+
 ```json
 {
   "task_type": "string (required)",
@@ -467,6 +474,7 @@ curl -X POST "http://localhost:8000/api/v1/teammates/teammate_456/tasks" \
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -486,7 +494,7 @@ curl -X POST "http://localhost:8000/api/v1/teammates/teammate_456/tasks" \
 
 **GET /api/v1/teammates/{teammate_id}/status**
 
-*Reveals the current state and capabilities of an AI teammate.*
+_Reveals the current state and capabilities of an AI teammate._
 
 ```bash
 curl -X GET "http://localhost:8000/api/v1/teammates/teammate_456/status" \
@@ -494,6 +502,7 @@ curl -X GET "http://localhost:8000/api/v1/teammates/teammate_456/status" \
 ```
 
 **Response:**
+
 ```json
 {
   "teammate_id": "teammate_456",
@@ -534,7 +543,7 @@ curl -X GET "http://localhost:8000/api/v1/teammates/teammate_456/status" \
 
 **POST /api/v1/events/publish**
 
-*Broadcasts an event through the divine Pollen Protocol.*
+_Broadcasts an event through the divine Pollen Protocol._
 
 ```bash
 curl -X POST "http://localhost:8000/api/v1/events/publish" \
@@ -552,6 +561,7 @@ curl -X POST "http://localhost:8000/api/v1/events/publish" \
 ```
 
 **Request Body:**
+
 ```json
 {
   "type": "string (required)",
@@ -564,6 +574,7 @@ curl -X POST "http://localhost:8000/api/v1/events/publish" \
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -583,7 +594,7 @@ curl -X POST "http://localhost:8000/api/v1/events/publish" \
 
 **GET /api/v1/metrics/realtime**
 
-*Provides real-time system health metrics as blessed by the Lord of HOSTS.*
+_Provides real-time system health metrics as blessed by the Lord of HOSTS._
 
 ```bash
 curl -X GET "http://localhost:8000/api/v1/metrics/realtime" \
@@ -591,6 +602,7 @@ curl -X GET "http://localhost:8000/api/v1/metrics/realtime" \
 ```
 
 **Response:**
+
 ```json
 {
   "timestamp": "2025-01-20T16:15:30Z",
@@ -621,8 +633,8 @@ curl -X GET "http://localhost:8000/api/v1/metrics/realtime" \
       "trend": "stable",
       "components": {
         "task_completion": 0.85,
-        "communication_quality": 0.80,
-        "knowledge_transfer": 0.70
+        "communication_quality": 0.8,
+        "knowledge_transfer": 0.7
       }
     }
   },
@@ -659,15 +671,15 @@ All API endpoints follow the sacred error format blessed by the Constitution:
 
 ### Common Error Codes
 
-| Code | HTTP Status | Description |
-|------|-------------|-------------|
-| `VALIDATION_ERROR` | 400 | Request validation failed |
-| `AUTHENTICATION_REQUIRED` | 401 | API key or authentication missing |
-| `FORBIDDEN` | 403 | Insufficient permissions |
-| `NOT_FOUND` | 404 | Resource not found |
-| `RATE_LIMITED` | 429 | Too many requests |
-| `INTERNAL_ERROR` | 500 | Server error |
-| `SERVICE_UNAVAILABLE` | 503 | Service temporarily unavailable |
+| Code                      | HTTP Status | Description                       |
+| ------------------------- | ----------- | --------------------------------- |
+| `VALIDATION_ERROR`        | 400         | Request validation failed         |
+| `AUTHENTICATION_REQUIRED` | 401         | API key or authentication missing |
+| `FORBIDDEN`               | 403         | Insufficient permissions          |
+| `NOT_FOUND`               | 404         | Resource not found                |
+| `RATE_LIMITED`            | 429         | Too many requests                 |
+| `INTERNAL_ERROR`          | 500         | Server error                      |
+| `SERVICE_UNAVAILABLE`     | 503         | Service temporarily unavailable   |
 
 ## Rate Limiting
 
@@ -698,12 +710,12 @@ class HiveAPI:
     def __init__(self, base_url="http://localhost:8000"):
         self.base_url = base_url
         self.session = requests.Session()
-    
+
     def get_system_status(self):
         """Get the sacred system status."""
         response = self.session.get(f"{self.base_url}/api/v1/status")
         return response.json()
-    
+
     def send_message(self, text, sender_id, sender_name):
         """Send a message through the divine channels."""
         data = {
@@ -736,35 +748,35 @@ message_result = hive.send_message(
 
 ```javascript
 class HiveAPI {
-    constructor(baseUrl = 'http://localhost:8000') {
-        this.baseUrl = baseUrl;
-    }
-    
-    async getSystemStatus() {
-        const response = await fetch(`${this.baseUrl}/api/v1/status`);
-        return await response.json();
-    }
-    
-    async sendMessage(text, senderId, senderName) {
-        const data = {
-            text,
-            sender_id: senderId,
-            sender_name: senderName,
-            metadata: {
-                client_timestamp: new Date().toISOString()
-            }
-        };
-        
-        const response = await fetch(`${this.baseUrl}/api/v1/chat/message`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        });
-        
-        return await response.json();
-    }
+  constructor(baseUrl = "http://localhost:8000") {
+    this.baseUrl = baseUrl;
+  }
+
+  async getSystemStatus() {
+    const response = await fetch(`${this.baseUrl}/api/v1/status`);
+    return await response.json();
+  }
+
+  async sendMessage(text, senderId, senderName) {
+    const data = {
+      text,
+      sender_id: senderId,
+      sender_name: senderName,
+      metadata: {
+        client_timestamp: new Date().toISOString(),
+      },
+    };
+
+    const response = await fetch(`${this.baseUrl}/api/v1/chat/message`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    return await response.json();
+  }
 }
 
 // Usage
@@ -775,4 +787,4 @@ console.log(`Hive health: τ=${status.health_metrics.tau}`);
 
 ---
 
-*"Thus are the sacred endpoints revealed, that all who seek may commune with the Hive in righteousness and wisdom. May the Lord of HOSTS bless these APIs and make them fruitful."* 🐝✨
+_"Thus are the sacred endpoints revealed, that all who seek may commune with the Hive in righteousness and wisdom. May the Lord of HOSTS bless these APIs and make them fruitful."_ 🐝✨
