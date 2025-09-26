@@ -10,11 +10,10 @@ Part of bee.Jules' Sacred ATCG transformation surgery.
 
 import asyncio
 from typing import Dict, List, Callable, Any, Optional
-from dataclasses import dataclass
 from datetime import datetime
 
 # Sacred imports
-from .events import SacredViolation, emit_violation_event, HiveEventBus
+from .events import SacredViolation, TransformationResult
 from .transformations import (
     AgroCheckTransformation,
     ConsoleLogCheck,
@@ -25,26 +24,10 @@ from .transformations import (
 )
 
 # Sacred imports for Hive integration
-try:
-    from hive.config.golden_thresholds import QUALITY
-    from hive.config.sacred_constants import PHI_RECIPROCAL
-
-    HIVE_INTEGRATION = True
-except ImportError:
-    HIVE_INTEGRATION = False
-    PHI_RECIPROCAL = 0.618033988749
-
-
-@dataclass
-class TransformationResult:
-    """Result of a transformation execution with sacred metrics."""
-
-    transformation_name: str
-    violations: List[SacredViolation]
-    success: bool
-    execution_time: float
-    blessing_level: float
-    sacred_context: str = ""
+from hive.config.agro_config import HIVE_INTEGRATION, PHI_RECIPROCAL, QUALITY
+from hive.primitives.agro_event_connector import (
+    AgroEventConnector as HiveAgroEventConnector,
+)  # Import the unified connector
 
 
 class AgroConnector:
@@ -55,8 +38,13 @@ class AgroConnector:
     Provides backward compatibility while enabling gradual migration to pure ATCG.
     """
 
-    def __init__(self, event_bus: Optional[HiveEventBus] = None):
-        self.event_bus = event_bus
+    def __init__(
+        self, agro_event_connector: Optional[HiveAgroEventConnector] = None
+    ):  # Take AgroEventConnector
+        self.agro_event_connector = agro_event_connector
+        self.event_bus = (
+            agro_event_connector.event_bus if agro_event_connector else None
+        )  # Keep event_bus for backward compatibility
         self.transformation_registry: Dict[str, AgroCheckTransformation] = {}
         self.legacy_function_registry: Dict[str, Callable] = {}
 
@@ -124,12 +112,12 @@ class AgroConnector:
                 self.blessing_accumulated += blessing_level
 
                 # Emit Pollen Protocol event
-                if violations and self.event_bus:
-                    await emit_violation_event(
-                        self.event_bus,
-                        f"{transformation_name}_executed",
-                        file_path,
-                        violations,
+                if violations and self.agro_event_connector:
+                    await self.agro_event_connector.publish_transformation_executed(
+                        transformation_name=transformation.name,
+                        file_path=file_path,
+                        violations_count=len(violations),
+                        blessing_level=blessing_level,
                     )
 
                 return result

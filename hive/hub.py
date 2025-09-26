@@ -22,7 +22,7 @@ import json
 
 from .intent import HiveIntent
 from .physics import HivePhysics
-from .primitives import Aggregate, Transformation, Connector, GenesisEvent
+from .primitives import ScoreTransformation, ReviewAggregate, AgroEventConnector
 from .events import HiveEventBus, PollenEvent, EventSubscription
 from .teammate import HiveTeammate, TeammateProfile, TaskRequest, TeammateCapability
 from .registry import HiveRegistry, RegistrationRequest
