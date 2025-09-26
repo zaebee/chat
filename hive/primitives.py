@@ -16,6 +16,8 @@ from typing import Dict, Any, List, Optional, Callable, Awaitable
 from datetime import datetime
 import uuid
 
+from .config.golden_thresholds import ATCG, QUALITY
+
 
 @dataclass
 class HiveComponent(ABC):
@@ -46,11 +48,11 @@ class Aggregate(HiveComponent):
     of the system.
     """
 
-    def __init__(self, name: str, invariants: List[str] = None):
+    def __init__(self, name: str, invariants: Optional[List[str]] = None):
         super().__init__(name=name)
         self.invariants = invariants or []
         self.state: Dict[str, Any] = {}
-        self.version = 1
+        self.version = ATCG.initial_version
         self.event_history: List[Dict[str, Any]] = []
 
     def apply_event(self, event: Dict[str, Any]) -> bool:
@@ -65,10 +67,14 @@ class Aggregate(HiveComponent):
 
         # Apply the event
         self.state.update(event.get("data", {}))
-        self.version += 1
+        self.version += ATCG.version_increment
         self.event_history.append(
             {**event, "applied_at": datetime.now().isoformat(), "version": self.version}
         )
+
+        # Keep event history within sacred limits
+        if len(self.event_history) > ATCG.max_history_retention:  # Fibonacci 377
+            self.event_history = self.event_history[-ATCG.max_history_retention :]
 
         return True
 
@@ -262,7 +268,7 @@ class Connector(HiveComponent):
             raise Exception(f"Translation failed: {str(e)}")
 
     async def send_message(
-        self, message: Dict[str, Any], target_protocol: str = None
+        self, message: Dict[str, Any], target_protocol: Optional[str] = None
     ) -> bool:
         """
         Send a message through this connector, translating if necessary.
@@ -299,14 +305,14 @@ class Connector(HiveComponent):
             else None,
             "timestamp": datetime.now().isoformat(),
             "health": "active"
-            if self.translation_errors / max(1, self.message_count) < 0.1
+            if self.translation_errors / max(1, self.message_count) < QUALITY.excellent
             else "degraded",
         }
 
     async def health_check(self) -> bool:
         """Check if connector is healthy (low error rate)."""
         error_rate = self.translation_errors / max(1, self.message_count)
-        return error_rate < 0.1  # Less than 10% error rate
+        return error_rate < QUALITY.excellent  # Sacred φ⁻⁴ ≈ 0.146 error rate
 
 
 class GenesisEvent(HiveComponent):
@@ -322,7 +328,7 @@ class GenesisEvent(HiveComponent):
         self,
         name: str,
         event_type: str,
-        broadcast_func: Callable[[Dict[str, Any]], Awaitable[bool]] = None,
+        broadcast_func: Optional[Callable[[Dict[str, Any]], Awaitable[bool]]] = None,
     ):
         super().__init__(name=name)
         self.event_type = event_type
@@ -331,7 +337,9 @@ class GenesisEvent(HiveComponent):
         self.broadcast_count = 0
         self.last_generation: Optional[datetime] = None
 
-    async def generate(self, template_data: Dict[str, Any] = None) -> Dict[str, Any]:
+    async def generate(
+        self, template_data: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
         """
         Generate a new event based on template data.
 
@@ -361,7 +369,7 @@ class GenesisEvent(HiveComponent):
         This is the mechanism for system-wide communication.
         """
         try:
-            if self.broadcast_func:
+            if self.broadcast_func is not None:
                 success = await self.broadcast_func(event)
                 if success:
                     self.broadcast_count += 1
@@ -375,7 +383,7 @@ class GenesisEvent(HiveComponent):
             return False
 
     async def replicate(
-        self, target_environment: str, template_data: Dict[str, Any] = None
+        self, target_environment: str, template_data: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """
         Create a new instance of something in a target environment.

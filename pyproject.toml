@@ -18,10 +18,14 @@ dependencies = [
     "netifaces>=0.11.0",
     "dotenv>=0.9.9",
     "mistralai>=1.9.10",
+    "markdown-it-py>=3.0.0",
+    "mdit-py-plugins>=0.4.0",
+    "bleach>=6.1.0",
+    "linkify-it-py>=2.0.2",
 ]
 
-[tool.setuptools]
-py-modules = ["chat"]
+[tool.setuptools.packages.find]
+where = ["."]
 
 [dependency-groups]
 dev = [
