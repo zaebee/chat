@@ -2,28 +2,25 @@
 title: "Development Environment: Sacred Setup Guide"
 description: "Complete guide to setting up and configuring the Hive development environment"
 category: "development"
-audience: "developer"
-complexity: "beginner"
-last_updated: "2025-01-20"
-related_docs: ["GETTING_STARTED.md", "CONTRIBUTING.md", "../05_OPERATIONS/CONFIGURATION.md"]
-code_examples: true
 ---
 
 # Development Environment: Sacred Setup Guide
 
-*"And let them make me a sanctuary; that I may dwell among them." - Exodus 25:8 (KJV)*
+_"And let them make me a sanctuary; that I may dwell among them." - Exodus 25:8 (KJV)_
 
 ## Prerequisites
 
 ### System Requirements
 
 **Minimum:**
+
 - **OS**: Linux, macOS, or Windows 10+
 - **RAM**: 4GB (8GB recommended)
 - **Storage**: 2GB free space
 - **Network**: Internet connection for dependencies
 
 **Recommended:**
+
 - **OS**: Ubuntu 22.04+ or macOS 12+
 - **RAM**: 8GB+
 - **Storage**: 10GB+ free space
@@ -32,6 +29,7 @@ code_examples: true
 ### Required Software
 
 #### Python Environment
+
 ```bash
 # Python 3.10 or higher
 python --version  # Should be 3.10+
@@ -43,6 +41,7 @@ pip install uv
 ```
 
 #### Node.js Environment
+
 ```bash
 # Node.js 20.19.0 or higher
 node --version  # Should be 20.19.0+
@@ -54,6 +53,7 @@ npm install -g bun
 ```
 
 #### Git
+
 ```bash
 # Git for version control
 git --version  # Should be 2.0+
@@ -76,6 +76,7 @@ git checkout feat/phase-2-jules-micro-implementation  # Development branch
 ### 2. Backend Environment
 
 #### Python Dependencies
+
 ```bash
 # Install Python dependencies with uv
 uv sync
@@ -87,6 +88,7 @@ pip install -r requirements.txt
 ```
 
 #### Database Initialization
+
 ```bash
 # Initialize SQLite database
 python -c "from database import init_db; init_db()"
@@ -96,6 +98,7 @@ ls -la chat.db
 ```
 
 #### Environment Variables
+
 ```bash
 # Create environment file
 cp .env.example .env
@@ -105,6 +108,7 @@ nano .env
 ```
 
 **.env Configuration:**
+
 ```bash
 # AI Service API Keys (optional for basic functionality)
 MISTRAL_API_KEY=your_mistral_api_key_here
@@ -141,6 +145,7 @@ RATE_LIMIT_WINDOW=60
 ### 3. Frontend Environment
 
 #### Node.js Dependencies
+
 ```bash
 # Navigate to frontend directory
 cd frontend
@@ -156,6 +161,7 @@ cd ..
 ```
 
 #### Frontend Configuration
+
 ```bash
 # Frontend environment variables
 cd frontend
@@ -163,6 +169,7 @@ cp .env.example .env.local
 ```
 
 **frontend/.env.local:**
+
 ```bash
 # API Configuration
 VITE_API_BASE_URL=http://localhost:8000
@@ -187,6 +194,7 @@ VITE_SOURCE_MAPS=true
 ### Code Quality Tools
 
 #### Python Tools
+
 ```bash
 # Install development tools
 uv add --dev ruff mypy pytest
@@ -205,6 +213,7 @@ pytest tests/
 ```
 
 #### Frontend Tools
+
 ```bash
 cd frontend
 
@@ -224,6 +233,7 @@ bun run test:unit
 ### IDE Configuration
 
 #### VS Code Setup
+
 ```json
 // .vscode/settings.json
 {
@@ -241,6 +251,7 @@ bun run test:unit
 ```
 
 #### Recommended Extensions
+
 ```json
 // .vscode/extensions.json
 {
@@ -261,6 +272,7 @@ bun run test:unit
 ### Development Mode
 
 #### Option 1: Full Hive Ecosystem
+
 ```bash
 # Terminal 1: Start Hive backend
 python hive_demo.py
@@ -273,6 +285,7 @@ bun run dev
 ```
 
 #### Option 2: Legacy Chat Mode
+
 ```bash
 # Terminal 1: Start simple chat server
 python chat.py
@@ -285,6 +298,7 @@ bun run dev
 ```
 
 #### Option 3: Quick Demo
+
 ```bash
 # Run quick demonstration
 python hive_demo.py --quick
@@ -293,6 +307,7 @@ python hive_demo.py --quick
 ### Production Mode
 
 #### Build Frontend
+
 ```bash
 cd frontend
 bun run build
@@ -302,6 +317,7 @@ bun run preview
 ```
 
 #### Run Production Server
+
 ```bash
 # Set production environment
 export HIVE_MODE=production
@@ -314,6 +330,7 @@ python chat.py --port 8000
 ## Database Management
 
 ### SQLite Operations
+
 ```bash
 # Connect to database
 sqlite3 chat.db
@@ -327,6 +344,7 @@ SELECT * FROM user_progress;        # View user progress
 ```
 
 ### Database Migrations
+
 ```bash
 # Backup database
 cp chat.db chat.db.backup
@@ -339,6 +357,7 @@ python -c "from database import init_db; init_db()"
 ## Debugging and Monitoring
 
 ### Backend Debugging
+
 ```bash
 # Run with debug logging
 export LOG_LEVEL=DEBUG
@@ -354,6 +373,7 @@ ipdb.set_trace()
 ```
 
 ### Frontend Debugging
+
 ```bash
 cd frontend
 
@@ -365,6 +385,7 @@ bun run build --sourcemap
 ```
 
 ### System Monitoring
+
 ```bash
 # Check system status
 curl http://localhost:8000/api/v1/status | jq
@@ -379,6 +400,7 @@ curl http://localhost:8000/api/v1/events/system | jq
 ## Performance Optimization
 
 ### Backend Optimization
+
 ```bash
 # Profile Python code
 python -m cProfile -o profile.stats chat.py
@@ -389,6 +411,7 @@ python -m memory_profiler chat.py
 ```
 
 ### Frontend Optimization
+
 ```bash
 cd frontend
 
@@ -404,6 +427,7 @@ bun run test:performance
 ### Common Issues
 
 #### Python Environment Issues
+
 ```bash
 # Issue: ModuleNotFoundError
 # Solution: Ensure virtual environment is activated
@@ -416,6 +440,7 @@ chmod +x scripts/*.sh
 ```
 
 #### Node.js Issues
+
 ```bash
 # Issue: Package installation fails
 # Solution: Clear cache and reinstall
@@ -430,6 +455,7 @@ bun run dev --port 5174
 ```
 
 #### Database Issues
+
 ```bash
 # Issue: Database locked
 # Solution: Close all connections and restart
@@ -446,6 +472,7 @@ rm chat.db && python -c "from database import init_db; init_db()"
 ### Debug Commands
 
 #### System Health Check
+
 ```bash
 # Check all services
 ./scripts/health-check.sh
@@ -467,6 +494,7 @@ console.log('Bun available:', !!process.versions.bun)
 ```
 
 #### Log Analysis
+
 ```bash
 # View application logs
 tail -f logs/hive.log
@@ -481,6 +509,7 @@ grep "WebSocket" logs/hive.log
 ## Development Workflow
 
 ### Daily Development
+
 ```bash
 # 1. Update code
 git pull origin feat/phase-2-jules-micro-implementation
@@ -504,6 +533,7 @@ git commit -m "feat: Add new sacred feature"
 ```
 
 ### Code Quality Checks
+
 ```bash
 # Run all quality checks
 ./scripts/quality-check.sh
@@ -519,29 +549,29 @@ cd frontend && bun run lint && bun run type-check
 
 ### Backend Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `MISTRAL_API_KEY` | - | Mistral AI API key |
-| `GOOGLE_API_KEY` | - | Google Gemini API key |
-| `DATABASE_URL` | `sqlite:///chat.db` | Database connection string |
-| `HOST` | `0.0.0.0` | Server host address |
-| `PORT` | `8000` | Server port |
-| `DEBUG` | `false` | Enable debug mode |
-| `LOG_LEVEL` | `INFO` | Logging level |
-| `HIVE_MODE` | `development` | Hive operation mode |
-| `MAX_CONCURRENT_TASKS` | `10` | Max AI teammate tasks |
-| `EVENT_HISTORY_SIZE` | `1000` | Event history limit |
+| Variable               | Default             | Description                |
+| ---------------------- | ------------------- | -------------------------- |
+| `MISTRAL_API_KEY`      | -                   | Mistral AI API key         |
+| `GOOGLE_API_KEY`       | -                   | Google Gemini API key      |
+| `DATABASE_URL`         | `sqlite:///chat.db` | Database connection string |
+| `HOST`                 | `0.0.0.0`           | Server host address        |
+| `PORT`                 | `8000`              | Server port                |
+| `DEBUG`                | `false`             | Enable debug mode          |
+| `LOG_LEVEL`            | `INFO`              | Logging level              |
+| `HIVE_MODE`            | `development`       | Hive operation mode        |
+| `MAX_CONCURRENT_TASKS` | `10`                | Max AI teammate tasks      |
+| `EVENT_HISTORY_SIZE`   | `1000`              | Event history limit        |
 
 ### Frontend Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `VITE_API_BASE_URL` | `http://localhost:8000` | Backend API URL |
-| `VITE_WS_URL` | `ws://localhost:8000/ws` | WebSocket URL |
-| `VITE_ENABLE_AI_FEATURES` | `true` | Enable AI features |
-| `VITE_ENABLE_LEARNING_PLATFORM` | `true` | Enable learning platform |
-| `VITE_DEFAULT_THEME` | `light` | Default UI theme |
+| Variable                        | Default                  | Description              |
+| ------------------------------- | ------------------------ | ------------------------ |
+| `VITE_API_BASE_URL`             | `http://localhost:8000`  | Backend API URL          |
+| `VITE_WS_URL`                   | `ws://localhost:8000/ws` | WebSocket URL            |
+| `VITE_ENABLE_AI_FEATURES`       | `true`                   | Enable AI features       |
+| `VITE_ENABLE_LEARNING_PLATFORM` | `true`                   | Enable learning platform |
+| `VITE_DEFAULT_THEME`            | `light`                  | Default UI theme         |
 
 ---
 
-*"Thus is the sacred development environment prepared, that the faithful may code in harmony with the divine Will of the Hive."* 🐝✨
+_"Thus is the sacred development environment prepared, that the faithful may code in harmony with the divine Will of the Hive."_ 🐝✨

@@ -2,16 +2,11 @@
 title: "Teacher Guide: Shepherding the Sacred Learning"
 description: "Complete guide for educators using the Hive learning platform"
 category: "user"
-audience: "user"
-complexity: "intermediate"
-last_updated: "2025-01-20"
-related_docs: ["STUDENT_GUIDE.md", "CHALLENGE_CREATION.md", "GAMIFICATION.md"]
-code_examples: true
 ---
 
 # Teacher Guide: Shepherding the Sacred Learning
 
-*"He will feed his flock like a shepherd; he will gather the lambs in his arms." - Isaiah 40:11 (ESV)*
+_"He will feed his flock like a shepherd; he will gather the lambs in his arms." - Isaiah 40:11 (ESV)_
 
 ## Welcome, Sacred Educator! 🎓
 
@@ -24,60 +19,72 @@ As a teacher in the Hive, you are a shepherd of digital wisdom, guiding students
 The Hive follows a unique pedagogical approach based on the **ATCG Learning Progression**:
 
 #### 🥚 **A - Aggregate Phase** (Foundation Building)
-*"Students gather fundamental concepts like bees collecting pollen"*
+
+_"Students gather fundamental concepts like bees collecting pollen"_
 
 **Educational Focus:**
+
 - Concrete, hands-on learning
 - Building confidence through small wins
 - Establishing coding vocabulary
 - Creating positive associations with programming
 
 **Teaching Strategies:**
+
 - Use visual metaphors and analogies
 - Provide immediate feedback
 - Celebrate every small achievement
 - Connect coding to real-world examples
 
 #### 🐛 **T - Transformation Phase** (Skill Development)
-*"Students learn to transform data and solve problems"*
+
+_"Students learn to transform data and solve problems"_
 
 **Educational Focus:**
+
 - Logical thinking and problem decomposition
 - Pattern recognition and abstraction
 - Algorithmic thinking development
 - Error handling and debugging skills
 
 **Teaching Strategies:**
+
 - Guide students through problem-solving processes
 - Encourage experimentation and iteration
 - Use pair programming and peer review
 - Introduce debugging as a valuable skill
 
 #### 🔗 **C - Connector Phase** (Integration and Application)
-*"Students connect concepts and build larger systems"*
+
+_"Students connect concepts and build larger systems"_
 
 **Educational Focus:**
+
 - Systems thinking and architecture
 - Integration of multiple concepts
 - Real-world application development
 - Collaboration and communication skills
 
 **Teaching Strategies:**
+
 - Assign project-based learning
 - Encourage cross-disciplinary connections
 - Facilitate group work and collaboration
 - Introduce software engineering practices
 
 #### 🌱 **G - Genesis Phase** (Creation and Leadership)
-*"Students become creators and mentors themselves"*
+
+_"Students become creators and mentors themselves"_
 
 **Educational Focus:**
+
 - Original project creation
 - Mentoring younger students
 - Contributing to open source
 - Developing teaching and leadership skills
 
 **Teaching Strategies:**
+
 - Provide opportunities for student leadership
 - Encourage original project development
 - Facilitate peer mentoring programs
@@ -88,6 +95,7 @@ The Hive follows a unique pedagogical approach based on the **ATCG Learning Prog
 ### Initial Setup
 
 #### 1. **Teacher Account Configuration**
+
 ```
 Teacher Dashboard Access:
 - Navigate to /teacher-dashboard
@@ -97,6 +105,7 @@ Teacher Dashboard Access:
 ```
 
 #### 2. **Classroom Setup**
+
 ```python
 # Example classroom configuration
 classroom_config = {
@@ -119,6 +128,7 @@ classroom_config = {
 ```
 
 #### 3. **Student Onboarding**
+
 - Create student accounts or provide registration links
 - Conduct orientation session on Hive navigation
 - Establish classroom norms and expectations
@@ -127,6 +137,7 @@ classroom_config = {
 ### Understanding the Dashboard
 
 #### Class Overview
+
 ```
 📊 Class Dashboard:
 
@@ -148,6 +159,7 @@ classroom_config = {
 ```
 
 #### Individual Student Tracking
+
 ```
 👤 Student Profile: Alex Chen
 
@@ -178,6 +190,7 @@ classroom_config = {
 ### Aligning with Learning Standards
 
 #### Computer Science Standards Mapping
+
 ```python
 # Example standards alignment
 standards_mapping = {
@@ -196,6 +209,7 @@ standards_mapping = {
 ```
 
 #### Lesson Plan Integration
+
 ```
 📚 Sample Lesson Plan: "Introduction to Functions"
 
@@ -227,12 +241,13 @@ standards_mapping = {
 #### Supporting Diverse Learners
 
 **For Advanced Students:**
+
 ```python
 # Advanced challenge example
 def create_advanced_challenge():
     """
     Challenge: Build a Text Adventure Game Engine
-    
+
     Requirements:
     - Use object-oriented programming
     - Implement save/load functionality
@@ -252,6 +267,7 @@ def create_advanced_challenge():
 ```
 
 **For Struggling Students:**
+
 ```python
 # Scaffolded support example
 def provide_scaffolding():
@@ -283,6 +299,7 @@ def provide_scaffolding():
 ```
 
 **For English Language Learners:**
+
 ```python
 # ELL support features
 def support_ell_students():
@@ -305,6 +322,7 @@ def support_ell_students():
 ### Monitoring Student Progress
 
 #### Real-time Awareness
+
 ```
 🔍 Live Classroom Monitor:
 
@@ -326,6 +344,7 @@ Currently Active Students: 18/25
 ```
 
 #### Intervention Strategies
+
 ```python
 def intervention_strategies():
     return {
@@ -353,6 +372,7 @@ def intervention_strategies():
 ### Facilitating Collaboration
 
 #### Peer Learning Strategies
+
 ```
 🤝 Collaboration Techniques:
 
@@ -378,6 +398,7 @@ def intervention_strategies():
 ```
 
 #### Managing Online Discussions
+
 ```python
 # Chat moderation guidelines
 def chat_moderation_best_practices():
@@ -408,6 +429,7 @@ def chat_moderation_best_practices():
 ### Formative Assessment Strategies
 
 #### Real-time Progress Monitoring
+
 ```python
 # Assessment data collection
 def collect_assessment_data():
@@ -436,6 +458,7 @@ def collect_assessment_data():
 ```
 
 #### Portfolio Development
+
 ```
 📁 Student Portfolio Components:
 
@@ -463,6 +486,7 @@ def collect_assessment_data():
 ### Summative Assessment Options
 
 #### Project-Based Assessment
+
 ```python
 # Example capstone project rubric
 def capstone_project_rubric():
@@ -507,6 +531,7 @@ def capstone_project_rubric():
 ```
 
 #### Alternative Assessment Methods
+
 ```
 🎯 Assessment Variety:
 
@@ -536,6 +561,7 @@ def capstone_project_rubric():
 ### Understanding AI Capabilities
 
 #### Mistral Gardener - The Code Architect
+
 ```python
 # How to leverage Mistral in your classroom
 def use_mistral_effectively():
@@ -562,6 +588,7 @@ def use_mistral_effectively():
 ```
 
 #### Gemini Guide - The Concept Explainer
+
 ```python
 # How to leverage Gemini in your classroom
 def use_gemini_effectively():
@@ -590,6 +617,7 @@ def use_gemini_effectively():
 ### AI Integration Strategies
 
 #### Scaffolding AI Interactions
+
 ```
 📋 Teaching Students to Work with AI:
 
@@ -609,6 +637,7 @@ def use_gemini_effectively():
 ```
 
 #### Balancing AI and Human Learning
+
 ```python
 def balance_ai_human_learning():
     return {
@@ -638,6 +667,7 @@ def balance_ai_human_learning():
 ### Staying Current with Technology
 
 #### Continuous Learning Resources
+
 ```
 📚 Professional Growth Opportunities:
 
@@ -661,6 +691,7 @@ def balance_ai_human_learning():
 ```
 
 #### Collaboration with Colleagues
+
 ```python
 def teacher_collaboration_strategies():
     return {
@@ -690,6 +721,7 @@ def teacher_collaboration_strategies():
 ### Technical Issues
 
 #### Platform Problems
+
 ```
 🔧 Common Technical Issues:
 
@@ -713,6 +745,7 @@ def teacher_collaboration_strategies():
 ```
 
 #### Student Account Management
+
 ```python
 def manage_student_accounts():
     return {
@@ -740,6 +773,7 @@ def manage_student_accounts():
 ### Pedagogical Challenges
 
 #### Student Engagement Issues
+
 ```
 🎯 Engagement Strategies:
 
@@ -763,6 +797,7 @@ def manage_student_accounts():
 ```
 
 #### Classroom Management Online
+
 ```python
 def online_classroom_management():
     return {
@@ -792,6 +827,7 @@ def online_classroom_management():
 ### Inspiring Examples
 
 #### Case Study: Rural High School Success
+
 ```
 🌟 Lincoln High School, Rural Montana
 
@@ -817,6 +853,7 @@ Key Factors:
 ```
 
 #### Case Study: Urban Middle School Integration
+
 ```
 🌟 Roosevelt Middle School, Chicago
 
@@ -844,7 +881,7 @@ Key Factors:
 ### Teacher Testimonials
 
 ```
-💬 "The Hive transformed my classroom. Students who never spoke up are now confidently explaining code to their peers. The AI mentors provide the individual attention I wish I could give every student." 
+💬 "The Hive transformed my classroom. Students who never spoke up are now confidently explaining code to their peers. The AI mentors provide the individual attention I wish I could give every student."
 - Maria Santos, 8th Grade Teacher
 
 💬 "I was intimidated by teaching programming, but the Hive's teacher support made it accessible. Now I'm more excited about CS education than my students!"
@@ -856,6 +893,6 @@ Key Factors:
 
 ---
 
-*"Thus are you equipped, sacred educator, to guide young minds in the paths of righteous code. May your teaching be fruitful, your students flourish, and your classroom become a beacon of collaborative learning. The Lord of HOSTS blesses all who shepherd the next generation of digital creators."* 🐝✨
+_"Thus are you equipped, sacred educator, to guide young minds in the paths of righteous code. May your teaching be fruitful, your students flourish, and your classroom become a beacon of collaborative learning. The Lord of HOSTS blesses all who shepherd the next generation of digital creators."_ 🐝✨
 
 **Ready to transform your classroom? Begin your journey with the Hive today!**

@@ -2,11 +2,6 @@
 title: "ATCG Primitives: The Genetic Code of the Hive"
 description: "Complete guide to Aggregates, Transformations, Connectors, and Genesis Events"
 category: "architecture"
-audience: "developer|ai-agent"
-complexity: "intermediate"
-last_updated: "2025-01-20"
-related_docs: ["OVERVIEW.md", "EVENT_SYSTEM.md"]
-code_examples: true
 ---
 
 # ATCG Primitives: The Genetic Code of the Hive
@@ -21,7 +16,7 @@ Just as DNA uses four nucleotides (A, T, C, G) to encode all biological informat
 
 ```
 A - Aggregates      → Structure and State
-T - Transformations → Processing and Logic  
+T - Transformations → Processing and Logic
 C - Connectors      → Communication and Interfaces
 G - Genesis Events  → Memory and Evolution
 ```
@@ -31,6 +26,7 @@ G - Genesis Events  → Memory and Evolution
 **Purpose:** Aggregates are the structural backbone of the system, managing state and enforcing invariants.
 
 **Characteristics:**
+
 - Contain business rules and data validation
 - Maintain consistency and integrity
 - Encapsulate related data and behavior
@@ -47,7 +43,7 @@ class ChatSystemAggregate(Aggregate):
         self.active_users = {}
         self.message_count = 0
         self.last_activity = None
-    
+
     def add_user(self, user_id: str, username: str) -> bool:
         """Add a user while maintaining invariants."""
         if self._validate_user(user_id, username):
@@ -58,19 +54,19 @@ class ChatSystemAggregate(Aggregate):
             }
             return True
         return False
-    
+
     def _validate_user(self, user_id: str, username: str) -> bool:
         """Enforce user invariants."""
         if "non_empty_username" in self.invariants:
             if not username or not username.strip():
                 return False
-        
+
         if "unique_user_id" in self.invariants:
             if user_id in self.active_users:
                 return False
-        
+
         return True
-    
+
     def get_status(self) -> Dict[str, Any]:
         """Required introspection interface."""
         return {
@@ -107,6 +103,7 @@ print(f"Active users: {status['active_users']}")
 **Purpose:** Transformations handle all data processing and business logic as pure, stateless functions.
 
 **Characteristics:**
+
 - Pure functions with no side effects
 - Composable and testable
 - Handle data validation and conversion
@@ -114,14 +111,14 @@ print(f"Active users: {status['active_users']}")
 
 ### Implementation
 
-```python
+````python
 from hive.primitives import Transformation
 from typing import Dict, Any, Callable
 
 class MessageProcessorTransformation(Transformation):
     def __init__(self, name: str, processor_func: Callable):
         super().__init__(name, processor_func)
-    
+
     async def process(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Process message data through the transformation."""
         try:
@@ -137,7 +134,7 @@ async def process_chat_message(data: Dict[str, Any]) -> Dict[str, Any]:
     """Transform raw message data into processed format."""
     message_text = data.get("text", "")
     sender_id = data.get("sender_id", "")
-    
+
     # Apply transformations
     processed = {
         "original_text": message_text,
@@ -150,7 +147,7 @@ async def process_chat_message(data: Dict[str, Any]) -> Dict[str, Any]:
         "sentiment": analyze_sentiment(message_text),
         "contains_code": detect_code_blocks(message_text)
     }
-    
+
     return processed
 
 def detect_language(text: str) -> str:
@@ -164,11 +161,11 @@ def analyze_sentiment(text: str) -> str:
     """Basic sentiment analysis."""
     positive_words = ["good", "great", "awesome", "excellent", "love"]
     negative_words = ["bad", "terrible", "awful", "hate", "horrible"]
-    
+
     text_lower = text.lower()
     positive_count = sum(1 for word in positive_words if word in text_lower)
     negative_count = sum(1 for word in negative_words if word in text_lower)
-    
+
     if positive_count > negative_count:
         return "positive"
     elif negative_count > positive_count:
@@ -179,7 +176,7 @@ def detect_code_blocks(text: str) -> bool:
     """Detect if message contains code."""
     code_indicators = ["```", "def ", "class ", "import ", "function", "var ", "const "]
     return any(indicator in text for indicator in code_indicators)
-```
+````
 
 ### Usage Examples
 
@@ -207,6 +204,7 @@ print(f"Word count: {processed['word_count']}")
 **Purpose:** Connectors handle all communication between components and external systems.
 
 **Characteristics:**
+
 - Protocol translation and adaptation
 - No business logic, pure interface layer
 - Handle WebSocket, HTTP, and internal communication
@@ -224,13 +222,13 @@ class WebSocketToPollenConnector(Connector):
         super().__init__(name, input_protocol, output_protocol)
         self.active_connections = {}
         self.message_queue = asyncio.Queue()
-    
+
     async def handle_websocket_message(self, websocket, message: str):
         """Convert WebSocket message to Pollen Protocol event."""
         try:
             # Parse incoming WebSocket message
             ws_data = json.loads(message)
-            
+
             # Transform to Pollen Protocol format
             pollen_event = {
                 "id": str(uuid.uuid4()),
@@ -243,25 +241,25 @@ class WebSocketToPollenConnector(Connector):
                     "protocol_version": "1.0"
                 }
             }
-            
+
             # Queue for processing
             await self.message_queue.put(pollen_event)
-            
+
             self.metrics["messages_processed"] += 1
-            
+
         except json.JSONDecodeError:
             self.metrics["parse_errors"] += 1
             await self.send_error(websocket, "Invalid JSON format")
         except Exception as e:
             self.metrics["processing_errors"] += 1
             await self.send_error(websocket, f"Processing error: {str(e)}")
-    
+
     async def send_to_websocket(self, connection_id: str, pollen_event: Dict[str, Any]):
         """Convert Pollen Protocol event to WebSocket message."""
         websocket = self.active_connections.get(connection_id)
         if not websocket:
             return False
-        
+
         try:
             # Transform Pollen event to WebSocket format
             ws_message = {
@@ -269,15 +267,15 @@ class WebSocketToPollenConnector(Connector):
                 "data": pollen_event["data"],
                 "timestamp": pollen_event["timestamp"]
             }
-            
+
             await websocket.send(json.dumps(ws_message))
             self.metrics["messages_sent"] += 1
             return True
-            
+
         except Exception as e:
             self.metrics["send_errors"] += 1
             return False
-    
+
     async def send_error(self, websocket, error_message: str):
         """Send error message to WebSocket client."""
         error_response = {
@@ -320,6 +318,7 @@ await ws_connector.send_to_websocket("connection123", pollen_event)
 **Purpose:** Genesis Events create immutable records of system state changes and enable system evolution.
 
 **Characteristics:**
+
 - Immutable event records
 - System-wide broadcasting capability
 - Audit trail and system memory
@@ -335,7 +334,7 @@ class SystemEventGenerator(GenesisEvent):
     def __init__(self, name: str, event_type: str, broadcast_func: Callable):
         super().__init__(name, event_type, broadcast_func)
         self.event_history = []
-    
+
     async def generate_event(self, event_data: Dict[str, Any]) -> bool:
         """Generate and broadcast a genesis event."""
         try:
@@ -348,28 +347,28 @@ class SystemEventGenerator(GenesisEvent):
                 "source": self.name,
                 "sequence_number": len(self.event_history) + 1
             }
-            
+
             # Store in history (immutable)
             self.event_history.append(event)
-            
+
             # Broadcast to system
             success = await self.broadcast_func(event)
-            
+
             if success:
                 self.metrics["events_generated"] += 1
             else:
                 self.metrics["broadcast_failures"] += 1
-            
+
             return success
-            
+
         except Exception as e:
             self.metrics["generation_errors"] += 1
             return False
-    
+
     def get_event_history(self, limit: int = 100) -> List[Dict[str, Any]]:
         """Get recent event history."""
         return self.event_history[-limit:]
-    
+
     def get_status(self) -> Dict[str, Any]:
         """Get genesis event status."""
         return {
@@ -427,16 +426,19 @@ print(f"Recent events: {len(recent_events)}")
 ## ATCG Composition Patterns
 
 ### Pattern 1: Message Flow
+
 ```
 WebSocket Message → [C] Connector → [T] Transformation → [A] Aggregate → [G] Genesis Event
 ```
 
 ### Pattern 2: User Registration
+
 ```
 User Input → [C] API Connector → [T] Validation → [A] User Aggregate → [G] Registration Event
 ```
 
 ### Pattern 3: System Health Check
+
 ```
 Health Request → [C] HTTP Connector → [A] System Aggregate → [T] Health Calculation → [G] Health Event
 ```
@@ -444,25 +446,30 @@ Health Request → [C] HTTP Connector → [A] System Aggregate → [T] Health Ca
 ## Best Practices
 
 ### 1. Single Responsibility
+
 Each primitive should have one clear purpose:
+
 - **A**: State management only
-- **T**: Pure processing only  
+- **T**: Pure processing only
 - **C**: Communication only
 - **G**: Event generation only
 
 ### 2. Immutability
+
 - Aggregates protect their internal state
 - Transformations never modify input data
 - Genesis Events are immutable once created
 - Connectors don't store business state
 
 ### 3. Composability
+
 - Primitives can be combined in any order
 - Each primitive is independently testable
 - Clear interfaces between all components
 - No hidden dependencies
 
 ### 4. Observability
+
 - All primitives implement `get_status()`
 - Metrics collection is built-in
 - Error handling is standardized
@@ -481,14 +488,14 @@ async def test_message_transformation():
         name="TestProcessor",
         processor_func=process_chat_message
     )
-    
+
     input_data = {
         "text": "Hello world!",
         "sender_id": "test_user"
     }
-    
+
     result = await processor.process(input_data)
-    
+
     assert result["word_count"] == 2
     assert result["sentiment"] == "neutral"
     assert result["sender_id"] == "test_user"
@@ -499,10 +506,10 @@ def test_aggregate_invariants():
         name="TestChat",
         invariants=["non_empty_username"]
     )
-    
+
     # Valid user should succeed
     assert chat_system.add_user("user1", "Alice") == True
-    
+
     # Empty username should fail
     assert chat_system.add_user("user2", "") == False
     assert chat_system.add_user("user3", "   ") == False
@@ -511,22 +518,22 @@ def test_aggregate_invariants():
 async def test_connector_protocol_translation():
     """Test connector protocol translation."""
     mock_broadcast = AsyncMock(return_value=True)
-    
+
     connector = WebSocketToPollenConnector(
         name="TestConnector",
         input_protocol="websocket",
         output_protocol="pollen"
     )
-    
+
     # Mock WebSocket connection
     mock_websocket = AsyncMock()
-    
+
     # Test message handling
     await connector.handle_websocket_message(
         mock_websocket,
         '{"type": "message", "text": "test"}'
     )
-    
+
     # Verify message was queued
     assert not connector.message_queue.empty()
 ```
@@ -536,7 +543,7 @@ async def test_connector_protocol_translation():
 The ATCG primitives provide a robust foundation for building Living Applications. By following these patterns and principles, developers can create systems that are:
 
 - **Maintainable**: Clear separation of concerns
-- **Testable**: Independent, pure components  
+- **Testable**: Independent, pure components
 - **Observable**: Built-in introspection and metrics
 - **Scalable**: Composable and modular architecture
 - **Evolvable**: Immutable event history enables system evolution
