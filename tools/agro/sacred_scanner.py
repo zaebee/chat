@@ -22,6 +22,7 @@ from .orchestrator import AgroOrchestrator, SacredScanResult
 
 # Sacred imports for Hive integration
 try:
+    from hive.events import HiveEventBus
     from hive.config.sacred_constants import PHI, PHI_RECIPROCAL
     from hive.config.fibonacci_sequences import FIBONACCI_89, FIBONACCI_13
 
