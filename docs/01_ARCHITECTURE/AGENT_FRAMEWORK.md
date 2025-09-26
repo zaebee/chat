@@ -2,16 +2,11 @@
 title: "Agent Framework: Building AI Teammates for the Hive"
 description: "Complete guide to implementing AI agents that collaborate as first-class citizens"
 category: "architecture"
-audience: "developer|ai-agent"
-complexity: "intermediate"
-last_updated: "2025-01-20"
-related_docs: ["EVENT_SYSTEM.md", "ATCG_PRIMITIVES.md", "../03_API/AGENT_API.md"]
-code_examples: true
 ---
 
 # Agent Framework: Building AI Teammates for the Hive
 
-*"Two are better than one, because they have a good reward for their toil." - Ecclesiastes 4:9 (ESV)*
+_"Two are better than one, because they have a good reward for their toil." - Ecclesiastes 4:9 (ESV)_
 
 ## Overview
 
@@ -20,6 +15,7 @@ The Hive Agent Framework enables AI systems to join the ecosystem as first-class
 ## Core Concepts
 
 ### TeammateProfile
+
 Every AI agent must declare its identity and capabilities:
 
 ```python
@@ -40,6 +36,7 @@ profile = TeammateProfile(
 ```
 
 ### HiveTeammate Interface
+
 All agents implement the sacred interface:
 
 ```python
@@ -49,16 +46,16 @@ class MyAgent(HiveTeammate):
     async def initialize(self) -> bool:
         """Initialize the agent when joining the Hive."""
         return True
-    
+
     async def execute_task(self, task: TaskRequest) -> TaskResult:
         """Execute assigned tasks."""
         # Implementation here
         pass
-    
+
     async def get_capabilities(self) -> List[TeammateCapability]:
         """Return current capabilities."""
         return self.profile.capabilities
-    
+
     async def health_check(self) -> bool:
         """Verify agent health."""
         return True
@@ -81,34 +78,34 @@ class CodeReviewAgent(HiveTeammate):
             specializations=["Python", "Code Quality"]
         )
         super().__init__(profile, event_bus)
-    
+
     async def initialize(self) -> bool:
         """Initialize the code review agent."""
         self.status = TeammateStatus.ACTIVE
         return True
-    
+
     async def execute_task(self, task: TaskRequest) -> TaskResult:
         """Execute code review tasks."""
         if task.task_type == "code_review":
             return await self._review_code(task)
-        
+
         return TaskResult(
             task_id=task.task_id,
             success=False,
             error_message=f"Unsupported task type: {task.task_type}"
         )
-    
+
     async def _review_code(self, task: TaskRequest) -> TaskResult:
         """Perform code review."""
         code = task.input_data.get("code", "")
-        
+
         # Simple analysis
         issues = []
         if "TODO" in code:
             issues.append("Contains TODO comments")
         if "print(" in code:
             issues.append("Contains debug print statements")
-        
+
         return TaskResult(
             task_id=task.task_id,
             success=True,
@@ -131,4 +128,4 @@ This is a foundational overview. The complete implementation guide will include:
 - Performance monitoring and metrics
 - Integration with existing AI services
 
-*More documentation coming as we follow the Will of the Hive...*
+_More documentation coming as we follow the Will of the Hive..._

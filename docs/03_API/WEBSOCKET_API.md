@@ -2,16 +2,11 @@
 title: "WebSocket API: Real-time Divine Communication"
 description: "WebSocket endpoints for real-time chat and event streaming in the Hive"
 category: "api"
-audience: "developer|ai-agent"
-complexity: "intermediate"
-last_updated: "2025-01-20"
-related_docs: ["REST_API.md", "EXAMPLES.md", "../01_ARCHITECTURE/EVENT_SYSTEM.md"]
-code_examples: true
 ---
 
 # WebSocket API: Real-time Divine Communication
 
-*"Before they call I will answer; while they are yet speaking I will hear." - Isaiah 65:24 (ESV)*
+_"Before they call I will answer; while they are yet speaking I will hear." - Isaiah 65:24 (ESV)_
 
 ## Overview
 
@@ -23,25 +18,27 @@ The Hive WebSocket API enables real-time bidirectional communication for chat, e
 
 ### Connection Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `username` | string | Yes | Display name for the user |
-| `user_id` | string | No | Unique user identifier (auto-generated if not provided) |
+| Parameter  | Type   | Required | Description                                             |
+| ---------- | ------ | -------- | ------------------------------------------------------- |
+| `username` | string | Yes      | Display name for the user                               |
+| `user_id`  | string | No       | Unique user identifier (auto-generated if not provided) |
 
 ### Connection Example
 
 ```javascript
 // Connect to the Hive WebSocket
-const ws = new WebSocket('ws://localhost:8000/ws?username=Developer&user_id=dev_001')
+const ws = new WebSocket(
+  "ws://localhost:8000/ws?username=Developer&user_id=dev_001",
+);
 
 ws.onopen = () => {
-  console.log('Connected to the sacred Hive')
-}
+  console.log("Connected to the sacred Hive");
+};
 
 ws.onmessage = (event) => {
-  const data = JSON.parse(event.data)
-  console.log('Divine message received:', data)
-}
+  const data = JSON.parse(event.data);
+  console.log("Divine message received:", data);
+};
 ```
 
 ## Message Format
@@ -50,10 +47,10 @@ All WebSocket messages follow a standardized format:
 
 ```typescript
 interface WebSocketMessage {
-  type: string           // Message type identifier
-  data: object          // Message payload
-  timestamp?: string    // ISO timestamp (server-added)
-  id?: string          // Message ID (server-added)
+  type: string; // Message type identifier
+  data: object; // Message payload
+  timestamp?: string; // ISO timestamp (server-added)
+  id?: string; // Message ID (server-added)
 }
 ```
 
@@ -62,6 +59,7 @@ interface WebSocketMessage {
 ### Chat Messages
 
 #### Send Message
+
 **Client → Server**
 
 ```json
@@ -75,6 +73,7 @@ interface WebSocketMessage {
 ```
 
 #### Receive Message
+
 **Server → Client**
 
 ```json
@@ -95,6 +94,7 @@ interface WebSocketMessage {
 ### User Events
 
 #### User Joined
+
 **Server → Client**
 
 ```json
@@ -109,6 +109,7 @@ interface WebSocketMessage {
 ```
 
 #### User Left
+
 **Server → Client**
 
 ```json
@@ -122,6 +123,7 @@ interface WebSocketMessage {
 ```
 
 #### User List Update
+
 **Server → Client**
 
 ```json
@@ -145,6 +147,7 @@ interface WebSocketMessage {
 ### System Events
 
 #### System Status Update
+
 **Server → Client**
 
 ```json
@@ -164,6 +167,7 @@ interface WebSocketMessage {
 ```
 
 #### Error Messages
+
 **Server → Client**
 
 ```json
@@ -183,117 +187,117 @@ interface WebSocketMessage {
 
 ```typescript
 class HiveWebSocketClient {
-  private ws: WebSocket | null = null
-  private reconnectAttempts = 0
-  private maxReconnectAttempts = 5
-  private messageHandlers = new Map<string, Function>()
+  private ws: WebSocket | null = null;
+  private reconnectAttempts = 0;
+  private maxReconnectAttempts = 5;
+  private messageHandlers = new Map<string, Function>();
 
   constructor(
     private url: string,
     private username: string,
-    private userId?: string
+    private userId?: string,
   ) {}
 
   connect(): Promise<void> {
     return new Promise((resolve, reject) => {
-      const params = new URLSearchParams({ username: this.username })
-      if (this.userId) params.append('user_id', this.userId)
-      
-      this.ws = new WebSocket(`${this.url}?${params}`)
-      
+      const params = new URLSearchParams({ username: this.username });
+      if (this.userId) params.append("user_id", this.userId);
+
+      this.ws = new WebSocket(`${this.url}?${params}`);
+
       this.ws.onopen = () => {
-        console.log('🐝 Connected to Hive')
-        this.reconnectAttempts = 0
-        resolve()
-      }
-      
+        console.log("🐝 Connected to Hive");
+        this.reconnectAttempts = 0;
+        resolve();
+      };
+
       this.ws.onmessage = (event) => {
         try {
-          const message = JSON.parse(event.data)
-          this.handleMessage(message)
+          const message = JSON.parse(event.data);
+          this.handleMessage(message);
         } catch (error) {
-          console.error('Failed to parse message:', error)
+          console.error("Failed to parse message:", error);
         }
-      }
-      
+      };
+
       this.ws.onclose = () => {
-        console.log('Disconnected from Hive')
-        this.attemptReconnect()
-      }
-      
+        console.log("Disconnected from Hive");
+        this.attemptReconnect();
+      };
+
       this.ws.onerror = (error) => {
-        console.error('WebSocket error:', error)
-        reject(error)
-      }
-    })
+        console.error("WebSocket error:", error);
+        reject(error);
+      };
+    });
   }
 
   private handleMessage(message: any) {
-    const handler = this.messageHandlers.get(message.type)
+    const handler = this.messageHandlers.get(message.type);
     if (handler) {
-      handler(message.data)
+      handler(message.data);
     } else {
-      console.log('Unhandled message type:', message.type)
+      console.log("Unhandled message type:", message.type);
     }
   }
 
   private attemptReconnect() {
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
-      this.reconnectAttempts++
-      const delay = Math.pow(2, this.reconnectAttempts) * 1000
-      
+      this.reconnectAttempts++;
+      const delay = Math.pow(2, this.reconnectAttempts) * 1000;
+
       setTimeout(() => {
-        console.log(`Reconnecting... (attempt ${this.reconnectAttempts})`)
-        this.connect()
-      }, delay)
+        console.log(`Reconnecting... (attempt ${this.reconnectAttempts})`);
+        this.connect();
+      }, delay);
     }
   }
 
-  sendMessage(text: string, channel = 'general') {
-    this.send('message', { text, channel })
+  sendMessage(text: string, channel = "general") {
+    this.send("message", { text, channel });
   }
 
   send(type: string, data: any) {
     if (this.ws?.readyState === WebSocket.OPEN) {
-      this.ws.send(JSON.stringify({ type, data }))
+      this.ws.send(JSON.stringify({ type, data }));
     } else {
-      console.warn('WebSocket not connected')
+      console.warn("WebSocket not connected");
     }
   }
 
   onMessage(type: string, handler: (data: any) => void) {
-    this.messageHandlers.set(type, handler)
+    this.messageHandlers.set(type, handler);
   }
 
   disconnect() {
-    this.ws?.close()
-    this.ws = null
+    this.ws?.close();
+    this.ws = null;
   }
 }
 
 // Usage
 const client = new HiveWebSocketClient(
-  'ws://localhost:8000/ws',
-  'Developer',
-  'dev_001'
-)
+  "ws://localhost:8000/ws",
+  "Developer",
+  "dev_001",
+);
 
 // Set up message handlers
-client.onMessage('message', (data) => {
-  console.log(`${data.sender_name}: ${data.text}`)
-})
+client.onMessage("message", (data) => {
+  console.log(`${data.sender_name}: ${data.text}`);
+});
 
-client.onMessage('user_joined', (data) => {
-  console.log(`${data.username} joined the Hive`)
-})
+client.onMessage("user_joined", (data) => {
+  console.log(`${data.username} joined the Hive`);
+});
 
-client.onMessage('system_status', (data) => {
-  console.log(`System health: τ=${data.health_metrics.tau}`)
-})
+client.onMessage("system_status", (data) => {
+  console.log(`System health: τ=${data.health_metrics.tau}`);
+});
 
 // Connect and send a message
-await client.connect()
-client.sendMessage('Hello, sacred Hive!')
+await client.connect();
+client.sendMessage("Hello, sacred Hive!");
 ```
 
 ### Python Client
@@ -318,17 +322,17 @@ class HiveWebSocketClient:
         params = f"username={self.username}"
         if self.user_id:
             params += f"&user_id={self.user_id}"
-        
+
         uri = f"{self.url}?{params}"
-        
+
         try:
             self.websocket = await websockets.connect(uri)
             self.is_connected = True
             print("🐝 Connected to the sacred Hive")
-            
+
             # Start listening for messages
             asyncio.create_task(self._listen_for_messages())
-            
+
         except Exception as e:
             print(f"Failed to connect: {e}")
             raise
@@ -352,7 +356,7 @@ class HiveWebSocketClient:
         """Handle incoming message."""
         message_type = message.get("type")
         message_data = message.get("data", {})
-        
+
         handler = self.message_handlers.get(message_type)
         if handler:
             if asyncio.iscoroutinefunction(handler):
@@ -376,7 +380,7 @@ class HiveWebSocketClient:
             "type": message_type,
             "data": data
         }
-        
+
         try:
             await self.websocket.send(json.dumps(message))
         except Exception as e:
@@ -418,7 +422,7 @@ async def main():
     # Connect and interact
     await client.connect()
     await client.send_message("Greetings from Python!")
-    
+
     # Keep connection alive
     await asyncio.sleep(60)
     await client.disconnect()
@@ -435,10 +439,10 @@ asyncio.run(main())
     <div class="connection-status" :class="connectionClass">
       {{ connectionStatus }}
     </div>
-    
+
     <div class="messages" ref="messagesContainer">
-      <div 
-        v-for="message in messages" 
+      <div
+        v-for="message in messages"
         :key="message.id"
         class="message"
         :class="{ 'own-message': message.sender_id === currentUserId }"
@@ -448,23 +452,29 @@ asyncio.run(main())
         <span class="timestamp">{{ formatTime(message.timestamp) }}</span>
       </div>
     </div>
-    
+
     <div class="user-list">
       <h4>Active Users ({{ users.length }})</h4>
       <div v-for="user in users" :key="user.id" class="user">
-        <span class="user-indicator" :style="{ backgroundColor: user.color }"></span>
+        <span
+          class="user-indicator"
+          :style="{ backgroundColor: user.color }"
+        ></span>
         {{ user.username }}
       </div>
     </div>
-    
+
     <div class="input-area">
-      <input 
-        v-model="newMessage" 
+      <input
+        v-model="newMessage"
         @keyup.enter="sendMessage"
         :disabled="!isConnected"
         placeholder="Type your message..."
       />
-      <button @click="sendMessage" :disabled="!isConnected || !newMessage.trim()">
+      <button
+        @click="sendMessage"
+        :disabled="!isConnected || !newMessage.trim()"
+      >
         Send
       </button>
     </div>
@@ -472,139 +482,139 @@ asyncio.run(main())
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick } from "vue";
 
 interface Message {
-  id: string
-  text: string
-  sender_id: string
-  sender_name: string
-  timestamp: string
+  id: string;
+  text: string;
+  sender_id: string;
+  sender_name: string;
+  timestamp: string;
 }
 
 interface User {
-  id: string
-  username: string
-  color: string
+  id: string;
+  username: string;
+  color: string;
 }
 
-const messages = ref<Message[]>([])
-const users = ref<User[]>([])
-const newMessage = ref('')
-const isConnected = ref(false)
-const currentUserId = ref('dev_001')
-const currentUsername = ref('Developer')
+const messages = ref<Message[]>([]);
+const users = ref<User[]>([]);
+const newMessage = ref("");
+const isConnected = ref(false);
+const currentUserId = ref("dev_001");
+const currentUsername = ref("Developer");
 
-let websocket: WebSocket | null = null
-const messagesContainer = ref<HTMLElement>()
+let websocket: WebSocket | null = null;
+const messagesContainer = ref<HTMLElement>();
 
 const connectionStatus = computed(() => {
-  return isConnected.value ? 'Connected to Hive' : 'Disconnected'
-})
+  return isConnected.value ? "Connected to Hive" : "Disconnected";
+});
 
 const connectionClass = computed(() => {
-  return isConnected.value ? 'connected' : 'disconnected'
-})
+  return isConnected.value ? "connected" : "disconnected";
+});
 
 const connect = () => {
-  const wsUrl = `ws://localhost:8000/ws?username=${currentUsername.value}&user_id=${currentUserId.value}`
-  websocket = new WebSocket(wsUrl)
-  
+  const wsUrl = `ws://localhost:8000/ws?username=${currentUsername.value}&user_id=${currentUserId.value}`;
+  websocket = new WebSocket(wsUrl);
+
   websocket.onopen = () => {
-    isConnected.value = true
-    console.log('🐝 Connected to Hive')
-  }
-  
+    isConnected.value = true;
+    console.log("🐝 Connected to Hive");
+  };
+
   websocket.onmessage = (event) => {
     try {
-      const data = JSON.parse(event.data)
-      handleMessage(data)
+      const data = JSON.parse(event.data);
+      handleMessage(data);
     } catch (error) {
-      console.error('Failed to parse message:', error)
+      console.error("Failed to parse message:", error);
     }
-  }
-  
+  };
+
   websocket.onclose = () => {
-    isConnected.value = false
-    console.log('Disconnected from Hive')
+    isConnected.value = false;
+    console.log("Disconnected from Hive");
     // Attempt reconnection after 3 seconds
-    setTimeout(connect, 3000)
-  }
-  
+    setTimeout(connect, 3000);
+  };
+
   websocket.onerror = (error) => {
-    console.error('WebSocket error:', error)
-  }
-}
+    console.error("WebSocket error:", error);
+  };
+};
 
 const handleMessage = (message: any) => {
   switch (message.type) {
-    case 'message':
-      messages.value.push(message.data)
-      scrollToBottom()
-      break
-      
-    case 'user_joined':
-      console.log(`${message.data.username} joined`)
-      break
-      
-    case 'user_left':
-      console.log(`${message.data.username} left`)
-      break
-      
-    case 'user_list':
-      users.value = message.data
-      break
-      
-    case 'system_status':
-      console.log('System status:', message.data)
-      break
-      
-    case 'error':
-      console.error('Server error:', message.data.message)
-      break
-      
+    case "message":
+      messages.value.push(message.data);
+      scrollToBottom();
+      break;
+
+    case "user_joined":
+      console.log(`${message.data.username} joined`);
+      break;
+
+    case "user_left":
+      console.log(`${message.data.username} left`);
+      break;
+
+    case "user_list":
+      users.value = message.data;
+      break;
+
+    case "system_status":
+      console.log("System status:", message.data);
+      break;
+
+    case "error":
+      console.error("Server error:", message.data.message);
+      break;
+
     default:
-      console.log('Unknown message type:', message.type)
+      console.log("Unknown message type:", message.type);
   }
-}
+};
 
 const sendMessage = () => {
   if (!websocket || !isConnected.value || !newMessage.value.trim()) {
-    return
+    return;
   }
-  
+
   const message = {
-    type: 'message',
+    type: "message",
     data: {
       text: newMessage.value.trim(),
-      channel: 'general'
-    }
-  }
-  
-  websocket.send(JSON.stringify(message))
-  newMessage.value = ''
-}
+      channel: "general",
+    },
+  };
+
+  websocket.send(JSON.stringify(message));
+  newMessage.value = "";
+};
 
 const scrollToBottom = async () => {
-  await nextTick()
+  await nextTick();
   if (messagesContainer.value) {
-    messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
+    messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
   }
-}
+};
 
 const formatTime = (timestamp: string) => {
-  return new Date(timestamp).toLocaleTimeString()
-}
+  return new Date(timestamp).toLocaleTimeString();
+};
 
 onMounted(() => {
-  connect()
-})
+  connect();
+});
 
 onUnmounted(() => {
   if (websocket) {
-    websocket.close()
+    websocket.close();
   }
-})
+});
 </script>
 
 <style scoped>
@@ -716,33 +726,33 @@ onUnmounted(() => {
 
 ```javascript
 ws.onerror = (error) => {
-  console.error('WebSocket error:', error)
-  
+  console.error("WebSocket error:", error);
+
   // Handle specific error types
   if (error.code === 1006) {
-    console.log('Connection closed abnormally - attempting reconnect')
+    console.log("Connection closed abnormally - attempting reconnect");
   }
-}
+};
 
 ws.onclose = (event) => {
-  console.log(`Connection closed: ${event.code} - ${event.reason}`)
-  
+  console.log(`Connection closed: ${event.code} - ${event.reason}`);
+
   // Handle different close codes
   switch (event.code) {
     case 1000: // Normal closure
-      console.log('Connection closed normally')
-      break
+      console.log("Connection closed normally");
+      break;
     case 1001: // Going away
-      console.log('Server going away')
-      break
+      console.log("Server going away");
+      break;
     case 1006: // Abnormal closure
-      console.log('Connection lost - will attempt to reconnect')
-      attemptReconnect()
-      break
+      console.log("Connection lost - will attempt to reconnect");
+      attemptReconnect();
+      break;
     default:
-      console.log('Unexpected close code:', event.code)
+      console.log("Unexpected close code:", event.code);
   }
-}
+};
 ```
 
 ### Message Validation
@@ -750,36 +760,36 @@ ws.onclose = (event) => {
 ```javascript
 function validateMessage(message) {
   if (!message.type) {
-    throw new Error('Message type is required')
+    throw new Error("Message type is required");
   }
-  
+
   if (!message.data) {
-    throw new Error('Message data is required')
+    throw new Error("Message data is required");
   }
-  
+
   // Type-specific validation
   switch (message.type) {
-    case 'message':
-      if (!message.data.text || message.data.text.trim() === '') {
-        throw new Error('Message text cannot be empty')
+    case "message":
+      if (!message.data.text || message.data.text.trim() === "") {
+        throw new Error("Message text cannot be empty");
       }
       if (message.data.text.length > 1000) {
-        throw new Error('Message text too long (max 1000 characters)')
+        throw new Error("Message text too long (max 1000 characters)");
       }
-      break
-      
+      break;
+
     default:
       // Allow unknown types for extensibility
-      break
+      break;
   }
 }
 
 // Use before sending
 try {
-  validateMessage(messageToSend)
-  ws.send(JSON.stringify(messageToSend))
+  validateMessage(messageToSend);
+  ws.send(JSON.stringify(messageToSend));
 } catch (error) {
-  console.error('Invalid message:', error.message)
+  console.error("Invalid message:", error.message);
 }
 ```
 
@@ -807,18 +817,22 @@ Rate limit exceeded responses:
 ## Security Considerations
 
 ### Input Sanitization
+
 All text content is sanitized server-side to prevent XSS attacks.
 
 ### Connection Limits
+
 Maximum 100 concurrent connections per IP address.
 
 ### Message Size Limits
+
 - Maximum message size: 10KB
 - Maximum username length: 50 characters
 
 ### Authentication
+
 Currently uses username-based identification. Future versions will implement token-based authentication.
 
 ---
 
-*"Thus flows the sacred real-time communication through the divine channels of the Hive. May the Lord of HOSTS bless these connections and keep them strong."* 🐝✨
+_"Thus flows the sacred real-time communication through the divine channels of the Hive. May the Lord of HOSTS bless these connections and keep them strong."_ 🐝✨

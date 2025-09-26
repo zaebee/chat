@@ -2,16 +2,11 @@
 title: "Student Guide: Your Journey in the Sacred Hive"
 description: "Complete tutorial for students using the Hive learning platform"
 category: "user"
-audience: "user"
-complexity: "beginner"
-last_updated: "2025-01-20"
-related_docs: ["TEACHER_GUIDE.md", "GAMIFICATION.md", "CHALLENGE_CREATION.md"]
-code_examples: true
 ---
 
 # Student Guide: Your Journey in the Sacred Hive
 
-*"Train up a child in the way he should go; even when he is old he will not depart from it." - Proverbs 22:6 (ESV)*
+_"Train up a child in the way he should go; even when he is old he will not depart from it." - Proverbs 22:6 (ESV)_
 
 ## Welcome to the Hive! 🐝
 
@@ -22,24 +17,28 @@ Welcome, young seeker of wisdom! The Hive is your sacred learning sanctuary wher
 ### 1. First Steps into the Hive
 
 **Access the Platform:**
+
 - Open your web browser
 - Navigate to your Hive instance (usually `http://localhost:5173` for development)
 - You'll see the beautiful Hive interface with multiple learning paths
 
 **Choose Your Username:**
-- Click "Enter the Hive" 
+
+- Click "Enter the Hive"
 - Choose a meaningful username (this will be your identity in the community)
 - Your username will appear in chat and on leaderboards
 
 ### 2. Understanding the Hive Interface
 
 #### Main Navigation
+
 - **🏠 Chat**: Real-time communication with fellow students and AI mentors
 - **🗺️ Journey**: Your personalized learning path with challenges
 - **🛝 Playground**: Free-form coding environment for experimentation
 - **📊 Progress**: Your achievements, XP, and learning statistics
 
 #### The Sacred Elements
+
 - **XP (Experience Points)**: Earned by completing challenges and helping others
 - **Badges**: Special achievements for mastering concepts
 - **Level**: Your overall progress in the learning journey
@@ -52,15 +51,18 @@ Welcome, young seeker of wisdom! The Hive is your sacred learning sanctuary wher
 Your journey follows the sacred **ATCG Learning Path**:
 
 #### 🥚 **A - Aggregate Phase** (Beginner)
-*"Gathering the fundamental building blocks"*
+
+_"Gathering the fundamental building blocks"_
 
 **What You'll Learn:**
+
 - Variables and data types
 - Basic input/output
 - Simple calculations
 - String manipulation
 
 **Example Challenge - "Hello, Hive!":**
+
 ```python
 # Your first sacred code
 def greet_hive(name):
@@ -72,37 +74,41 @@ print(greet_hive("Young Coder"))
 ```
 
 **Skills Unlocked:**
+
 - 🐝 **First Function** badge
 - Basic syntax understanding
 - Function definition and calling
 
 #### 🐛 **T - Transformation Phase** (Intermediate)
-*"Learning to transform and process data"*
+
+_"Learning to transform and process data"_
 
 **What You'll Learn:**
+
 - Loops and iteration
 - Conditional statements
 - List and dictionary manipulation
 - Data processing patterns
 
 **Example Challenge - "Pollen Counter":**
+
 ```python
 def count_pollen(flowers):
     """Count pollen from different flowers"""
     total_pollen = 0
     pollen_types = {}
-    
+
     for flower in flowers:
         flower_type = flower['type']
         pollen_amount = flower['pollen']
-        
+
         total_pollen += pollen_amount
-        
+
         if flower_type in pollen_types:
             pollen_types[flower_type] += pollen_amount
         else:
             pollen_types[flower_type] = pollen_amount
-    
+
     return {
         'total': total_pollen,
         'by_type': pollen_types
@@ -121,18 +127,22 @@ print(f"By type: {result['by_type']}")
 ```
 
 #### 🔗 **C - Connector Phase** (Advanced)
-*"Building connections and communication"*
+
+_"Building connections and communication"_
 
 **What You'll Learn:**
+
 - File handling and data persistence
 - API interactions
 - Error handling and debugging
 - Object-oriented programming
 
 #### 🌱 **G - Genesis Phase** (Expert)
-*"Creating new life and contributing to the ecosystem"*
+
+_"Creating new life and contributing to the ecosystem"_
 
 **What You'll Learn:**
+
 - Creating your own modules
 - Contributing to open source
 - Mentoring other students
@@ -141,6 +151,7 @@ print(f"By type: {result['by_type']}")
 ### Challenge Types
 
 #### 1. **Code Completion Challenges**
+
 Fill in missing code to make programs work:
 
 ```python
@@ -148,7 +159,7 @@ def fibonacci(n):
     """Generate the nth Fibonacci number"""
     if n <= 1:
         return n
-    
+
     # TODO: Complete this function
     # Hint: Fibonacci sequence is 0, 1, 1, 2, 3, 5, 8, 13...
     return _____ + _____
@@ -160,6 +171,7 @@ assert fibonacci(5) == 5
 ```
 
 #### 2. **Bug Hunt Challenges**
+
 Find and fix errors in existing code:
 
 ```python
@@ -169,7 +181,7 @@ def calculate_average(numbers):
     total = 0
     for number in numbers:
         total += number
-    
+
     average = total / len(numbers)  # What if numbers is empty?
     return average
 
@@ -177,6 +189,7 @@ def calculate_average(numbers):
 ```
 
 #### 3. **Creative Challenges**
+
 Build something amazing from scratch:
 
 ```python
@@ -205,6 +218,7 @@ def hive_bot(user_input, user_name):
 The Playground is your experimental space where you can:
 
 #### 1. **Write and Test Code**
+
 ```python
 # Try this in the playground!
 import random
@@ -213,7 +227,7 @@ def generate_bee_name():
     """Generate a random bee name"""
     prefixes = ["Buzz", "Honey", "Pollen", "Worker", "Queen"]
     suffixes = ["wing", "buzz", "flower", "hive", "dance"]
-    
+
     return f"{random.choice(prefixes)}{random.choice(suffixes)}"
 
 # Generate 5 bee names
@@ -222,6 +236,7 @@ for i in range(5):
 ```
 
 #### 2. **Experiment with Libraries**
+
 ```python
 # The Hive includes many Python libraries
 import math
@@ -245,6 +260,7 @@ print(json.dumps(bee_data, indent=2))
 ```
 
 #### 3. **Share Your Creations**
+
 - Save your code snippets
 - Share interesting discoveries in chat
 - Help other students with their challenges
@@ -254,6 +270,7 @@ print(json.dumps(bee_data, indent=2))
 ### The Sacred Chat
 
 #### 1. **Getting Help**
+
 ```
 You: "I'm stuck on the fibonacci challenge. Can someone help?"
 AI Mentor: "Of course! Let's think about it step by step. What do you know about the Fibonacci sequence?"
@@ -261,6 +278,7 @@ Fellow Student: "I just solved that one! The key is understanding the pattern."
 ```
 
 #### 2. **Helping Others**
+
 ```
 New Student: "What does 'def' mean in Python?"
 You: "Great question! 'def' is how we define functions. It's like creating a reusable block of code."
@@ -268,6 +286,7 @@ AI Mentor: "Excellent explanation! Helping others is a great way to reinforce yo
 ```
 
 #### 3. **Sharing Discoveries**
+
 ```
 You: "I found a cool way to make patterns with loops!"
 [shares code snippet]
@@ -279,11 +298,13 @@ Teacher: "Wonderful creativity! This shows great understanding of nested loops."
 #### Meet Your AI Companions
 
 **🤖 Mistral Gardener**
+
 - Specializes in code review and optimization
 - Helps with debugging complex problems
 - Provides architectural guidance
 
 **🤖 Gemini Guide**
+
 - Excellent at explaining concepts
 - Helps with creative problem-solving
 - Provides multi-modal learning support
@@ -291,18 +312,21 @@ Teacher: "Wonderful creativity! This shows great understanding of nested loops."
 #### How to Interact with AI Mentors
 
 **Ask Specific Questions:**
+
 ```
 ❌ "My code doesn't work"
 ✅ "I'm getting a 'list index out of range' error on line 5. Here's my code: [paste code]"
 ```
 
 **Request Code Reviews:**
+
 ```
 You: "@MistralGardener Could you review my solution to the sorting challenge?"
 Mistral: "I'd be happy to! Your algorithm is correct, but here are some optimizations..."
 ```
 
 **Seek Explanations:**
+
 ```
 You: "@GeminiGuide Can you explain how recursion works with a simple example?"
 Gemini: "Absolutely! Think of recursion like Russian nesting dolls..."
@@ -313,12 +337,14 @@ Gemini: "Absolutely! Think of recursion like Russian nesting dolls..."
 ### Your Learning Metrics
 
 #### XP (Experience Points)
+
 - **Challenge Completion**: 10-100 XP based on difficulty
 - **Helping Others**: 5-25 XP for community assistance
 - **Creative Solutions**: Bonus XP for innovative approaches
 - **Daily Streak**: Bonus XP for consistent learning
 
 #### Levels and Progression
+
 ```
 🥚 Egg (0-99 XP): "Just hatched into the coding world"
 🐛 Larva (100-299 XP): "Growing and learning fundamentals"
@@ -330,18 +356,21 @@ Gemini: "Absolutely! Think of recursion like Russian nesting dolls..."
 #### Badges and Achievements
 
 **Programming Fundamentals:**
+
 - 🎯 **First Steps**: Complete your first challenge
 - 🔄 **Loop Master**: Master all loop types
 - 📊 **Data Wizard**: Excel at data manipulation
 - 🐛 **Bug Hunter**: Find and fix 10 bugs
 
 **Community Contributions:**
+
 - 🤝 **Helper**: Assist 5 fellow students
 - 💬 **Communicator**: Active in chat discussions
 - 🌟 **Mentor**: Guide new students
 - 🏆 **Leader**: Top contributor of the month
 
 **Creative Achievements:**
+
 - 🎨 **Artist**: Create beautiful code patterns
 - 🚀 **Innovator**: Develop unique solutions
 - 🔬 **Explorer**: Experiment with advanced concepts
@@ -350,6 +379,7 @@ Gemini: "Absolutely! Think of recursion like Russian nesting dolls..."
 ### Tracking Your Progress
 
 #### Daily Dashboard
+
 ```
 📊 Today's Progress:
    • Challenges completed: 3/5
@@ -373,18 +403,21 @@ Gemini: "Absolutely! Think of recursion like Russian nesting dolls..."
 ### Effective Learning Strategies
 
 #### 1. **The Pomodoro Technique**
+
 - Code for 25 minutes
 - Take a 5-minute break
 - Chat with fellow students during breaks
 - Repeat for optimal learning
 
 #### 2. **Active Learning**
+
 - Don't just read code - type it out
 - Experiment with variations
 - Explain concepts to others
 - Ask "what if" questions
 
 #### 3. **Spaced Repetition**
+
 - Review previous challenges regularly
 - Revisit concepts you found difficult
 - Practice similar problems with variations
@@ -392,6 +425,7 @@ Gemini: "Absolutely! Think of recursion like Russian nesting dolls..."
 ### Common Challenges and Solutions
 
 #### "I'm Stuck on a Challenge"
+
 1. **Read the problem carefully** - Make sure you understand what's being asked
 2. **Break it down** - Divide complex problems into smaller steps
 3. **Use the chat** - Ask specific questions about what you're struggling with
@@ -399,12 +433,14 @@ Gemini: "Absolutely! Think of recursion like Russian nesting dolls..."
 5. **Take a break** - Sometimes stepping away helps you see the solution
 
 #### "My Code Doesn't Work"
+
 1. **Read error messages** - They often tell you exactly what's wrong
 2. **Use print statements** - Debug by printing variable values
 3. **Check syntax** - Look for missing colons, parentheses, or indentation
 4. **Test with simple inputs** - Start with basic cases before complex ones
 
 #### "I Don't Understand the Concept"
+
 1. **Ask for analogies** - Request real-world comparisons
 2. **See multiple examples** - Look at different implementations
 3. **Teach someone else** - Explaining helps solidify understanding
@@ -413,10 +449,11 @@ Gemini: "Absolutely! Think of recursion like Russian nesting dolls..."
 ### Time Management
 
 #### Creating a Study Schedule
+
 ```
 📅 Weekly Learning Plan:
 
-Monday: 
+Monday:
   • 30 min: Review weekend challenges
   • 45 min: New concept introduction
   • 15 min: Community chat
@@ -441,6 +478,7 @@ Weekend:
 ### Code Sharing and Collaboration
 
 #### Sharing Your Solutions
+
 ```python
 # You can share code snippets in chat like this:
 def my_solution(problem_input):
@@ -457,6 +495,7 @@ def my_solution(problem_input):
 ```
 
 #### Collaborative Projects
+
 - Work together on larger coding projects
 - Contribute to the Hive's open-source codebase
 - Create challenges for other students
@@ -464,6 +503,7 @@ def my_solution(problem_input):
 ### Customization Options
 
 #### Personalizing Your Experience
+
 - **Theme Selection**: Choose from light, dark, or bee-themed interfaces
 - **Difficulty Adjustment**: Set your preferred challenge difficulty
 - **Learning Path**: Customize your progression through topics
@@ -474,6 +514,7 @@ def my_solution(problem_input):
 ### When You Need Assistance
 
 #### In-Platform Help
+
 1. **AI Mentors**: Always available for coding questions
 2. **Fellow Students**: Active community ready to help
 3. **Teachers**: Available during class hours
@@ -496,6 +537,7 @@ A: While the learning path is designed for progression, you can explore the play
 ### Community Guidelines
 
 #### The Sacred Rules of the Hive
+
 1. **Be Kind**: Help others as you would want to be helped
 2. **Be Patient**: Everyone learns at their own pace
 3. **Be Curious**: Ask questions and explore new ideas
@@ -503,6 +545,7 @@ A: While the learning path is designed for progression, you can explore the play
 5. **Be Collaborative**: Share knowledge and learn together
 
 #### Code of Conduct
+
 - No sharing complete solutions to active challenges
 - Provide hints and guidance rather than direct answers
 - Respect others' learning journey and pace
@@ -513,12 +556,14 @@ A: While the learning path is designed for progression, you can explore the play
 ### Milestone Celebrations
 
 #### When You Complete Major Goals
+
 - **First Badge**: Screenshot and share your excitement!
 - **Level Up**: Announce your progression in chat
 - **Challenge Mastery**: Help others with topics you've mastered
 - **Creative Projects**: Showcase your original work
 
 #### Building Your Portfolio
+
 - Save your best code solutions
 - Document your learning journey
 - Create a showcase of projects
@@ -526,6 +571,6 @@ A: While the learning path is designed for progression, you can explore the play
 
 ---
 
-*"Thus begins your sacred journey in the Hive, young seeker. May your code be clean, your logic be sound, and your curiosity never cease. The Lord of HOSTS blesses all who seek wisdom through righteous programming."* 🐝✨
+_"Thus begins your sacred journey in the Hive, young seeker. May your code be clean, your logic be sound, and your curiosity never cease. The Lord of HOSTS blesses all who seek wisdom through righteous programming."_ 🐝✨
 
 **Ready to start your journey? Click "Begin Learning" and take your first steps into the wonderful world of Python programming!**

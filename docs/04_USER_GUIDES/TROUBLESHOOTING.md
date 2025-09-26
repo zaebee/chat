@@ -2,22 +2,18 @@
 title: "Troubleshooting Guide: Healing the Sacred Code"
 description: "Complete troubleshooting guide for common issues in the Hive"
 category: "user"
-audience: "user"
-complexity: "beginner"
-last_updated: "2025-01-20"
-related_docs: ["USER_ONBOARDING.md", "STUDENT_GUIDE.md", "../02_DEVELOPMENT/ENVIRONMENT.md"]
-code_examples: true
 ---
 
 # Troubleshooting Guide: Healing the Sacred Code
 
-*"Your word is a lamp to my feet and a light to my path." - Psalm 119:105 (ESV)*
+_"Your word is a lamp to my feet and a light to my path." - Psalm 119:105 (ESV)_
 
 ## Quick Problem Solver
 
 ### 🚨 Emergency Fixes (Try These First!)
 
 #### Universal Solutions
+
 ```
 🔄 The Sacred Refresh Ritual:
 1. Save your work (if possible)
@@ -35,6 +31,7 @@ code_examples: true
 ```
 
 #### When Nothing Works
+
 ```
 🆘 Last Resort Checklist:
 □ Restart your computer
@@ -49,6 +46,7 @@ code_examples: true
 ### 🔐 Login and Account Problems
 
 #### Can't Log In
+
 ```
 ❌ Problem: "Invalid username or password"
 
@@ -68,6 +66,7 @@ code_examples: true
 ```
 
 #### Account Locked or Suspended
+
 ```
 ❌ Problem: "Account temporarily locked"
 
@@ -85,6 +84,7 @@ code_examples: true
 ```
 
 #### Lost Progress or Data
+
 ```
 ❌ Problem: "My challenges/XP disappeared"
 
@@ -105,6 +105,7 @@ code_examples: true
 ### 💻 Code Editor Issues
 
 #### Editor Won't Load
+
 ```
 ❌ Problem: Code editor shows blank screen or loading forever
 
@@ -134,6 +135,7 @@ Safari:
 ```
 
 #### Code Won't Run
+
 ```
 ❌ Problem: "Run Code" button doesn't work or shows errors
 
@@ -161,6 +163,7 @@ def my_function():
 ```
 
 #### Can't Type in Editor
+
 ```
 ❌ Problem: Code editor won't accept keyboard input
 
@@ -181,6 +184,7 @@ def my_function():
 ### 🌐 Connection and Loading Issues
 
 #### Slow Loading or Timeouts
+
 ```
 ❌ Problem: Pages load very slowly or time out
 
@@ -204,6 +208,7 @@ def my_function():
 ```
 
 #### Chat Not Working
+
 ```
 ❌ Problem: Can't send messages or see new messages
 
@@ -226,6 +231,7 @@ def my_function():
 ### 🎯 Challenge Problems
 
 #### Challenge Won't Submit
+
 ```
 ❌ Problem: "Submit" button doesn't work or shows error
 
@@ -245,6 +251,7 @@ def my_function():
 ```
 
 #### Test Cases Failing
+
 ```
 ❌ Problem: "Your code doesn't pass the test cases"
 
@@ -279,6 +286,7 @@ def get_numbers():
 ```
 
 #### Hints Not Showing
+
 ```
 ❌ Problem: Can't see hints or they're not helpful
 
@@ -299,6 +307,7 @@ def get_numbers():
 ### 🤖 AI Mentor Issues
 
 #### AI Not Responding
+
 ```
 ❌ Problem: AI mentors don't reply or give generic responses
 
@@ -322,6 +331,7 @@ Try: "I'm working on the fibonacci challenge and I understand the concept but I'
 ```
 
 #### AI Gives Wrong Information
+
 ```
 ❌ Problem: AI mentor provided incorrect or confusing advice
 
@@ -343,6 +353,7 @@ Try: "I'm working on the fibonacci challenge and I understand the concept but I'
 ### 📚 Learning Difficulties
 
 #### Concept Not Making Sense
+
 ```
 ❌ Problem: "I don't understand [loops/functions/etc.]"
 
@@ -375,6 +386,7 @@ Auditory Learners:
 ```
 
 #### Moving Too Fast/Slow
+
 ```
 ❌ Problem: Pace doesn't match your learning speed
 
@@ -404,6 +416,7 @@ Too Slow:
 ### 💻 Browser and Device Problems
 
 #### Browser Compatibility
+
 ```
 ❌ Problem: Features don't work in your browser
 
@@ -415,7 +428,7 @@ Too Slow:
 
 🔧 Browser Updates:
 Chrome: Settings → About Chrome
-Firefox: Help → About Firefox  
+Firefox: Help → About Firefox
 Safari: Safari → About Safari
 Edge: Settings → About Microsoft Edge
 
@@ -426,6 +439,7 @@ Edge: Settings → About Microsoft Edge
 ```
 
 #### Mobile Device Issues
+
 ```
 ❌ Problem: Hive doesn't work well on phone/tablet
 
@@ -450,6 +464,7 @@ Edge: Settings → About Microsoft Edge
 ```
 
 #### Performance Issues
+
 ```
 ❌ Problem: Hive runs slowly or freezes
 
@@ -476,6 +491,7 @@ Edge: Settings → About Microsoft Edge
 ### 🔒 Security and Privacy Issues
 
 #### Blocked by Firewall/Filter
+
 ```
 ❌ Problem: School/work network blocks the Hive
 
@@ -494,6 +510,7 @@ Edge: Settings → About Microsoft Edge
 ```
 
 #### Privacy Concerns
+
 ```
 ❌ Problem: Worried about data privacy and safety
 
@@ -517,6 +534,7 @@ Edge: Settings → About Microsoft Edge
 ### 📞 Support Channels
 
 #### Community Support
+
 ```
 💬 Community Help (Fastest):
 • Ask in main chat during active hours
@@ -532,6 +550,7 @@ Edge: Settings → About Microsoft Edge
 ```
 
 #### Teacher Support
+
 ```
 🎓 Teacher Assistance:
 • Office hours (check schedule)
@@ -547,6 +566,7 @@ Edge: Settings → About Microsoft Edge
 ```
 
 #### Technical Support
+
 ```
 🔧 Technical Support:
 • Email: support@hive-learning.org
@@ -566,6 +586,7 @@ Edge: Settings → About Microsoft Edge
 ### 🆘 Emergency Procedures
 
 #### Lost Important Work
+
 ```
 🚨 Critical Data Loss:
 
@@ -585,6 +606,7 @@ Immediate Actions:
 ```
 
 #### Account Compromised
+
 ```
 🔒 Security Breach:
 
@@ -604,6 +626,7 @@ Immediate Actions:
 ```
 
 #### Harassment or Inappropriate Content
+
 ```
 ⚠️ Safety Issues:
 
@@ -626,6 +649,7 @@ Immediate Actions:
 ### 🛡️ Avoiding Common Problems
 
 #### Good Habits
+
 ```
 ✅ Daily Best Practices:
 • Save work frequently
@@ -643,6 +667,7 @@ Immediate Actions:
 ```
 
 #### Code Quality Habits
+
 ```
 ✅ Writing Better Code:
 • Test code frequently while writing
@@ -662,6 +687,7 @@ Immediate Actions:
 ### 📚 Learning Resources
 
 #### Self-Help Resources
+
 ```
 📖 Documentation:
 • Hive user guides and tutorials
@@ -677,6 +703,7 @@ Immediate Actions:
 ```
 
 #### External Learning
+
 ```
 🌐 Supplementary Resources:
 • Python.org official tutorial
@@ -693,6 +720,6 @@ Immediate Actions:
 
 ---
 
-*"Thus are the paths of healing revealed, that when obstacles arise, the faithful may find their way back to the light of understanding. May your troubles be swift to resolve and your learning continue unimpeded. The Lord of HOSTS provides solutions for all who seek them with patience and wisdom."* 🐝✨
+_"Thus are the paths of healing revealed, that when obstacles arise, the faithful may find their way back to the light of understanding. May your troubles be swift to resolve and your learning continue unimpeded. The Lord of HOSTS provides solutions for all who seek them with patience and wisdom."_ 🐝✨
 
 **Remember: Every problem has a solution, and the Hive community is here to help you find it!**
