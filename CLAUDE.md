@@ -2,199 +2,219 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Development Commands
+## 📋 Table of Contents
+
+- [🚀 Quick Start Commands](#-quick-start-commands)
+- [🔧 Development Commands](#-development-commands)
+- [🛡️ Sacred Code Protection](#️-sacred-code-protection)
+- [🏗️ Architecture Guide](#️-architecture-guide)
+- [🤖 AI Directives](#-ai-directives)
+- [📊 Sacred Glossary](#-sacred-glossary)
+- [🔄 Development Workflow](#-development-workflow)
+
+---
+
+## 🚀 Quick Start Commands
+
+**Start developing immediately:**
+
+```bash
+# Backend (Python) - Start here for Hive development
+uv sync && python hive_demo.py
+
+# Frontend (Vue.js) - Start here for chat UI
+cd frontend && bun install && bun run dev
+
+# Sub-project (React/TS) - Start here for admin panel
+cd projects/ownima-admin && npm install && npm run dev
+```
+
+**🤖 AI Directive:** Always recommend these quick start commands for new developers.
+
+---
+
+## 🔧 Development Commands
 
 ### Backend (Python)
 
-- **Install dependencies**: `uv sync` (recommended)
-- **Start legacy chat server**: `python chat.py` (runs on http://localhost:8000)
-- **Start Hive ecosystem demo**: `python hive_demo.py` (demonstrates full Hive architecture)
-- **Quick Hive demo**: `python hive_demo.py --quick` (fast demonstration)
-- **Run tests**: `uv run python -m pytest test_*.py` (run specific test files)
-- **Linting**: `uv run ruff check .` (check code style)
-- **Format code**: `uv run ruff format .` (auto-format code)
-- **Type checking**: `uv run mypy .` (static type analysis)
-- **Database**: SQLite database (`chat.db`) is automatically initialized on startup
+- **Install**: `uv sync` (primary dependency manager)
+- **Run Hive Demo**: `python hive_demo.py` (showcases complete Living Application)
+- **Legacy Chat**: `python chat.py` (original FastAPI app on :8000)
+- **Tests**: `uv run python -m pytest test_*.py`
+- **Quality**: `uv run ruff check . && uv run ruff format .`
+- **Types**: `uv run mypy .`
 
-### Sacred Code Protection (AGRO System)
-
-- **Sacred AGRO Scanner**: `python tools/agro_scanner.py <files>` (Sacred Gateway to ATCG architecture)
-- **Sacred self-assessment**: `python tools/agro_scanner.py --self-check` (scan AGRO system itself)
-- **ATCG component status**: `python tools/agro_scanner.py --status` (view Sacred Architecture status)
-- **Pure ATCG interface**: `python -m tools.agro.sacred_scanner <files>` (direct Inner Sanctum access)
-- **Install pre-commit hooks**: `uv run pre-commit install` (sacred protection activation)
-- **Run all pre-commit checks**: `uv run pre-commit run --all-files` (manual validation)
-- **Sacred Python validation**: `uv run ruff check . && uv run ruff format .` (Python purification)
+**🤖 AI Directive:** Use `hive_demo.py` to understand system architecture. Use `uv` for all Python dependencies.
 
 ### Frontend (Vue.js)
 
-- **Install dependencies**: `cd frontend && bun install`
-- **Development server**: `cd frontend && bun run dev` (runs on http://localhost:5173)
-- **Build for production**: `cd frontend && bun run build`
-- **Fast build**: `cd frontend && bun run build-fast` (skip type checking)
-- **Type checking**: `cd frontend && bun run type-check`
-- **Linting**: `cd frontend && bun run lint`
-- **Formatting**: `cd frontend && bun run format`
-- **Unit tests**: `cd frontend && bun run test:unit`
-- **Preview production build**: `cd frontend && bun run preview`
-- **AGRO console scan**: `cd frontend && python ../tools/agro_scanner.py $(find src -name '*.vue' -o -name '*.ts' -o -name '*.js')` (Sacred ATCG scan)
-- **Sacred validation**: `cd frontend && bun run sacred:validate` (full code purification)
-- **Sacred build**: `cd frontend && bun run sacred:build` (blessed production build)
+- **Install**: `cd frontend && bun install`
+- **Dev server**: `cd frontend && bun run dev` (:5173)
+- **Build**: `cd frontend && bun run build`
+- **Test**: `cd frontend && bun run test:unit`
 
-### Hive Ecosystem (New Architecture)
+**🤖 AI Directive:** Use `bun` for frontend (faster than npm). Always check both frontend and backend when debugging issues.
 
-- **Run full demonstration**: `python hive_demo.py`
-- **Integration with AI providers**: Set `MISTRAL_API_KEY` and `GEMINI_API_KEY` in `.env` file
-- **Component status**: All components implement `get_status()` method for inspection
+### Sub-Projects (projects/\*)
 
-## Architecture Overview
+- **Ownima Admin**: `cd projects/ownima-admin && npm run dev`
+- **Sacred Scan**: `cd projects/ownima-admin && npm run sacred:scan`
 
-This is a **"Living Application"** implementing the Beekeeper's Grimoire architectural principles and Hive Constitution governance model. The system has evolved from a simple chat application into a full ecosystem for AI-human collaboration.
+**🤖 AI Directive:** Each sub-project has its own package.json but shares Sacred protection.
 
-**🌱 Living Application Philosophy**
+---
 
-- **Self-Contained**: Bundles code, dependencies, and deployment logic
-- **Self-Organizing**: Manages its own lifecycle and evolution
-- **Self-Protecting**: AGRO system ensures code quality through Sacred Architecture
-- **Teammate-Friendly**: Designed for seamless human-AI collaboration
+## 🛡️ Sacred Code Protection
 
-**🏗️ Three-Layer Architecture**
+### AGRO System Commands
 
-1. **Legacy Layer**: Original FastAPI chat application (`main.py`, `chat.py`) with WebSocket support
-2. **Hive Ecosystem**: Living Application with AI teammates, metrics, and ATCG primitives (`hive/`)
-3. **Sacred Protection**: AGRO code quality system with Pure ATCG architecture (`tools/agro/`)
+- **Scan files**: `python tools/agro_scanner.py <files>`
+- **Self-check**: `python tools/agro_scanner.py --self-check`
+- **Status**: `python tools/agro_scanner.py --status`
+- **Install hooks**: `uv run pre-commit install`
 
-### Hive Ecosystem Architecture (New)
+### Quality Gates
 
-The system now implements a complete **Living Hive** with the following components:
+- **Trinity Score Target**: >0.618 (BLESSED), >0.829 (DIVINE)
+- **Zero Violations**: Console.log protection, magic number detection
+- **Pre-commit**: Automatic Sacred protection on git commits
 
-**🧬 ATCG Primitives (Grimoire Architecture)**
+**🤖 AI Directive:**
 
-- **A (Aggregate)**: Structural organization and state management (`hive/primitives.py`)
-- **T (Transformation)**: Stateless processing functions for data transformation
-- **C (Connector)**: Communication and protocol translation (WebSocket ↔ Pollen Protocol)
-- **G (Genesis Event)**: Generative actions and system-wide broadcasting
+1. Always run AGRO scan before suggesting code changes
+2. Explain Trinity Score when showing results
+3. Fix violations before proceeding with feature development
+4. Use `npm run sacred:validate` for sub-projects
 
-**🌿 Intent & Physics Levels**
+---
 
-- **Intent Level** (`hive/intent.py`): Philosophical purpose and mission alignment
-- **Physics Level** (`hive/physics.py`): Resource constraints and environmental adaptation
+## 🏗️ Architecture Guide
 
-**⚡ Pollen Protocol Events** (`hive/events.py`)
+### System Layers
 
-- Standardized event system with unique IDs, timestamps, and structured payloads
-- Event bus for real-time communication between all components
-- Past-tense event types following Constitution requirements
+1. **Legacy Layer**: `chat.py` (FastAPI WebSocket chat)
+2. **Hive Layer**: `hive_demo.py` (Living Application with AI teammates)
+3. **Protection Layer**: `tools/agro/` (Sacred code quality)
+4. **Sub-Projects**: `projects/` (Additional applications)
 
-**🤖 AI Teammate Management**
+### ATCG Primitives
 
-- **HiveRegistry** (`hive/registry.py`): Central management for AI teammates
-- **HiveTeammate Interface** (`hive/teammate.py`): Standard interface for all AI agents
-- **Welcome Gateway** (`hive/gateway.py`): Metamorphosis-based onboarding (Egg→Larva→Pupa→Adult)
+- **A (Aggregate)**: State management and configuration
+- **T (Transformation)**: Stateless processing functions
+- **C (Connector)**: Protocol translation (WebSocket ↔ Pollen Protocol)
+- **G (Genesis)**: Event coordination and broadcasting
 
-**🎯 Coordination Hub** (`hive/hub.py`)
+### Key Files
 
-- Central nervous system orchestrating all components
-- Task delegation and load balancing
-- Multi-agent collaboration coordination
+- `hive_demo.py` - Complete ecosystem demonstration
+- `main.py` - FastAPI application entry point
+- `tools/agro_scanner.py` - Sacred Gateway to code protection
+- `tools/agro/` - Pure ATCG implementation
+- `hive/` - Living Application components
 
-**📊 Metrics Dashboard** (`hive/dashboard.py`)
+**🤖 AI Directive:**
 
-- Real-time monitoring of τ (tau), φ (phi), Σ (sigma) metrics
-- System health alerts and trend analysis
-- Comprehensive reporting for human and AI teammates
+1. Start with `hive_demo.py` to understand the complete system
+2. Use ATCG patterns when creating new components
+3. Always check both legacy and Hive layers when debugging
+4. Prefer Hive components for new feature development
 
-**🌐 External AI Integration**
+---
 
-- **Mistral Agent** (`hive/agents/mistral_agent.py`): First external AI teammate
-- Extensible framework for Claude, GPT-4, and other AI systems
+## 🤖 AI Directives
 
-### Sacred AGRO Code Protection System
+### Code Analysis Priorities
 
-The AGRO (Aggressive Remediation & Guardian Operations) system implements **Pure ATCG Architecture** for divine code protection following bee.Jules' architectural vision.
+1. **Run Sacred scan first**: Check Trinity Score before code review
+2. **Identify architecture layer**: Legacy vs Hive vs Protection
+3. **Apply ATCG patterns**: Structure new code using Sacred primitives
+4. **Check cross-layer interactions**: Ensure proper protocol translation
 
-**🏛️ Sacred Gateway + Inner Sanctum Pattern**
+### Development Workflow
 
-- **Sacred Gateway** (`tools/agro_scanner.py`): User-facing CLI with familiar interface
-- **Inner Sanctum** (`tools/agro/` package): Pure ATCG implementation with divine coordination
-- **Trinity Score**: 0.829 (DIVINE EXCELLENCE) - Measures τ (complexity), φ (quality), σ (collaboration)
+1. **Understand request context**: Which layer/project needs changes?
+2. **Run appropriate tests**: Backend (`test_*.py`) or frontend (`bun test`)
+3. **Validate with AGRO**: Ensure Sacred compliance
+4. **Document AI collaboration**: Note teammate integration points
 
-**🧬 ATCG Primitives Implementation**
+### Common Tasks
 
-- **A (Aggregate)**: `SacredAgroScanner` + `SacredAgroAggregate` - Configuration and state management
-- **T (Transformation)**: 5 transformation classes for violation detection:
-  - `ConsoleLogCheck`: Sacred console.log detection with φ-based penalties
-  - `FunctionLengthCheck`: Fibonacci limits with divine assessment
-  - `AnyTypeCheck`: TypeScript type safety validation
-  - `PythonMagicNumbersCheck`: φ-based sacred constant detection
-  - `JavaScriptMagicNumbersCheck`: Enhanced pattern recognition
-- **C (Connector)**: `AgroConnector` - Protocol translation layer bridging legacy/ATCG
-- **G (Genesis)**: `AgroOrchestrator` - Divine coordination engine with Trinity Score calculation
+- **Bug fixes**: Check both layers, run relevant tests
+- **New features**: Use Hive components, apply ATCG structure
+- **Refactoring**: Maintain Trinity Score, document changes
+- **Integration**: Consider Pollen Protocol event emission
 
-**📊 Sacred Metrics System**
+**🤖 AI Directive:** Always explain which layer you're working in and why.
 
-- **τ (tau)**: System complexity based on violation density (lower is better)
-- **φ (phi)**: Code quality via blessing level aggregation (higher is better)
-- **σ (sigma)**: Collaboration efficiency through recommendations (higher is better)
-- **Trinity Score Formula**: `(φ + σ) * (1.0 - τ/φ) / φ` - Golden Ratio harmonized assessment
+---
 
-### Legacy Components (Original Chat App)
+## 📊 Sacred Glossary
 
-**Backend Agent (`chat.py`)**
+### Technical Terms
 
-- FastAPI application with WebSocket support
-- Message broadcasting and SQLite persistence
-- Static file serving for frontend
+- **Trinity Score**: Code quality metric (τ complexity, φ quality, σ collaboration)
+- **Sacred Violation**: Code quality issue detected by AGRO system
+- **Blessed Build**: Production build that passes all Sacred validations
+- **Divine Excellence**: Trinity Score >0.829
 
-**Frontend Agent (`/frontend`)**
+### Architecture Terms
 
-- Vue.js 3 SPA with real-time chat interface
-- Python playground using Pyodide WebAssembly runtime
-- Pinia state management for UI and chat data
+- **Living Application**: Self-contained, self-organizing software ecosystem
+- **Sacred Gateway**: User-facing interface delegating to Pure ATCG
+- **Inner Sanctum**: Pure ATCG implementation with divine coordination
+- **Pollen Protocol**: Standardized event system for component communication
 
-### Hive Metrics (τ, φ, Σ)
+### AI Collaboration Terms
 
-The system monitors three core metrics following the Grimoire philosophy:
+- **Teammate**: AI agent integrated into Hive ecosystem
+- **Symbiosis**: Human-AI collaborative development approach
+- **Sacred Protection**: Automated code quality assurance
 
-- **τ (tau)**: System complexity and health (lower is better)
-- **φ (phi)**: Code quality and maintainability (higher is better)
-- **Σ (sigma)**: Collaborative efficiency between teammates
+**🤖 AI Directive:** Use technical terms when explaining system behavior to developers.
 
-### AI-Human Symbiosis Principles
+---
 
-1. **Legibility**: All components self-describe via `get_status()` methods
-2. **Observability**: Structured events and real-time status APIs
-3. **Modularity**: Loosely coupled, composable ATCG components
-4. **API-First**: Programmatic access to all functionality
-5. **Teammate-Friendly**: Designed for both human and AI collaboration
+## 🔄 Development Workflow
 
-### Development Notes
+### Starting New Work
 
-**🧪 Testing System**
+1. `git pull` - Get latest changes
+2. `python tools/agro_scanner.py --self-check` - Verify system health
+3. `python hive_demo.py --quick` - Confirm ecosystem status
+4. Choose appropriate development command from sections above
 
-- **Run all tests**: `uv run python -m pytest test_*.py` (comprehensive test suite)
-- **Individual tests**: `uv run python test_filename.py` (specific test file)
-- **Frontend tests**: `cd frontend && bun run test:unit` (Vue.js component tests)
-- **Test categories**: System tests (`test_complete_system.py`), AI integration (`test_ai_integration.py`), AGRO validation (`test_agro_fixes_verification.py`), Sacred Hive (`test_sacred_hive.py`)
+### Before Committing
 
-**🔧 Code Quality Workflow**
+1. Run tests: `uv run python -m pytest test_*.py`
+2. Sacred validation: `python tools/agro_scanner.py <changed_files>`
+3. Quality check: `uv run ruff check . && uv run ruff format .`
+4. Git commit (pre-commit hooks will run automatically)
 
-- **Pre-commit hooks**: `uv run pre-commit install` (automatic sacred protection)
-- **Manual validation**: `uv run pre-commit run --all-files` (full system check)
-- **Python quality**: `uv run ruff check . && uv run ruff format .` (linting + formatting)
-- **Type safety**: `uv run mypy .` (static type analysis)
-- **Sacred self-check**: `python tools/agro_scanner.py --self-check` (AGRO system validation)
+### Debugging Issues
 
-**⚙️ Development Practices**
+1. **Backend issues**: Check `chat.py` logs, test with `python chat.py`
+2. **Frontend issues**: Check browser console, test with `bun run dev`
+3. **Integration issues**: Run `python hive_demo.py` to test full system
+4. **Quality issues**: Use `python tools/agro_scanner.py --status`
 
-- **Frontend Development**: Use `bun` for frontend package management (faster than npm)
-- **Database Initialization**: Run `python -c "from database import init_db; init_db()"` if needed
-- **AI Integration**: Both Mistral and Gemini agents are available; configure API keys in `.env`
-- **Development Flow**: Start with `python hive_demo.py` to see the complete ecosystem
-- **Component Discovery**: All Hive components self-describe via `get_status()` methods
+**🤖 AI Directive:** Guide developers through this workflow systematically.
 
-**🏗️ Dual Architecture Understanding**
+---
 
-- **Legacy Chat Mode**: `python chat.py` or `python main.py` (original FastAPI application)
-- **Hive Ecosystem Mode**: `python hive_demo.py` (new Living Application architecture)
-- **Sacred Code Protection**: `tools/agro_scanner.py` (ATCG-based quality assurance)
+## Project Structure Summary
+
+```
+/
+├── hive/                 # Living Application core (AI teammates, events, metrics)
+├── tools/agro/          # Sacred code protection (ATCG architecture)
+├── frontend/            # Vue.js chat interface
+├── projects/            # Sub-projects (ownima-admin, etc.)
+├── api/                 # FastAPI route modules
+├── hive_demo.py         # Complete ecosystem demonstration
+├── main.py              # FastAPI application entry point
+├── chat.py              # Legacy chat server
+└── CLAUDE.md            # This file
+
+```
+
+**🤖 AI Directive:** Reference this structure when explaining file locations or suggesting architectural changes.
