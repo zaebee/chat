@@ -2,16 +2,11 @@
 title: "User Onboarding: Welcome to the Sacred Hive"
 description: "Complete onboarding guide for new users entering the Hive ecosystem"
 category: "user"
-audience: "user"
-complexity: "beginner"
-last_updated: "2025-01-20"
-related_docs: ["STUDENT_GUIDE.md", "TEACHER_GUIDE.md", "GAMIFICATION.md"]
-code_examples: true
 ---
 
 # User Onboarding: Welcome to the Sacred Hive
 
-*"The stranger who dwells among you shall be to you as one born among you, and you shall love him as yourself." - Leviticus 19:34 (NKJV)*
+_"The stranger who dwells among you shall be to you as one born among you, and you shall love him as yourself." - Leviticus 19:34 (NKJV)_
 
 ## Welcome, New Seeker! 🐝
 
@@ -20,18 +15,19 @@ Congratulations on taking your first step into the Hive - a sacred learning ecos
 ## Your First 5 Minutes
 
 ### Step 1: Choose Your Identity
+
 When you first enter the Hive, you'll be asked to create your identity:
 
 ```
 🐝 Welcome to the Hive!
 
 Choose your username:
-[________________] 
+[________________]
 (This will be your identity in the community)
 
 Select your role:
 ○ Student - I'm here to learn programming
-○ Teacher - I'm here to guide students  
+○ Teacher - I'm here to guide students
 ○ Explorer - I'm here to discover what the Hive offers
 
 What brings you to the Hive?
@@ -42,13 +38,15 @@ What brings you to the Hive?
 ```
 
 **Tips for choosing a username:**
+
 - Make it memorable and appropriate
 - Consider how others will address you
 - You can change it later if needed
 - Avoid personal information
 
 ### Step 2: Take the Placement Assessment
-*"Know thyself, that the Hive may guide thee wisely"*
+
+_"Know thyself, that the Hive may guide thee wisely"_
 
 The Hive will offer a brief, optional assessment to understand your current level:
 
@@ -56,15 +54,15 @@ The Hive will offer a brief, optional assessment to understand your current leve
 # Example placement question
 def welcome_assessment():
     """
-    Don't worry - this isn't graded! We just want to help 
+    Don't worry - this isn't graded! We just want to help
     you start at the right level.
     """
-    
+
     # Question 1: What does this code do?
     name = "Alice"
     greeting = f"Hello, {name}!"
     print(greeting)
-    
+
     # A) Prints "Hello, Alice!"
     # B) Creates an error
     # C) Prints "Hello, name!"
@@ -72,12 +70,14 @@ def welcome_assessment():
 ```
 
 **Remember:**
+
 - There are no wrong answers
 - "I don't know" is perfectly fine
 - This helps us recommend the best starting point
 - You can always adjust your path later
 
 ### Step 3: Meet Your AI Mentors
+
 You'll be introduced to your AI companions:
 
 ```
@@ -86,8 +86,8 @@ You'll be introduced to your AI companions:
 🌱 Mistral Gardener
    "I help with code review and architecture"
    Specialties: Debugging, optimization, best practices
-   
-🌟 Gemini Guide  
+
+🌟 Gemini Guide
    "I explain concepts and inspire creativity"
    Specialties: Learning support, creative projects, explanations
 
@@ -100,6 +100,7 @@ Type: "Hello Mistral!" or "Hi Gemini!" to start a conversation
 ### Exploring the Hive Interface
 
 #### 🏠 **Chat Tab - The Community Heart**
+
 ```
 💬 Live Community Chat
 
@@ -118,6 +119,7 @@ Type your message: [________________] [Send]
 ```
 
 #### 🗺️ **Journey Tab - Your Learning Path**
+
 ```
 🌟 Your Learning Journey
 
@@ -132,7 +134,7 @@ Streak: 0 days
 │  ├─ 🔤 Understanding variables and text
 │  └─ 🧮 Basic calculations and numbers
 │
-├─ 🔄 Learning to Repeat (0/4 completed)  
+├─ 🔄 Learning to Repeat (0/4 completed)
 │  ├─ 🔁 Your first loop
 │  ├─ 📝 Processing lists of data
 │  ├─ 🎯 Counting and accumulating
@@ -147,12 +149,13 @@ Streak: 0 days
 ```
 
 #### 🛝 **Playground Tab - Experimentation Space**
+
 ```
 🔬 Code Playground
 
 Welcome to your coding laboratory! Here you can:
 • Experiment with Python code safely
-• Test ideas before submitting challenges  
+• Test ideas before submitting challenges
 • Build creative projects
 • Share discoveries with the community
 
@@ -178,7 +181,7 @@ Try this example:
 """
 🌟 Challenge: Hello, Hive!
 
-Welcome to your first programming challenge! 
+Welcome to your first programming challenge!
 Don't worry - we'll guide you through every step.
 
 Your mission: Create a program that introduces you to the Hive community.
@@ -192,22 +195,22 @@ What you'll learn:
 def introduce_yourself():
     """
     Create a friendly introduction message.
-    
+
     Fill in the blanks below to complete your introduction!
     """
-    
+
     # Step 1: Store your name in a variable
     my_name = "____"  # Replace ____ with your name in quotes
-    
+
     # Step 2: Store your favorite thing about learning
     favorite_thing = "____"  # What excites you about programming?
-    
+
     # Step 3: Create your introduction message
     introduction = f"Hello, Hive! I'm {my_name} and I love {favorite_thing}!"
-    
+
     # Step 4: Display your message
     print(introduction)
-    
+
     # Bonus: Add another line about your goals
     print("I'm excited to learn programming with this amazing community! 🐝")
 
@@ -216,11 +219,13 @@ introduce_yourself()
 ```
 
 **Guided Help Available:**
+
 - 💡 **Hint 1**: Replace the `____` with text in quotes, like `"Alice"`
 - 💡 **Hint 2**: Try something like `"solving puzzles"` or `"creating things"`
 - 💡 **Hint 3**: Click "Run Code" to see your introduction!
 
 **Expected Output:**
+
 ```
 Hello, Hive! I'm Alice and I love solving puzzles!
 I'm excited to learn programming with this amazing community! 🐝
@@ -238,16 +243,16 @@ You've completed your first challenge!
 🏆 Achievements Unlocked:
    ✨ "First Steps" badge
    🐝 "Hive Member" badge
-   
+
 📈 Progress Update:
    +25 XP earned!
    Level progress: 25/100 XP
-   
+
 🎯 What's Next:
    • Try the "Variables and Values" challenge
    • Explore the Code Playground
    • Say hello in the community chat
-   
+
 💬 Share your success:
    "I just completed my first coding challenge in the Hive! 🐝"
    [Share to Chat] [Skip]
@@ -258,11 +263,12 @@ You've completed your first challenge!
 ### Building Learning Habits
 
 #### Morning Routine (5-10 minutes)
+
 ```
 🌅 Start Your Day in the Hive:
 
 1. 📱 Check in and maintain your streak
-2. 💬 Read community updates and messages  
+2. 💬 Read community updates and messages
 3. 🎯 Review your daily learning goal
 4. 🤖 Ask AI mentors about yesterday's concepts
 
@@ -274,6 +280,7 @@ Daily Goal Suggestions:
 ```
 
 #### Learning Session Structure
+
 ```
 📚 Effective Learning Sessions (20-45 minutes):
 
@@ -294,6 +301,7 @@ Daily Goal Suggestions:
 ```
 
 #### Evening Reflection
+
 ```
 🌙 End-of-Day Reflection:
 
@@ -312,6 +320,7 @@ Daily Goal Suggestions:
 ### Understanding the Community Culture
 
 #### The Sacred Rules of the Hive
+
 ```
 🐝 Community Guidelines:
 
@@ -337,11 +346,12 @@ Daily Goal Suggestions:
 ```
 
 #### How to Ask for Help
+
 ```
 ❓ Effective Help-Seeking:
 
 ✅ Good Example:
-"I'm working on the loop challenge and getting confused about the range() function. 
+"I'm working on the loop challenge and getting confused about the range() function.
 Here's my code: [paste code]
 The error says 'TypeError' on line 3. Can someone help me understand what's wrong?"
 
@@ -356,15 +366,16 @@ The error says 'TypeError' on line 3. Can someone help me understand what's wron
 ```
 
 #### How to Give Help
+
 ```
 🤝 Helpful Response Patterns:
 
 ✅ Encouraging Approach:
-"Great question! I had the same confusion. The range() function works like this... 
+"Great question! I had the same confusion. The range() function works like this...
 [explanation]. Try changing line 3 to... and see if that helps!"
 
 ✅ Guiding Questions:
-"What do you think range(5) produces? Try printing it to see! 
+"What do you think range(5) produces? Try printing it to see!
 That might help you understand the error."
 
 ❌ Avoid:
@@ -378,6 +389,7 @@ That might help you understand the error."
 ### Week 1 Milestones
 
 #### Day 1-2: Foundation Building
+
 ```
 🎯 Goals:
    ✅ Complete account setup and introduction
@@ -393,6 +405,7 @@ That might help you understand the error."
 ```
 
 #### Day 3-4: Skill Development
+
 ```
 🎯 Goals:
    ✅ Complete 5 more challenges
@@ -408,6 +421,7 @@ That might help you understand the error."
 ```
 
 #### Day 5-7: Community Integration
+
 ```
 🎯 Goals:
    ✅ Participate in group discussion
@@ -425,6 +439,7 @@ That might help you understand the error."
 ### Common First Week Challenges
 
 #### "I'm Overwhelmed"
+
 ```
 🌊 Feeling Overwhelmed?
 
@@ -447,6 +462,7 @@ This is completely normal! Here's how to cope:
 ```
 
 #### "I Don't Understand Anything"
+
 ```
 🤔 Feeling Lost?
 
@@ -469,6 +485,7 @@ Programming concepts take time to click:
 ```
 
 #### "I'm Moving Too Slowly"
+
 ```
 🐌 Worried About Pace?
 
@@ -495,11 +512,12 @@ Everyone learns at their own speed:
 ### Learning Preferences
 
 #### Visual Learners
+
 ```
 🎨 Visual Learning Features:
 
 • 📊 Flowchart challenges
-• 🎯 Diagram-based explanations  
+• 🎯 Diagram-based explanations
 • 🌈 Color-coded syntax highlighting
 • 📈 Visual progress tracking
 
@@ -511,6 +529,7 @@ Recommended Activities:
 ```
 
 #### Kinesthetic Learners
+
 ```
 🏃 Hands-On Learning Features:
 
@@ -527,6 +546,7 @@ Recommended Activities:
 ```
 
 #### Social Learners
+
 ```
 🤝 Collaborative Learning Features:
 
@@ -545,6 +565,7 @@ Recommended Activities:
 ### Accessibility Options
 
 #### Screen Reader Support
+
 ```
 ♿ Accessibility Features:
 
@@ -561,6 +582,7 @@ Setup Instructions:
 ```
 
 #### Visual Adjustments
+
 ```
 👁️ Visual Customization:
 
@@ -578,6 +600,7 @@ Settings → Accessibility → Visual Preferences
 ### When You Need Assistance
 
 #### Technical Issues
+
 ```
 🔧 Technical Support:
 
@@ -595,6 +618,7 @@ Contact Support:
 ```
 
 #### Learning Support
+
 ```
 📚 Learning Assistance:
 
@@ -612,6 +636,7 @@ How to Get Help:
 ```
 
 #### Emotional Support
+
 ```
 💝 Wellness and Motivation:
 
@@ -633,25 +658,26 @@ Resources:
 ### New Student Testimonials
 
 ```
-💬 "I was terrified of programming, but the Hive made it feel like a game. 
-The AI mentors are so patient, and the community is incredibly supportive. 
-After just two weeks, I built my first real program!" 
+💬 "I was terrified of programming, but the Hive made it feel like a game.
+The AI mentors are so patient, and the community is incredibly supportive.
+After just two weeks, I built my first real program!"
 - Sarah, Age 16
 
-💬 "As an adult learner returning to education, I was worried about keeping up. 
-The self-paced nature and helpful community made all the difference. 
-I'm now helping other students and loving every minute!" 
+💬 "As an adult learner returning to education, I was worried about keeping up.
+The self-paced nature and helpful community made all the difference.
+I'm now helping other students and loving every minute!"
 - Michael, Age 34
 
-💬 "The gamification kept me motivated when concepts got tough. 
-Earning badges and seeing my progress visualized made learning addictive 
-in the best way possible." 
+💬 "The gamification kept me motivated when concepts got tough.
+Earning badges and seeing my progress visualized made learning addictive
+in the best way possible."
 - Alex, Age 14
 ```
 
 ### Typical Learning Journeys
 
 #### The Steady Climber
+
 ```
 📈 Emma's Journey:
 
@@ -669,6 +695,7 @@ Key Success Factors:
 ```
 
 #### The Creative Explorer
+
 ```
 🎨 Jordan's Journey:
 
@@ -687,6 +714,6 @@ Key Success Factors:
 
 ---
 
-*"Thus begins your sacred journey in the Hive, new seeker. May your path be filled with discovery, your questions met with wisdom, and your growth celebrated by the community. The Lord of HOSTS welcomes all who come with open hearts and curious minds."* 🐝✨
+_"Thus begins your sacred journey in the Hive, new seeker. May your path be filled with discovery, your questions met with wisdom, and your growth celebrated by the community. The Lord of HOSTS welcomes all who come with open hearts and curious minds."_ 🐝✨
 
 **Ready to start your journey? Click "Begin Learning" and take your first steps into the wonderful world of programming!**
