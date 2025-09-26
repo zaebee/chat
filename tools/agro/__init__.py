@@ -49,7 +49,7 @@ def get_atcg_status():
     Get status of all ATCG components for divine observability.
     """
     try:
-        from .events import HIVE_INTEGRATION
+        from .connector import HIVE_INTEGRATION
 
         return {
             "package": "tools.agro",

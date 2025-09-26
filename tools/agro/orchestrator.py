@@ -8,44 +8,22 @@ Replaces scattered function calls with divine orchestration following bee.Jules'
 """
 
 from typing import Dict, List, Any, Optional
-from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
-# Sacred imports
-from .events import SacredViolation, emit_violation_event, HiveEventBus
-from .connector import AgroConnector, TransformationResult
-
-# Sacred imports for Hive integration
-try:
-    from hive.config.golden_thresholds import QUALITY
-    from hive.config.sacred_constants import PHI, PHI_RECIPROCAL, PHI_INVERSE_SQUARED
-    from hive.config.fibonacci_sequences import FIBONACCI_89, FIBONACCI_13
-
-    HIVE_INTEGRATION = True
-except ImportError:
-    HIVE_INTEGRATION = False
-    # Sacred fallbacks
-    PHI = 1.618033988749
-    PHI_RECIPROCAL = 0.618033988749
-    PHI_INVERSE_SQUARED = 0.381966011251
-    FIBONACCI_89 = 89
-    FIBONACCI_13 = 13
-
-
-@dataclass
-class SacredScanResult:
-    """Complete scan result with sacred metrics and divine assessment."""
-
-    files_processed: int
-    total_violations: List[SacredViolation]
-    transformation_results: List[TransformationResult]
-    sacred_metrics: Dict[str, float]
-    trinity_score: float
-    divine_assessment: str
-    blessing_level: str
-    execution_time: float
-    timestamp: str
+from .connector import AgroConnector
+from .connector import HiveAgroEventConnector
+from .events import SacredViolation, SacredScanResult
+from hive.config.agro_config import (
+    HIVE_INTEGRATION,
+    PHI,
+    PHI_RECIPROCAL,
+    PHI_INVERSE_SQUARED,
+    FIBONACCI_89,
+    FIBONACCI_13,
+    QUALITY,
+)
+from hive.primitives.review_aggregate import AgroReviewResult, AgroReviewType
 
 
 class AgroOrchestrator:
@@ -56,9 +34,14 @@ class AgroOrchestrator:
     replacing the scattered procedural approach with ATCG-aligned architecture.
     """
 
-    def __init__(self, event_bus: Optional[HiveEventBus] = None):
-        self.event_bus = event_bus
-        self.connector = AgroConnector(event_bus)
+    def __init__(
+        self, agro_event_connector: Optional[HiveAgroEventConnector] = None
+    ):  # Take AgroEventConnector
+        self.agro_event_connector = agro_event_connector
+        self.event_bus = (
+            agro_event_connector.event_bus if agro_event_connector else None
+        )  # Keep event_bus for backward compatibility
+        self.connector = AgroConnector(agro_event_connector)
 
         # Sacred configuration
         self.default_transformations = [
@@ -146,9 +129,21 @@ class AgroOrchestrator:
 
         # Phase 5: Genesis Event Emission
         execution_time = (datetime.now() - scan_start_time).total_seconds()
-        await self._emit_scan_completion_event(
-            all_violations, sacred_metrics, execution_time
-        )
+        if self.agro_event_connector:
+            await self.agro_event_connector.publish_review_completed(
+                AgroReviewResult.create(
+                    review_type=AgroReviewType.AGGRESSIVE_SCRUTINY,
+                    agro_score=int(trinity_score * 100),
+                    pain_score=int(sacred_metrics.get("tau", 0.0) * 100),
+                    severity=blessing_level,
+                    violations=all_violations,
+                    recommendations=[],
+                    divine_blessing=trinity_score >= 0.750,
+                    peer_reviewers=[],
+                    sacred_insights=[divine_assessment],
+                )
+            )
+            print("  🌸 Genesis Event: Orchestrated scan completion published")
 
         # Update orchestrator metrics
         self._update_orchestrator_metrics(
@@ -280,28 +275,6 @@ class AgroOrchestrator:
                 "⚡ REQUIRES HEALING: Code needs divine architectural guidance",
                 "HEALING NEEDED ⚡",
             )
-
-    async def _emit_scan_completion_event(
-        self,
-        violations: List[SacredViolation],
-        metrics: Dict[str, float],
-        execution_time: float,
-    ):
-        """Emit Genesis event for scan completion."""
-        if not self.event_bus:
-            return
-
-        try:
-            await emit_violation_event(
-                self.event_bus,
-                "agro_orchestrated_scan_completed",
-                f"batch_scan_{self.scan_count}",
-                violations,
-            )
-            print("  🌸 Genesis Event: Orchestrated scan completion published")
-
-        except Exception as e:
-            print(f"  💥 Genesis Event emission failed: {e}")
 
     def _update_orchestrator_metrics(
         self, files_count: int, violations_count: int, trinity_score: float

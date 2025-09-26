@@ -4,37 +4,16 @@ from abc import ABC, abstractmethod
 from typing import List
 
 # Sacred imports for Hive integration
-try:
-    from hive.config.golden_thresholds import CONFIDENCE
-    from hive.config.sacred_constants import (
-        PHI,
-        PHI_RECIPROCAL,
-        PHI_INVERSE_SQUARED,
-        PHI_INVERSE_CUBED,
-        PHI_INVERSE_FOURTH,
-    )
-    from hive.config.fibonacci_sequences import FIBONACCI_89, FIBONACCI_13
-
-    HIVE_INTEGRATION = True
-except ImportError:
-    HIVE_INTEGRATION = False
-
-    # Fallback constants if Hive not available
-    class MockConfidence:
-        low = 0.236
-        medium = 0.382
-        high = 0.618
-        minimal = 0.146
-
-    CONFIDENCE = MockConfidence()
-    # Sacred constants fallback
-    PHI = 1.618033988749
-    PHI_RECIPROCAL = 0.618033988749
-    PHI_INVERSE_SQUARED = 0.381966011251
-    PHI_INVERSE_CUBED = 0.236067977499
-    PHI_INVERSE_FOURTH = 0.145898033750
-    FIBONACCI_89 = 89
-    FIBONACCI_13 = 13
+from hive.config.agro_config import (
+    HIVE_INTEGRATION,
+    PHI,
+    PHI_RECIPROCAL,
+    PHI_INVERSE_SQUARED,
+    PHI_INVERSE_CUBED,
+    PHI_INVERSE_FOURTH,
+    CONFIDENCE,
+    FIBONACCI_89,
+)
 
 from .events import SacredViolation
 

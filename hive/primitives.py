@@ -13,8 +13,9 @@ These primitives form the DNA of the Living Application.
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Dict, Any, List, Optional, Callable, Awaitable
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
+import logging
 
 from .config.golden_thresholds import ATCG, QUALITY
 
@@ -25,8 +26,11 @@ class HiveComponent(ABC):
 
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
     name: str = ""
-    created_at: datetime = field(default_factory=datetime.now)
+    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     metadata: Dict[str, Any] = field(default_factory=dict)
+    logger: logging.Logger = field(
+        default_factory=lambda: logging.getLogger(__name__)
+    )  # Added logger
 
     @abstractmethod
     def get_status(self) -> Dict[str, Any]:
@@ -69,7 +73,11 @@ class Aggregate(HiveComponent):
         self.state.update(event.get("data", {}))
         self.version += ATCG.version_increment
         self.event_history.append(
-            {**event, "applied_at": datetime.now().isoformat(), "version": self.version}
+            {
+                **event,
+                "applied_at": datetime.now(timezone.utc).isoformat(),
+                "version": self.version,
+            }
         )
 
         # Keep event history within sacred limits
@@ -117,7 +125,7 @@ class Aggregate(HiveComponent):
             "last_event": self.event_history[-1]["applied_at"]
             if self.event_history
             else None,
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "health": "active",
         }
 
@@ -155,16 +163,16 @@ class Transformation(HiveComponent):
 
         Transformations must be idempotent and side-effect free.
         """
-        start_time = datetime.now()
+        start_time = datetime.now(timezone.utc)
 
         try:
             result = await self.processor_func(input_data)
 
             # Update execution metrics
-            execution_time = (datetime.now() - start_time).total_seconds()
+            execution_time = (datetime.now(timezone.utc) - start_time).total_seconds()
             self.execution_count += 1
             self.total_execution_time += execution_time
-            self.last_execution = datetime.now()
+            self.last_execution = datetime.now(timezone.utc)
 
             return {
                 "success": True,

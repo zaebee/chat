@@ -13,7 +13,6 @@ ATCG Primitives:
 
 import sys
 import os
-import asyncio
 from typing import Dict, Any
 from datetime import datetime
 
@@ -21,24 +20,14 @@ from datetime import datetime
 from .orchestrator import AgroOrchestrator, SacredScanResult
 
 # Sacred imports for Hive integration
-try:
-    from hive.events import HiveEventBus
-    from hive.config.sacred_constants import PHI, PHI_RECIPROCAL
-    from hive.config.fibonacci_sequences import FIBONACCI_89, FIBONACCI_13
-
-    HIVE_INTEGRATION = True
-except ImportError:
-    HIVE_INTEGRATION = False
-    # Sacred fallbacks
-    PHI = 1.618033988749
-    PHI_RECIPROCAL = 0.618033988749
-    FIBONACCI_89 = 89
-    FIBONACCI_13 = 13
-
-    # Mock HiveEventBus for standalone mode
-    class HiveEventBus:
-        async def publish(self, event):
-            pass
+from hive.config.agro_config import (
+    HIVE_INTEGRATION,
+    PHI,
+    PHI_RECIPROCAL,
+    FIBONACCI_89,
+    FIBONACCI_13,
+    HiveEventBus,
+)
 
 
 class SacredAgroAggregate:
@@ -323,6 +312,8 @@ async def sacred_main():
 
 def main():
     """Synchronous entry point that runs the async sacred main."""
+    import asyncio
+
     try:
         exit_code = asyncio.run(sacred_main())
         sys.exit(exit_code)

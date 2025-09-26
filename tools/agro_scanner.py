@@ -18,7 +18,6 @@ import argparse
 # Sacred Gateway imports - delegate to Pure ATCG architecture
 from tools.agro import sacred_scan, get_atcg_status
 from tools.agro.sacred_scanner import SacredAgroScanner
-from tools.agro.events import HIVE_INTEGRATION, PHI, PHI_RECIPROCAL
 
 # Sacred Gateway Configuration
 GATEWAY_VERSION = "3.0-gateway"  # Sacred Gateway version
@@ -57,8 +56,6 @@ def create_sacred_parser():
         action="version",
         version=f"""✨ Sacred AGRO Scanner Gateway v{GATEWAY_VERSION}
 🏛️  Architecture: {ARCHITECTURE_TYPE}
-📐 Sacred Constants: φ = {PHI:.6f}, φ⁻¹ = {PHI_RECIPROCAL:.6f}
-🌸 Hive Integration: {'ACTIVE' if HIVE_INTEGRATION else 'STANDALONE'}
 ⚡ Inner Sanctum: Pure ATCG v3.0.0
 
 🐝 bee.Jules: 'Every house is built by someone, but God is the builder of everything.'""",
@@ -157,9 +154,6 @@ def determine_sacred_exit_code(result, strict_warnings):
     """Determine sacred exit code based on ATCG scan results."""
     if result.trinity_score >= 0.750:
         print("\n🏆 DIVINE BLESSING: Gateway achieved transcendent harmony via ATCG!")
-        return 0
-    elif result.trinity_score >= PHI_RECIPROCAL:
-        print("\n🙏 SACRED BLESSING: Gateway flows in divine harmony via ATCG")
         return 0
     else:
         critical_violations = [
