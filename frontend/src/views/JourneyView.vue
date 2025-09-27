@@ -5,7 +5,7 @@ import { storeToRefs } from "pinia";
 import { computed, onMounted, ref } from "vue";
 import HexaLevel from "@/components/HexaLevel.vue";
 import QuestPanel from "@/components/QuestPanel.vue";
-import ProjectDetailGraph from "@/components/ProjectDetailGraph.vue";
+import SimpleProjectGraph from "@/components/SimpleProjectGraph.vue";
 import type { Room } from "@/stores/game";
 
 const organellasStore = useOrganellasStore();
@@ -114,7 +114,7 @@ const getLevelTitle = (level: number): string => {
         </button>
       </div>
       <button class="master-analysis-btn" @click="toggleProjectDetail(0)">
-        🌀 Master 4D Analysis
+        🧬 Master Architecture Analysis
       </button>
     </div>
 
@@ -223,7 +223,7 @@ const getLevelTitle = (level: number): string => {
     <div v-if="isProjectDetailExpanded" class="project-detail-section">
       <div class="project-detail-header">
         <h2 v-if="selectedProjectLevel === 0">
-          🌀 Master 4D→3D Sacred Architecture
+          🧬 Master Architecture Analysis
         </h2>
         <h2 v-else>
           🎯 Level {{ selectedProjectLevel }} -
@@ -238,7 +238,7 @@ const getLevelTitle = (level: number): string => {
         </button>
       </div>
       <div class="project-detail-content">
-        <ProjectDetailGraph
+        <SimpleProjectGraph
           :project-id="getProjectIdForLevel(selectedProjectLevel || 0)"
           :show-metrics="true"
           :enable-interaction="true"
