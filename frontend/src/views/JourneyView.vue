@@ -5,6 +5,7 @@ import { storeToRefs } from "pinia";
 import { computed, onMounted, ref } from "vue";
 import HexaLevel from "@/components/HexaLevel.vue";
 import QuestPanel from "@/components/QuestPanel.vue";
+import ProjectDetailGraph from "@/components/ProjectDetailGraph.vue";
 import type { Room } from "@/stores/game";
 
 const organellasStore = useOrganellasStore();
@@ -13,21 +14,23 @@ const { organellas } = storeToRefs(organellasStore);
 const { currentUser } = storeToRefs(userStore);
 
 const isGenesisQuestVisible = ref(false);
+const isProjectDetailExpanded = ref(false);
+const selectedProjectLevel = ref<number | null>(null);
 
 // Mock room for QuestPanel
 const genesisRoom: Room = {
-  id: 'genesis',
-  name: 'Genesis Chamber',
-  description: 'The birthplace of new organellas',
-  type: 'journey',
-  created_by: 'system',
+  id: "genesis",
+  name: "Genesis Chamber",
+  description: "The birthplace of new organellas",
+  type: "journey",
+  created_by: "system",
   created_at: new Date().toISOString(),
   is_archived: false,
   level: 1,
   unlocked: true,
   completed: false,
   organellas: [],
-  quests: []
+  quests: [],
 };
 
 onMounted(() => {
@@ -49,10 +52,69 @@ const organellasByLevel = computed(() => {
   }
   return result;
 });
+
+// Project detail functions
+const toggleProjectDetail = (level: number) => {
+  if (isProjectDetailExpanded.value && selectedProjectLevel.value === level) {
+    // Clicking the same level closes the detail
+    isProjectDetailExpanded.value = false;
+    selectedProjectLevel.value = null;
+  } else {
+    // Clicking a different level or expanding for the first time
+    selectedProjectLevel.value = level;
+    isProjectDetailExpanded.value = true;
+  }
+};
+
+const getProjectIdForLevel = (level: number): string => {
+  const projectMap: { [key: number]: string } = {
+    7: "intent-level",
+    6: "physics-level",
+    5: "implementation-level",
+    4: "atcg-primitives",
+    3: "codons-level",
+    2: "cell-level",
+    1: "organism-level",
+    0: "master-architecture",
+  };
+  return projectMap[level] || "unknown-project";
+};
+
+const getLevelTitle = (level: number): string => {
+  const titleMap: { [key: number]: string } = {
+    7: "Intent (Дух улья • смысл • цель)",
+    6: "Physics (OS • Network • CPU)",
+    5: "Implementation (Codeons • tests • clarity)",
+    4: "ATCG (A • T • C • G primitives)",
+    3: "Codons (C→A→G • C→T→C • G→C→A→G)",
+    2: "Cell (Bounded Context / API wall)",
+    1: "Organism (All Hives • whole system)",
+  };
+  return titleMap[level] || "Unknown Level";
+};
 </script>
 
 <template>
   <div class="journey-view">
+    <!-- 4D Project Analysis Controls -->
+    <div class="project-controls">
+      <h2 class="controls-title">🧬 Sacred Architecture Analysis</h2>
+      <p class="controls-subtitle">4D→3D Dimensional Bridge Navigation</p>
+      <div class="level-buttons">
+        <button
+          v-for="level in [7, 6, 5, 4, 3, 2, 1]"
+          :key="level"
+          @click="toggleProjectDetail(level)"
+          :class="['level-btn', `level-${level}`]"
+        >
+          🎯 Level {{ level }} Detail
+        </button>
+      </div>
+      <button class="master-analysis-btn" @click="toggleProjectDetail(0)">
+        🌀 Master 4D Analysis
+      </button>
+    </div>
+
     <div class="journey-map">
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -71,6 +133,7 @@ const organellasByLevel = computed(() => {
           :x="400"
           :y="350"
           :organellas="organellasByLevel[7] || []"
+          @click="toggleProjectDetail(7)"
         />
 
         <HexaLevel
@@ -81,6 +144,7 @@ const organellasByLevel = computed(() => {
           :x="400"
           :y="200"
           :organellas="organellasByLevel[6] || []"
+          @click="toggleProjectDetail(6)"
         />
 
         <HexaLevel
@@ -91,6 +155,7 @@ const organellasByLevel = computed(() => {
           :x="520"
           :y="275"
           :organellas="organellasByLevel[5] || []"
+          @click="toggleProjectDetail(5)"
         />
 
         <HexaLevel
@@ -101,6 +166,7 @@ const organellasByLevel = computed(() => {
           :x="520"
           :y="425"
           :organellas="organellasByLevel[4] || []"
+          @click="toggleProjectDetail(4)"
         />
 
         <HexaLevel
@@ -111,6 +177,7 @@ const organellasByLevel = computed(() => {
           :x="400"
           :y="500"
           :organellas="organellasByLevel[3] || []"
+          @click="toggleProjectDetail(3)"
         />
 
         <HexaLevel
@@ -121,6 +188,7 @@ const organellasByLevel = computed(() => {
           :x="280"
           :y="425"
           :organellas="organellasByLevel[2] || []"
+          @click="toggleProjectDetail(2)"
         />
 
         <HexaLevel
@@ -131,34 +199,240 @@ const organellasByLevel = computed(() => {
           :x="280"
           :y="275"
           :organellas="organellasByLevel[1] || []"
+          @click="toggleProjectDetail(1)"
         />
 
         <!-- Quest marker: GENESIS:x:y -->
-        <g class="pulse" transform="translate(500,220)" @click="isGenesisQuestVisible = !isGenesisQuestVisible">
+        <g
+          class="pulse"
+          transform="translate(500,220)"
+          @click="isGenesisQuestVisible = !isGenesisQuestVisible"
+        >
           <circle r="18" fill="var(--color-quest)" />
-          <text x="0" y="4" font-size="20" text-anchor="middle" fill="#fff">?</text>
+          <text x="0" y="4" font-size="20" text-anchor="middle" fill="#fff">
+            ?
+          </text>
         </g>
       </svg>
     </div>
-    <QuestPanel v-if="isGenesisQuestVisible" :room="genesisRoom" @close="isGenesisQuestVisible = false" />
+
+    <!-- Project Detail Graph Inline Section -->
+    <div v-if="isProjectDetailExpanded" class="project-detail-section">
+      <div class="project-detail-header">
+        <h2 v-if="selectedProjectLevel === 0">
+          🌀 Master 4D→3D Sacred Architecture
+        </h2>
+        <h2 v-else>
+          🎯 Level {{ selectedProjectLevel }} -
+          {{ getLevelTitle(selectedProjectLevel) }}
+        </h2>
+        <button
+          class="collapse-btn"
+          @click="isProjectDetailExpanded = false"
+          title="Collapse"
+        >
+          ▲
+        </button>
+      </div>
+      <div class="project-detail-content">
+        <ProjectDetailGraph
+          :project-id="getProjectIdForLevel(selectedProjectLevel || 0)"
+          :show-metrics="true"
+          :enable-interaction="true"
+        />
+      </div>
+    </div>
+
+    <QuestPanel
+      v-if="isGenesisQuestVisible"
+      :room="genesisRoom"
+      @close="isGenesisQuestVisible = false"
+    />
   </div>
 </template>
 
 <style scoped>
 .journey-view {
   display: flex;
-  justify-content: center;
-  align-items: center;
+  flex-direction: column;
   height: 100%;
   width: 100%;
   overflow: auto;
   background-color: var(--color-background);
+  padding: 1rem;
+  gap: 1.5rem;
 }
 
 .journey-map {
   max-width: 100%;
   max-height: 100%;
-  display: block; /* Remove extra space below SVG */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Project Controls Styles */
+.project-controls {
+  background: linear-gradient(
+    135deg,
+    rgba(139, 92, 246, 0.05),
+    rgba(255, 255, 255, 0.95)
+  );
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.1);
+}
+
+.controls-title {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #8b5cf6;
+}
+
+.controls-subtitle {
+  margin: 0 0 1.5rem 0;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary, #6b7280);
+  font-style: italic;
+}
+
+.level-buttons {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.level-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: white;
+  min-width: 120px;
+}
+
+.level-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Level-specific colors matching Sacred ATCG */
+.level-7 {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+} /* Intent - Purple */
+.level-6 {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+} /* Physics - Blue */
+.level-5 {
+  background: linear-gradient(135deg, #10b981, #059669);
+} /* Implementation - Green */
+.level-4 {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+} /* ATCG - Orange */
+.level-3 {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+} /* Codons - Red */
+.level-2 {
+  background: linear-gradient(135deg, #06b6d4, #0891b2);
+} /* Cell - Cyan */
+.level-1 {
+  background: linear-gradient(135deg, #84cc16, #65a30d);
+} /* Organism - Lime */
+
+.master-analysis-btn {
+  padding: 0.75rem 2rem;
+  background: linear-gradient(135deg, #ffd700, #fbbf24);
+  border: none;
+  border-radius: 0.5rem;
+  color: #92400e;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+}
+
+.master-analysis-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 215, 0, 0.4);
+}
+
+/* Project Detail Inline Section Styles */
+.project-detail-section {
+  margin: 2rem 0;
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  border: 2px solid #e5e7eb;
+  overflow: hidden;
+  animation: expandIn 0.3s ease-out;
+}
+
+@keyframes expandIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.project-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: linear-gradient(
+    135deg,
+    rgba(139, 92, 246, 0.05),
+    rgba(255, 255, 255, 0.95)
+  );
+}
+
+.project-detail-header h2 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #8b5cf6;
+}
+
+.collapse-btn {
+  padding: 0.5rem;
+  background: #6b7280;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: bold;
+  transition: all 0.2s ease;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.collapse-btn:hover {
+  background: #4b5563;
+  transform: translateY(-1px);
+}
+
+.project-detail-content {
+  height: 700px;
+  overflow: auto;
+  padding: 0;
 }
 
 .hex {
