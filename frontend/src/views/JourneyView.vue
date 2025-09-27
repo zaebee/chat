@@ -45,10 +45,13 @@ const organellasByLevel = computed(() => {
   // Add defensive check to ensure organellas.value is an array
   const organellaArray = organellas.value || [];
   for (const organella of organellaArray) {
-    if (!result[organella.level]) {
-      result[organella.level] = [];
+    // Additional defensive check for organella validity
+    if (organella && organella.id && typeof organella.level === 'number') {
+      if (!result[organella.level]) {
+        result[organella.level] = [];
+      }
+      result[organella.level].push(organella);
     }
-    result[organella.level].push(organella);
   }
   return result;
 });
